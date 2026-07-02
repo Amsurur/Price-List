@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/*
+  Softclub Store design tokens — from documents/05-design-system.md.
+  Tailwind v4 is CSS-first, so tokens live here (no tailwind.config.ts).
+  Use utilities like bg-bg, text-ink, bg-brand, text-brand-strong, bg-save-tint.
+*/
+@theme {
+  --color-bg: #f5f6fb;
+  --color-surface: #ffffff;
+  --color-ink: #14161d;
+  --color-muted: #6b7280;
+  --color-line: #e7e9f2;
+
+  --color-brand: #5a4bff;
+  --color-brand-strong: #3f32c7;
+  --color-brand-tint: #eeedff;
+
+  --color-save: #0fa37f;
+  --color-save-tint: #e4f6ef;
+
+  --color-warn: #b7791f;
+  --color-warn-tint: #fbf3e4;
+
+  --color-danger: #d04a3b;
+
+  --font-display: var(--font-space-grotesk), sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+
+  --radius-xl: 15px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+/* Prices align cleanly with tabular figures (design system rule). */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

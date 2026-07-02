@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: softclub-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-softclub}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-softclub}
+      POSTGRES_DB: ${DB_NAME:-softclub_store}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      # postgres:18 wants the mount at /var/lib/postgresql (data goes in a subdir).
+      - softclub_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-softclub} -d ${DB_NAME:-softclub_store}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  softclub_pgdata:

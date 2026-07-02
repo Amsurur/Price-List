@@ -1,0 +1,27 @@
+# dependencies
+node_modules/
+apps/*/node_modules/
+
+# env
+.env
+.env.local
+apps/*/.env
+apps/*/.env.local
+
+# next.js
+apps/web/.next/
+apps/web/out/
+
+# nest.js
+apps/api/dist/
+
+# build / cache
+dist/
+*.tsbuildinfo
+
+# logs
+*.log
+.pids/
+
+# os
+.DS_Store
