@@ -1,0 +1,9 @@
+# dependencies
+node_modules
+
+# build
+dist
+
+# uploaded product images (dev, local disk)
+uploads/*
+!uploads/.gitkeep
