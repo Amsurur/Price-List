@@ -31,9 +31,13 @@ async function errorMessage(res: Response): Promise<string> {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
     cache: "no-store",
+    credentials: "include",
     headers: { "Content-Type": "application/json", ...init?.headers },
     ...init,
   });
+  if (res.status === 401 && typeof window !== "undefined") {
+    window.location.href = "/admin/login";
+  }
   if (!res.ok) throw new Error(await errorMessage(res));
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
@@ -81,6 +85,7 @@ export async function uploadProductImage(file: File): Promise<string> {
   form.append("file", file);
   const res = await fetch(`${API_URL}/products/upload`, {
     method: "POST",
+    credentials: "include",
     body: form,
   });
   if (!res.ok) throw new Error(await errorMessage(res));

@@ -11,6 +11,8 @@ Stop the local dev stack for Softclub Store. Report a concise summary at the end
 
 2. **Postgres (Docker):** run `npm run db:down` from the repo root. This stops the container but **keeps the data volume** (`softclub_pgdata`), so nothing is lost. Only run `docker compose down -v` if the user explicitly asks to wipe the database.
 
+2.5 **Update Roadmap.md** which M is done check the mark 
+
 3. **Commit + push the session's work:** run `git status --porcelain`.
    - No changes → skip this step entirely.
    - Changes present:

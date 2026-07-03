@@ -45,16 +45,16 @@ Build order roughly follows this list. Read the doc before writing the code for 
 Ship each milestone as a working, deployed slice. Don't build ahead.
 
 ### M0 — Project setup
-- [ ] Scaffold the app per `docs/08-tech-stack.md` (Next.js + TypeScript + Tailwind).
-- [ ] Create the Supabase project; wire up env vars; confirm the app builds and deploys to Vercel (even if empty).
-- [ ] Add design tokens from `docs/05-design-system.md` to the Tailwind config.
-- **Done when:** a blank but styled app is live on a URL.
+- [x] Scaffold the app per `docs/08-tech-stack.md` (Next.js + TypeScript + Tailwind).
+- [ ] ~~Create the Supabase project; wire up env vars; confirm the app builds and deploys to Vercel~~ — N/A under the stack override in `CLAUDE.md` (Postgres + TypeORM + NestJS, no Supabase); hosted deploy is deferred to M5.
+- [x] Add design tokens from `docs/05-design-system.md` to the Tailwind config.
+- **Done when:** a blank but styled app is live on a URL. *(Runs locally; no public URL yet — that's M5.)*
 
 ### M1 — Data + admin core
-- [ ] Create DB tables from `docs/03-data-model.md` (products, student_codes, reservations).
-- [ ] Admin login (Supabase Auth, single owner account). Everything under `/admin` is protected.
-- [ ] Products: list, add, edit, delete, with all fields (incl. image upload to Supabase Storage).
-- **Done when:** the owner can log in and fully manage the product catalogue.
+- [x] Create DB tables from `docs/03-data-model.md` (products, student_codes, reservations).
+- [x] Admin login (JWT + guard per the `CLAUDE.md` stack override, not Supabase Auth — single owner account via env credentials). Everything under `/admin` is protected.
+- [x] Products: list, add, edit, delete, with all fields (image upload to local disk, not Supabase Storage — per stack override).
+- **Done when:** the owner can log in and fully manage the product catalogue. ✅
 
 ### M2 — Storefront browse
 - [ ] Product grid pulling live products, showing **regular** prices only.

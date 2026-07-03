@@ -1,8 +1,9 @@
 import Link from "next/link";
+import { LogoutButton } from "@/components/admin/logout-button";
 import { Seal } from "@/components/seal";
 
-// Admin shell: sticky top bar + tabs. Auth guard is added in Slice 2 —
-// for now every /admin route is open in dev.
+// Admin shell: sticky top bar + tabs. proxy.ts redirects here-to-/admin/login
+// when the auth cookie is missing; the JwtAuthGuard on the API enforces it.
 const tabs = [
   { href: "/admin/products", label: "Products" },
   { href: "/admin/codes", label: "Student codes" },
@@ -33,12 +34,15 @@ export default function AdminLayout({
               </Link>
             ))}
           </nav>
-          <Link
-            href="/"
-            className="ml-auto text-sm font-medium text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-          >
-            View store
-          </Link>
+          <div className="ml-auto flex items-center gap-4">
+            <Link
+              href="/"
+              className="text-sm font-medium text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              View store
+            </Link>
+            <LogoutButton />
+          </div>
         </div>
       </header>
 

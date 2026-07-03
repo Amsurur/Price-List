@@ -63,9 +63,23 @@ const products: Partial<Product>[] = [
 ];
 
 const codes: Partial<StudentCode>[] = [
-  { code: 'SOFT-7K2Q', studentName: 'Standard student', note: 'Uses each product’s standard discount.' },
-  { code: 'SOFT-VIP1', studentName: 'Ali (top student)', discountOverride: 25, note: '25% on everything.' },
-  { code: 'SOFT-OFF0', studentName: 'Disabled example', active: false, note: 'Toggled off to test rejection.' },
+  {
+    code: 'SOFT-7K2Q',
+    studentName: 'Standard student',
+    note: 'Uses each product’s standard discount.',
+  },
+  {
+    code: 'SOFT-VIP1',
+    studentName: 'Ali (top student)',
+    discountOverride: 25,
+    note: '25% on everything.',
+  },
+  {
+    code: 'SOFT-OFF0',
+    studentName: 'Disabled example',
+    active: false,
+    note: 'Toggled off to test rejection.',
+  },
 ];
 
 async function run() {
@@ -82,15 +96,15 @@ async function run() {
     await productRepo.save(productRepo.create(products));
     await codeRepo.save(codeRepo.create(codes));
 
-    // eslint-disable-next-line no-console
-    console.log(`Seeded ${products.length} products and ${codes.length} codes.`);
+    console.log(
+      `Seeded ${products.length} products and ${codes.length} codes.`,
+    );
   } finally {
     await dataSource.destroy();
   }
 }
 
 run().catch((err) => {
-  // eslint-disable-next-line no-console
   console.error('Seed failed:', err);
   process.exit(1);
 });

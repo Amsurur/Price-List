@@ -38,7 +38,9 @@ export class ProductsService {
   }
 
   async findAll(query: FindProductsQuery = {}): Promise<ProductView[]> {
-    const qb = this.products.createQueryBuilder('p').orderBy('p.created_at', 'DESC');
+    const qb = this.products
+      .createQueryBuilder('p')
+      .orderBy('p.created_at', 'DESC');
 
     if (query.search) {
       const term = `%${query.search.toLowerCase()}%`;
