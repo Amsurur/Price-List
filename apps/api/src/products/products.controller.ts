@@ -32,8 +32,16 @@ export class ProductsController {
   constructor(private readonly products: ProductsService) {}
 
   @Get()
-  findAll(@Query('search') search?: string, @Query('tag') tag?: string) {
-    return this.products.findAll({ search, tag });
+  findAll(
+    @Query('search') search?: string,
+    @Query('tag') tag?: string,
+    @Query('active') active?: string,
+  ) {
+    return this.products.findAll({
+      search,
+      tag,
+      active: active === undefined ? undefined : active === 'true',
+    });
   }
 
   // Save an image to local disk and return its public URL.
