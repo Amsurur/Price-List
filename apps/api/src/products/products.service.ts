@@ -17,6 +17,7 @@ export interface ProductView extends Product {
 export interface FindProductsQuery {
   search?: string;
   tag?: string;
+  active?: boolean;
 }
 
 @Injectable()
@@ -52,6 +53,10 @@ export class ProductsService {
 
     if (query.tag) {
       qb.andWhere(':tag = ANY(p.tags)', { tag: query.tag.toLowerCase() });
+    }
+
+    if (query.active !== undefined) {
+      qb.andWhere('p.active = :active', { active: query.active });
     }
 
     const rows = await qb.getMany();

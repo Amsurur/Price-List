@@ -57,9 +57,9 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - **Done when:** the owner can log in and fully manage the product catalogue. ✅
 
 ### M2 — Storefront browse
-- [ ] Product grid pulling live products, showing **regular** prices only.
-- [ ] Search, filter by tag, sort by price. Stock / "out of stock" states.
-- **Done when:** a visitor can browse the real catalogue with no code.
+- [x] Product grid pulling live products, showing **regular** prices only.
+- [x] Search, filter by tag, sort by price. Stock / "out of stock" states.
+- **Done when:** a visitor can browse the real catalogue with no code. ✅
 
 ### M3 — Student codes + member pricing
 - [ ] Admin: generate codes (single or batch), set per-student discount override, activate/deactivate, view use count, **export list** (CSV).

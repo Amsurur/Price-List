@@ -46,10 +46,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export function listProducts(params?: {
   search?: string;
   tag?: string;
+  active?: boolean;
 }): Promise<Product[]> {
   const q = new URLSearchParams();
   if (params?.search) q.set("search", params.search);
   if (params?.tag) q.set("tag", params.tag);
+  if (params?.active !== undefined) q.set("active", String(params.active));
   const qs = q.toString();
   return request<Product[]>(`/products${qs ? `?${qs}` : ""}`);
 }
