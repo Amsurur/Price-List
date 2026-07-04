@@ -33,10 +33,16 @@ async function bootstrap() {
     prefix: `/${UPLOADS_DIR}/`,
   });
 
-  // Allow the Next.js dev origin to call the API from the browser, and let
-  // it send/receive the admin auth cookie (credentials).
+  // Allow the Next.js origin(s) to call the API from the browser, and let
+  // it send/receive the admin auth cookie (credentials). WEB_ORIGIN can be
+  // a comma-separated list (e.g. local dev + the deployed Vercel URL) —
+  // an Origin header is never a single fixed string across environments.
+  const webOrigins = (process.env.WEB_ORIGIN ?? 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
   app.enableCors({
-    origin: process.env.WEB_ORIGIN ?? 'http://localhost:3000',
+    origin: webOrigins,
     credentials: true,
   });
 
