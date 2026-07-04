@@ -36,11 +36,13 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('tag') tag?: string,
     @Query('active') active?: string,
+    @Query('code') code?: string,
   ) {
     return this.products.findAll({
       search,
       tag,
       active: active === undefined ? undefined : active === 'true',
+      code,
     });
   }
 

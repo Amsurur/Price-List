@@ -2,7 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
-import { memberPrice, saving, stockLabel } from '../common/pricing';
+import {
+  memberPrice,
+  PricingCode,
+  saving,
+  stockLabel,
+} from '../common/pricing';
+import { StudentCodesService } from '../student-codes/student-codes.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -18,6 +24,9 @@ export interface FindProductsQuery {
   search?: string;
   tag?: string;
   active?: boolean;
+  // A validated student code, to price the listing for that student's
+  // discount override (falls back to each product's own discount if unset).
+  code?: string;
 }
 
 @Injectable()
@@ -25,15 +34,20 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly products: Repository<Product>,
+    private readonly studentCodes: StudentCodesService,
   ) {}
 
-  // Compute member price/saving with the product's own standard discount
-  // (no student code applies on the admin side).
-  private toView(product: Product): ProductView {
+  // With no code, this reflects each product's own standard discount — used
+  // as-is by the admin view. The storefront only shows it once a student's
+  // code is applied; it decides that gating itself.
+  private toView(
+    product: Product,
+    code: PricingCode | null = null,
+  ): ProductView {
     return {
       ...product,
-      memberPrice: memberPrice(product, null),
-      saving: saving(product, null),
+      memberPrice: memberPrice(product, code),
+      saving: saving(product, code),
       stockLabel: stockLabel(product.stock),
     };
   }
@@ -60,7 +74,13 @@ export class ProductsService {
     }
 
     const rows = await qb.getMany();
-    return rows.map((p) => this.toView(p));
+    const code = query.code
+      ? await this.studentCodes.findActiveByCode(query.code)
+      : null;
+    const pricingCode: PricingCode | null = code
+      ? { discountOverride: code.discountOverride }
+      : null;
+    return rows.map((p) => this.toView(p, pricingCode));
   }
 
   async findOne(id: string): Promise<ProductView> {

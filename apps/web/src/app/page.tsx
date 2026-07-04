@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { listProducts } from "@/lib/api";
+import { listProducts, validateStudentCode } from "@/lib/api";
 import { Seal } from "@/components/seal";
 import { ProductCard } from "@/components/store/product-card";
 import { TagFilterChips } from "@/components/store/tag-filter-chips";
 import { SortSelect, type SortOption } from "@/components/store/sort-select";
 import { ProductGridSkeleton } from "@/components/store/product-grid-skeleton";
-import type { Product } from "@/lib/types";
+import {
+  CodeUnlockStrip,
+  type AppliedCode,
+} from "@/components/store/code-unlock-strip";
+import type { Product, ValidateCodeResult } from "@/lib/types";
 
 type State =
   | { kind: "loading" }
@@ -19,12 +23,13 @@ export default function Home() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOption>("featured");
+  const [appliedCode, setAppliedCode] = useState<AppliedCode | null>(null);
 
-  async function fetchProducts() {
+  async function fetchProducts(code?: string) {
     try {
       setState({
         kind: "ready",
-        products: await listProducts({ active: true }),
+        products: await listProducts({ active: true, code }),
       });
     } catch (err) {
       setState({
@@ -36,10 +41,28 @@ export default function Home() {
 
   useEffect(() => {
     fetchProducts();
+    // Only on mount — applying/removing a code refetches explicitly below.
   }, []);
 
   function retry() {
     setState({ kind: "loading" });
+    fetchProducts(appliedCode?.code);
+  }
+
+  async function handleApplyCode(code: string): Promise<ValidateCodeResult> {
+    const result = await validateStudentCode(code);
+    if (result.ok) {
+      setAppliedCode({
+        code: code.trim().toUpperCase(),
+        studentName: result.studentName,
+      });
+      await fetchProducts(code);
+    }
+    return result;
+  }
+
+  function handleRemoveCode() {
+    setAppliedCode(null);
     fetchProducts();
   }
 
@@ -94,6 +117,12 @@ export default function Home() {
       </header>
 
       <main className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-6 px-6 py-10">
+        <CodeUnlockStrip
+          applied={appliedCode}
+          onApply={handleApplyCode}
+          onRemove={handleRemoveCode}
+        />
+
         <div className="flex flex-col gap-4">
           <input
             type="search"
@@ -151,7 +180,11 @@ export default function Home() {
         {state.kind === "ready" && filtered.length > 0 && (
           <ul className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
             {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                unlocked={Boolean(appliedCode)}
+              />
             ))}
           </ul>
         )}

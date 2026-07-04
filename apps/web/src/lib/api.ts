@@ -1,6 +1,13 @@
 // Thin REST client for the NestJS API. The API is the single source of truth;
 // the web app only reads/writes through it.
-import type { Product, ProductInput } from "./types";
+import type {
+  BatchStudentCodeInput,
+  Product,
+  ProductInput,
+  StudentCode,
+  StudentCodeInput,
+  ValidateCodeResult,
+} from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 
@@ -47,11 +54,14 @@ export function listProducts(params?: {
   search?: string;
   tag?: string;
   active?: boolean;
+  // A validated student code, to price the listing for that student.
+  code?: string;
 }): Promise<Product[]> {
   const q = new URLSearchParams();
   if (params?.search) q.set("search", params.search);
   if (params?.tag) q.set("tag", params.tag);
   if (params?.active !== undefined) q.set("active", String(params.active));
+  if (params?.code) q.set("code", params.code);
   const qs = q.toString();
   return request<Product[]>(`/products${qs ? `?${qs}` : ""}`);
 }
@@ -93,4 +103,59 @@ export async function uploadProductImage(file: File): Promise<string> {
   if (!res.ok) throw new Error(await errorMessage(res));
   const body = (await res.json()) as { imageUrl: string };
   return body.imageUrl;
+}
+
+export function listStudentCodes(params?: {
+  search?: string;
+}): Promise<StudentCode[]> {
+  const q = new URLSearchParams();
+  if (params?.search) q.set("search", params.search);
+  const qs = q.toString();
+  return request<StudentCode[]>(`/student-codes${qs ? `?${qs}` : ""}`);
+}
+
+export function createStudentCode(
+  input: StudentCodeInput,
+): Promise<StudentCode> {
+  return request<StudentCode>(`/student-codes`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function createStudentCodeBatch(
+  input: BatchStudentCodeInput,
+): Promise<StudentCode[]> {
+  return request<StudentCode[]>(`/student-codes/batch`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateStudentCode(
+  id: string,
+  input: Partial<StudentCodeInput>,
+): Promise<StudentCode> {
+  return request<StudentCode>(`/student-codes/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function deleteStudentCode(id: string): Promise<void> {
+  return request<void>(`/student-codes/${id}`, { method: "DELETE" });
+}
+
+// A plain link target — the browser sends the admin cookie on this top-level
+// GET, and the API responds with a Content-Disposition download.
+export function studentCodesExportUrl(): string {
+  return `${API_URL}/student-codes/export`;
+}
+
+// The storefront's verification step. Public — never exposes the full table.
+export function validateStudentCode(code: string): Promise<ValidateCodeResult> {
+  return request<ValidateCodeResult>(`/student-codes/validate`, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
 }
