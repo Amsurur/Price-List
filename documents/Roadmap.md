@@ -62,10 +62,10 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - **Done when:** a visitor can browse the real catalogue with no code. ✅
 
 ### M3 — Student codes + member pricing
-- [ ] Admin: generate codes (single or batch), set per-student discount override, activate/deactivate, view use count, **export list** (CSV).
-- [ ] Storefront: code entry that validates a code and unlocks the member price on every product (logic in `docs/04-business-logic.md`).
-- [ ] Each product card shows regular price struck out, member price, and savings once unlocked.
-- **Done when:** a valid code changes prices; an invalid or disabled code is politely rejected.
+- [x] Admin: generate codes (single or batch), set per-student discount override, activate/deactivate, view use count, **export list** (CSV).
+- [x] Storefront: code entry that validates a code and unlocks the member price on every product (logic in `docs/04-business-logic.md`).
+- [x] Each product card shows regular price struck out, member price, and savings once unlocked.
+- **Done when:** a valid code changes prices; an invalid or disabled code is politely rejected. ✅
 
 ### M4 — Reservations
 - [ ] Storefront: **Reserve** button (only active when a code is applied) → short form (name + contact, pre-filled from code) → confirmation screen.

@@ -33,6 +33,7 @@ export function GenerateCodePanel({
     setNote("");
     setCount("10");
     setError(null);
+    setJustGenerated([]);
   }
 
   async function handleGenerate(e: React.FormEvent) {

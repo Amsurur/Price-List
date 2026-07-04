@@ -20,7 +20,7 @@ export default function AdminLayout({
           <Link href="/admin/products" className="flex items-center gap-3">
             <Seal />
             <span className="font-display text-lg font-semibold text-ink">
-              Softclub admin
+              Computerra admin
             </span>
           </Link>
           <nav className="ml-4 flex items-center gap-1">

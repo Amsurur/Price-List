@@ -8,7 +8,7 @@ export function Seal() {
       aria-hidden="true"
       className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-brand bg-brand-tint font-display text-sm font-bold text-brand-strong"
     >
-      S
+      C
     </span>
   );
 }
