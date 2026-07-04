@@ -32,3 +32,36 @@ export interface ProductInput {
   imageUrl?: string;
   active?: boolean;
 }
+
+// Matches the API's StudentCode entity.
+export interface StudentCode {
+  id: string;
+  code: string;
+  studentName: string | null;
+  discountOverride: number | null;
+  active: boolean;
+  note: string | null;
+  usesCount: number;
+  lastUsedAt: string | null;
+  createdAt: string;
+}
+
+// Fields the admin form sends when generating or editing a code.
+export interface StudentCodeInput {
+  studentName?: string;
+  discountOverride?: number | null;
+  note?: string;
+  active?: boolean;
+}
+
+export interface BatchStudentCodeInput {
+  count: number;
+  discountOverride?: number | null;
+  note?: string;
+}
+
+// The storefront's code-entry result — only what's needed to unlock pricing,
+// never the full student_codes table.
+export type ValidateCodeResult =
+  | { ok: false; reason: "empty" | "invalid" | "disabled" }
+  | { ok: true; studentName: string | null; discountOverride: number | null };

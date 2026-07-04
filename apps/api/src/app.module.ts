@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
+import { StudentCodesModule } from './student-codes/student-codes.module';
 
 @Module({
   imports: [
@@ -18,11 +19,19 @@ import { ProductsModule } from './products/products.module';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
         const url = config.get<string>('DATABASE_URL');
+        // Managed Postgres (e.g. Render's external connection string) requires
+        // SSL with a self-signed chain; local/dev and internal-network
+        // connections don't need it, so it's opt-in via DB_SSL.
+        const ssl =
+          config.get<string>('DB_SSL') === 'true'
+            ? { rejectUnauthorized: false }
+            : false;
         const base = {
           type: 'postgres' as const,
           autoLoadEntities: true,
           // M0 dev convenience only. Replaced by migrations in M1.
           synchronize: true,
+          ssl,
         };
         if (url) {
           return { ...base, url };
@@ -40,6 +49,7 @@ import { ProductsModule } from './products/products.module';
     AuthModule,
     HealthModule,
     ProductsModule,
+    StudentCodesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
