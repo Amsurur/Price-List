@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
         <div className="mb-6 flex flex-col items-center gap-3">
           <Seal />
           <h1 className="font-display text-xl font-bold text-ink">
-            Softclub admin
+            Computerra admin
           </h1>
         </div>
 

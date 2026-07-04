@@ -3,7 +3,7 @@ import { imageSrc } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
-// `unlocked` reflects whether a valid Softclub code is currently applied in
+// `unlocked` reflects whether a valid Computerra code is currently applied in
 // this session — never inferred from product.saving, since the API returns
 // a non-zero saving for admin/reference purposes even with no code applied.
 export function ProductCard({
@@ -42,7 +42,7 @@ export function ProductCard({
         <div className="mt-3 flex flex-wrap gap-1.5">
           {hasSaving && (
             <span className="rounded-full bg-brand-tint px-2 py-0.5 text-xs font-medium text-brand-strong">
-              Softclub −{discountPercent}%
+              Computerra −{discountPercent}%
             </span>
           )}
           {product.tags.slice(0, 3).map((tag) => (
@@ -99,7 +99,7 @@ export function ProductCard({
 
       {!unlocked && (
         <p className="mt-1 text-xs text-muted">
-          Have a Softclub code? Enter it to see your member price.
+          Have a Computerra code? Enter it to see your member price.
         </p>
       )}
 
@@ -108,7 +108,7 @@ export function ProductCard({
         disabled
         title={
           !unlocked
-            ? "Enter your Softclub code to reserve."
+            ? "Enter your Computerra code to reserve."
             : outOfStock
               ? "Out of stock."
               : undefined

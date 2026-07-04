@@ -15,9 +15,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Softclub Store",
+  title: "Computerra Store",
   description:
-    "Softclub students unlock a member price with a personal code and reserve computer hardware for pickup.",
+    "Computerra students unlock a member price with a personal code and reserve computer hardware for pickup.",
 };
 
 export default function RootLayout({

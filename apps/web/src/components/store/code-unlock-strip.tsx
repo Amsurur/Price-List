@@ -61,14 +61,14 @@ export function CodeUnlockStrip({
   return (
     <div className="rounded-xl bg-brand-tint px-4 py-3">
       <p className="text-sm font-medium text-brand-strong">
-        Softclub student? Enter your code to unlock your member price.
+        Computerra student? Enter your code to unlock your member price.
       </p>
       <form onSubmit={handleSubmit} className="mt-2 flex flex-wrap gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="e.g. SOFT-7K2Q"
-          aria-label="Softclub code"
+          aria-label="Computerra code"
           className="w-full max-w-[220px] rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
         />
         <button

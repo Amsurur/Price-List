@@ -111,7 +111,7 @@ export default function Home() {
         <div className="mx-auto flex h-16 max-w-[1120px] items-center gap-3 px-6">
           <Seal />
           <span className="font-display text-lg font-semibold text-ink">
-            Softclub Store
+            Computerra Store
           </span>
         </div>
       </header>
@@ -191,7 +191,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line py-6 text-center text-xs text-muted">
-        Softclub Store · reserve online, pick up at the shop
+        Computerra Store · reserve online, pick up at the shop
       </footer>
     </div>
   );
