@@ -26,6 +26,19 @@ export function imageSrc(url: string | null | undefined): string | null {
   return `${API_ORIGIN}${url}`;
 }
 
+// Thrown by request() on a non-ok response. Callers that need to tell a 404
+// apart from a network/server failure (e.g. the product edit page) can check
+// `status` instead of parsing the message.
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public status: number,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 // Read the error message the API sends (class-validator returns string[]).
 async function errorMessage(res: Response): Promise<string> {
   try {
@@ -48,7 +61,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   if (res.status === 401 && typeof window !== "undefined") {
     window.location.href = "/admin/login";
   }
-  if (!res.ok) throw new Error(await errorMessage(res));
+  if (!res.ok) throw new ApiError(await errorMessage(res), res.status);
   if (res.status === 204) return undefined as T;
   return (await res.json()) as T;
 }

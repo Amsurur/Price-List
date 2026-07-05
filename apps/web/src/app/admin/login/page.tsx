@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
     setSubmitting(true);
     try {
       await login(email, password);
-      router.push("/admin/products");
+      router.push("/admin");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not log in");

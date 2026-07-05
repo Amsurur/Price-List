@@ -216,7 +216,7 @@ export function ProductForm({ product }: { product?: Product }) {
                 <button
                   type="button"
                   onClick={() => setImageUrl(null)}
-                  className="self-start text-xs text-danger hover:underline"
+                  className="self-start text-xs text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
                 >
                   Remove image
                 </button>

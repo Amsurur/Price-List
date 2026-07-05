@@ -105,7 +105,7 @@ export function GenerateCodePanel({
         </h2>
         <button
           onClick={() => setOpen(false)}
-          className="text-sm text-muted hover:text-ink"
+          className="text-sm text-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           Close
         </button>
@@ -134,7 +134,7 @@ export function GenerateCodePanel({
               setJustGenerated([]);
               reset();
             }}
-            className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg"
+            className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
             Generate another
           </button>
@@ -222,7 +222,7 @@ function CopyPill({ code }: { code: string }) {
     <li>
       <button
         onClick={handleCopy}
-        className="rounded-full bg-surface px-3 py-1 font-display text-sm font-semibold text-save shadow-sm hover:bg-brand-tint"
+        className="rounded-full bg-surface px-3 py-1 font-display text-sm font-semibold text-save shadow-sm hover:bg-brand-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         {copied ? "Copied!" : code}
       </button>

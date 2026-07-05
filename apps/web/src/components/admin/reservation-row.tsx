@@ -85,7 +85,7 @@ export function ReservationRow({
             <button
               onClick={() => transition("contacted")}
               disabled={updating}
-              className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+              className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Mark contacted
             </button>
@@ -94,7 +94,7 @@ export function ReservationRow({
             <button
               onClick={() => transition("completed")}
               disabled={updating}
-              className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-60"
+              className="rounded-lg bg-brand px-2.5 py-1.5 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Mark completed
             </button>
@@ -102,7 +102,7 @@ export function ReservationRow({
           <button
             onClick={() => transition("cancelled")}
             disabled={updating}
-            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 disabled:opacity-60"
+            className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
           >
             Cancel
           </button>

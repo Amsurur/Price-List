@@ -72,7 +72,7 @@ export function ReserveForm({
         <button
           type="button"
           onClick={onClose}
-          className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg"
+          className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           Reserve something else
         </button>
@@ -149,7 +149,7 @@ export function ReserveForm({
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink hover:bg-bg"
+          className="rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
           Cancel
         </button>

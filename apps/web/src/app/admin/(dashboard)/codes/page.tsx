@@ -106,7 +106,7 @@ export default function StudentCodesPage() {
             <p className="text-sm text-danger">{state.message}</p>
             <button
               onClick={load}
-              className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg"
+              className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Try again
             </button>
