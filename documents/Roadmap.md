@@ -74,11 +74,11 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - **Done when:** a reservation made in the shop appears in admin and can be worked to "completed". ✅
 
 ### M5 — Polish + launch
-- [ ] Design pass against `docs/05-design-system.md`; responsive + accessible (keyboard focus, reduced motion).
-- [ ] Empty states, error states, loading states (see writing rules in the design doc).
-- [ ] Low-stock badges; simple admin dashboard stats (products, in-stock, active codes, open reservations).
-- [ ] Owner guide: how to add products, hand out codes, print a QR to the store.
-- **Done when:** the owner can run the whole loop end-to-end and the app is live.
+- [x] Design pass against `docs/05-design-system.md`; responsive + accessible (keyboard focus, reduced motion).
+- [x] Empty states, error states, loading states (see writing rules in the design doc).
+- [x] Low-stock badges; simple admin dashboard stats (products, in-stock, active codes, open reservations).
+- [x] Owner guide: how to add products, hand out codes, print a QR to the store.
+- **Done when:** the owner can run the whole loop end-to-end and the app is live. *(loop verified end-to-end locally; hosted deploy still open — see stack override in root `CLAUDE.md`)*
 
 ## 6. Later (Phase 2 / 3 — do NOT build yet)
 

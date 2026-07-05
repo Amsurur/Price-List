@@ -6,7 +6,7 @@ export default function NewProductPage() {
     <div>
       <Link
         href="/admin/products"
-        className="text-sm text-brand-strong hover:underline"
+        className="text-sm text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         ← Back to products
       </Link>
