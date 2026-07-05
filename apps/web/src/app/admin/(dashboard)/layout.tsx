@@ -1,9 +1,11 @@
 import Link from "next/link";
+import { AdminAuthGuard } from "@/components/admin/auth-guard";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { Seal } from "@/components/seal";
 
-// Admin shell: sticky top bar + tabs. proxy.ts redirects here-to-/admin/login
-// when the auth cookie is missing; the JwtAuthGuard on the API enforces it.
+// Admin shell: sticky top bar + tabs. AdminAuthGuard redirects to
+// /admin/login when the session check fails; the JwtAuthGuard on the API
+// enforces it on every actual request regardless.
 const tabs = [
   { href: "/admin/products", label: "Products" },
   { href: "/admin/codes", label: "Student codes" },
@@ -47,7 +49,7 @@ export default function AdminLayout({
       </header>
 
       <main className="mx-auto w-full max-w-[1120px] flex-1 px-6 py-8">
-        {children}
+        <AdminAuthGuard>{children}</AdminAuthGuard>
       </main>
     </div>
   );

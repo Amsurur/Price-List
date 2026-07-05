@@ -29,3 +29,16 @@ export async function logout(): Promise<void> {
     credentials: "include",
   });
 }
+
+// The admin_token cookie is set on the API's own domain, which in production
+// (web on Vercel, API on Render) is a different domain than the web app —
+// so a Next.js proxy/middleware running on the web app's domain can never
+// see it. This is the only reliable way to check the session: ask the API,
+// which does receive the cookie since the request goes straight to it.
+export async function getCurrentAdmin(): Promise<{ email: string }> {
+  const res = await fetch(`${API_URL}/auth/me`, {
+    credentials: "include",
+  });
+  if (!res.ok) throw new Error("Not authenticated");
+  return res.json();
+}

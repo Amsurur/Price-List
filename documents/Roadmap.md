@@ -68,10 +68,10 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - **Done when:** a valid code changes prices; an invalid or disabled code is politely rejected. ✅
 
 ### M4 — Reservations
-- [ ] Storefront: **Reserve** button (only active when a code is applied) → short form (name + contact, pre-filled from code) → confirmation screen.
-- [ ] Admin: reservations list with status `new → contacted → completed / cancelled`, filters, and the code/student attached.
-- [ ] On **completed**, decrement stock.
-- **Done when:** a reservation made in the shop appears in admin and can be worked to "completed".
+- [x] Storefront: **Reserve** button (only active when a code is applied) → short form (name + contact, pre-filled from code) → confirmation screen.
+- [x] Admin: reservations list with status `new → contacted → completed / cancelled`, filters, and the code/student attached.
+- [x] On **completed**, decrement stock.
+- **Done when:** a reservation made in the shop appears in admin and can be worked to "completed". ✅
 
 ### M5 — Polish + launch
 - [ ] Design pass against `docs/05-design-system.md`; responsive + accessible (keyboard focus, reduced motion).

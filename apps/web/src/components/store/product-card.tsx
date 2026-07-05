@@ -1,6 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import Image from "next/image";
 import { imageSrc } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import type { AppliedCode } from "./code-unlock-strip";
+import { ReserveForm } from "./reserve-form";
 import type { Product } from "@/lib/types";
 
 // `unlocked` reflects whether a valid Computerra code is currently applied in
@@ -8,11 +13,13 @@ import type { Product } from "@/lib/types";
 // a non-zero saving for admin/reference purposes even with no code applied.
 export function ProductCard({
   product,
-  unlocked,
+  appliedCode,
 }: {
   product: Product;
-  unlocked: boolean;
+  appliedCode: AppliedCode | null;
 }) {
+  const [reserving, setReserving] = useState(false);
+  const unlocked = Boolean(appliedCode);
   const src = imageSrc(product.imageUrl);
   const outOfStock = product.stock <= 0;
   const hasSaving = unlocked && product.saving > 0;
@@ -103,20 +110,36 @@ export function ProductCard({
         </p>
       )}
 
-      <button
-        type="button"
-        disabled
-        title={
-          !unlocked
-            ? "Enter your Computerra code to reserve."
-            : outOfStock
-              ? "Out of stock."
-              : undefined
-        }
-        className="mt-3 w-full cursor-not-allowed rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white opacity-50"
-      >
-        Reserve
-      </button>
+      {unlocked && !outOfStock ? (
+        <button
+          type="button"
+          onClick={() => setReserving((v) => !v)}
+          className="mt-3 w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          {reserving ? "Close" : "Reserve"}
+        </button>
+      ) : (
+        <button
+          type="button"
+          disabled
+          title={
+            !unlocked
+              ? "Enter your Computerra code to reserve."
+              : "Out of stock."
+          }
+          className="mt-3 w-full cursor-not-allowed rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white opacity-50"
+        >
+          Reserve
+        </button>
+      )}
+
+      {reserving && appliedCode && (
+        <ReserveForm
+          product={product}
+          appliedCode={appliedCode}
+          onClose={() => setReserving(false)}
+        />
+      )}
     </li>
   );
 }

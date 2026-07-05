@@ -25,3 +25,6 @@ dist/
 
 # os
 .DS_Store
+
+# harness-internal (Claude Code), not project state
+.claude/scheduled_tasks.lock
