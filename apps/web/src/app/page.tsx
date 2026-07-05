@@ -183,7 +183,7 @@ export default function Home() {
               <ProductCard
                 key={product.id}
                 product={product}
-                unlocked={Boolean(appliedCode)}
+                appliedCode={appliedCode}
               />
             ))}
           </ul>

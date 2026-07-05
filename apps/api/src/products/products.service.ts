@@ -113,4 +113,17 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
   }
+
+  // Atomic, floor-at-0 decrement — the only place stock ever moves (on a
+  // reservation's contacted → completed transition). A single UPDATE avoids
+  // a read-then-write race between two reservations completing close together.
+  async decrementStock(id: string, qty: number): Promise<void> {
+    await this.products
+      .createQueryBuilder()
+      .update(Product)
+      .set({ stock: () => 'GREATEST(stock - :qty, 0)' })
+      .where('id = :id', { id })
+      .setParameter('qty', qty)
+      .execute();
+  }
 }

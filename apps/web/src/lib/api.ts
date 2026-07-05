@@ -4,6 +4,9 @@ import type {
   BatchStudentCodeInput,
   Product,
   ProductInput,
+  Reservation,
+  ReservationInput,
+  ReservationStatus,
   StudentCode,
   StudentCodeInput,
   ValidateCodeResult,
@@ -157,5 +160,36 @@ export function validateStudentCode(code: string): Promise<ValidateCodeResult> {
   return request<ValidateCodeResult>(`/student-codes/validate`, {
     method: "POST",
     body: JSON.stringify({ code }),
+  });
+}
+
+export function listReservations(params?: {
+  status?: ReservationStatus;
+  search?: string;
+}): Promise<Reservation[]> {
+  const q = new URLSearchParams();
+  if (params?.status) q.set("status", params.status);
+  if (params?.search) q.set("search", params.search);
+  const qs = q.toString();
+  return request<Reservation[]>(`/reservations${qs ? `?${qs}` : ""}`);
+}
+
+// The storefront's Reserve step. Public — gated server-side on a valid code.
+export function createReservation(
+  input: ReservationInput,
+): Promise<Reservation> {
+  return request<Reservation>(`/reservations`, {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updateReservationStatus(
+  id: string,
+  status: ReservationStatus,
+): Promise<Reservation> {
+  return request<Reservation>(`/reservations/${id}/status`, {
+    method: "PATCH",
+    body: JSON.stringify({ status }),
   });
 }

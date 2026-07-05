@@ -11,7 +11,6 @@ export type ReservationStatus = 'new' | 'contacted' | 'completed' | 'cancelled';
 // A student's reserve-for-pickup request. product_name and unit_price are
 // SNAPSHOTS taken at creation so later product edits never rewrite history.
 // See documents/03-data-model.md and documents/04-business-logic.md.
-// (No endpoints in Slice 1 — defined now so the schema is whole.)
 @Entity('reservations')
 export class Reservation {
   @PrimaryGeneratedColumn('uuid')

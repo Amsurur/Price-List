@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { StudentCode } from '../entities/student-code.entity';
 import { CreateStudentCodeDto } from './dto/create-student-code.dto';
 import { BatchStudentCodesDto } from './dto/batch-student-codes.dto';
@@ -153,6 +153,27 @@ export class StudentCodesService {
     const row = await this.codes.findOne({ where: { code } });
     if (!row || !row.active) return null;
     return row;
+  }
+
+  // A reservation also counts as a "use" of the code, same as validate().
+  // Atomic update — no read-then-write race with a concurrent unlock/reserve.
+  async recordUse(id: string): Promise<void> {
+    await this.codes
+      .createQueryBuilder()
+      .update(StudentCode)
+      .set({ usesCount: () => '"uses_count" + 1', lastUsedAt: new Date() })
+      .where('id = :id', { id })
+      .execute();
+  }
+
+  // Batched lookup for the admin reservations list, which shows the human
+  // -readable code string rather than the FK.
+  async findCodeStrings(ids: string[]): Promise<Record<string, string>> {
+    if (ids.length === 0) return {};
+    const rows = await this.codes.find({ where: { id: In(ids) } });
+    const map: Record<string, string> = {};
+    for (const row of rows) map[row.id] = row.code;
+    return map;
   }
 
   async exportCsv(): Promise<string> {

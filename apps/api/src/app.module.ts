@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
+import { ReservationsModule } from './reservations/reservations.module';
 import { StudentCodesModule } from './student-codes/student-codes.module';
 
 @Module({
@@ -50,6 +51,7 @@ import { StudentCodesModule } from './student-codes/student-codes.module';
     HealthModule,
     ProductsModule,
     StudentCodesModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
