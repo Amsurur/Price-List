@@ -72,7 +72,7 @@ export function GenerateCodePanel({
 
   if (!open) {
     return (
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => {
             setMode("single");
@@ -222,7 +222,7 @@ function CopyPill({ code }: { code: string }) {
     <li>
       <button
         onClick={handleCopy}
-        className="rounded-full bg-surface px-3 py-1 font-display text-sm font-semibold text-save shadow-sm hover:bg-brand-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        className="rounded-full bg-surface px-3 py-1.5 font-display text-sm font-semibold text-save shadow-sm hover:bg-brand-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         {copied ? "Copied!" : code}
       </button>

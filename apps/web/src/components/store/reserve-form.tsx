@@ -19,10 +19,10 @@ export function ReserveForm({
   onClose,
 }: {
   product: Product;
-  appliedCode: AppliedCode;
+  appliedCode: AppliedCode | null;
   onClose: () => void;
 }) {
-  const [name, setName] = useState(appliedCode.studentName ?? "");
+  const [name, setName] = useState(appliedCode?.studentName ?? "");
   const [contact, setContact] = useState("");
   const [quantity, setQuantity] = useState("1");
   const [note, setNote] = useState("");
@@ -36,7 +36,7 @@ export function ReserveForm({
     setError(null);
     try {
       const created = await createReservation({
-        code: appliedCode.code,
+        code: appliedCode?.code,
         productId: product.id,
         studentName: name.trim() || undefined,
         studentContact: contact.trim(),
@@ -80,7 +80,8 @@ export function ReserveForm({
     );
   }
 
-  const total = product.memberPrice * (Number(quantity) || 0);
+  const unitPrice = appliedCode ? product.memberPrice : product.price;
+  const total = unitPrice * (Number(quantity) || 0);
 
   return (
     <form

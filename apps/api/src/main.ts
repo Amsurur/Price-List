@@ -3,10 +3,13 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import { join } from 'path';
+import { resolve } from 'path';
 import { AppModule } from './app.module';
 import { ADMIN_COOKIE_NAME } from './auth/auth.constants';
-import { UPLOADS_DIR } from './products/products.controller';
+import {
+  UPLOADS_DIR,
+  UPLOADS_URL_PREFIX,
+} from './products/products.controller';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -27,10 +30,12 @@ async function bootstrap() {
     }),
   );
 
-  // Serve uploaded product images from local disk (dev). URLs look like
-  // /uploads/<file> — deliberately outside the /api prefix.
-  app.useStaticAssets(join(process.cwd(), UPLOADS_DIR), {
-    prefix: `/${UPLOADS_DIR}/`,
+  // Serve uploaded product images from disk. URLs look like /uploads/<file>
+  // — deliberately outside the /api prefix. UPLOADS_DIR may be relative
+  // (dev) or an absolute persistent-disk mount path (production);
+  // path.resolve handles both correctly (path.join does not).
+  app.useStaticAssets(resolve(UPLOADS_DIR), {
+    prefix: `/${UPLOADS_URL_PREFIX}/`,
   });
 
   // Allow the Next.js origin(s) to call the API from the browser, and let

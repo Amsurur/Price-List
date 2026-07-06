@@ -8,10 +8,13 @@ import {
 } from 'class-validator';
 
 export class CreateReservationDto {
-  // The student's Computerra code — validated server-side, never trusted as-is.
+  // The student's Computerra code — optional. Validated server-side, never
+  // trusted as-is. Omitted entirely, the reservation is priced at regular
+  // price with no code attached.
+  @IsOptional()
   @IsString()
   @MaxLength(50)
-  code: string;
+  code?: string;
 
   @IsUUID()
   productId: string;

@@ -16,9 +16,10 @@ export class Reservation {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  // Which student reserved (FK → student_codes.id).
-  @Column('uuid', { name: 'code_id' })
-  codeId: string;
+  // Which student reserved (FK → student_codes.id). Null when reserved
+  // without a code, at the regular price.
+  @Column('uuid', { name: 'code_id', nullable: true })
+  codeId: string | null;
 
   @Column('text', { name: 'student_name', nullable: true })
   studentName: string | null;

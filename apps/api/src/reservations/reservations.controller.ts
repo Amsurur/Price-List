@@ -29,7 +29,8 @@ export class ReservationsController {
     return this.reservations.findAll({ status, search });
   }
 
-  // Public: the storefront's reservation step, gated on a valid code.
+  // Public: the storefront's reservation step. Code is optional — it
+  // applies the member price when valid, but reserving works without one.
   @Post()
   @HttpCode(201)
   create(@Body() dto: CreateReservationDto) {

@@ -144,7 +144,7 @@ export function CodeRow({
       <button
         onClick={handleCopy}
         title="Copy code"
-        className="rounded-full bg-brand-tint px-3 py-1 font-display text-sm font-semibold text-brand-strong hover:bg-brand/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        className="rounded-full bg-brand-tint px-3 py-1.5 font-display text-sm font-semibold text-brand-strong hover:bg-brand/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         {copied ? "Copied!" : code.code}
       </button>
@@ -172,7 +172,7 @@ export function CodeRow({
 
       <button
         onClick={handleToggleActive}
-        className={`rounded-full px-3 py-1 text-xs font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+        className={`rounded-full px-3 py-1.5 text-xs font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
           code.active
             ? "bg-save-tint text-save"
             : "bg-danger/10 text-danger"
@@ -186,13 +186,13 @@ export function CodeRow({
           <>
             <button
               onClick={handleDelete}
-              className="rounded-lg bg-danger px-2.5 py-1.5 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+              className="rounded-lg bg-danger px-3 py-2 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
               Delete
             </button>
             <button
               onClick={() => setConfirming(false)}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Keep
             </button>
@@ -201,13 +201,13 @@ export function CodeRow({
           <>
             <button
               onClick={() => setEditing(true)}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Edit
             </button>
             <button
               onClick={() => setConfirming(true)}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
               Delete
             </button>

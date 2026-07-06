@@ -183,7 +183,7 @@ export function ProductForm({ product }: { product?: Product }) {
 
         <div>
           <span className={labelClass}>Image</span>
-          <div className="mt-1 flex items-center gap-4">
+          <div className="mt-1 flex flex-wrap items-center gap-4">
             <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
               {preview ? (
                 <Image
@@ -250,7 +250,7 @@ export function ProductForm({ product }: { product?: Product }) {
         </label>
       </div>
 
-      <div className="mt-6 flex items-center gap-3">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           type="submit"
           disabled={saving || uploading}
@@ -266,7 +266,7 @@ export function ProductForm({ product }: { product?: Product }) {
           Cancel
         </button>
         {editing && (
-          <span className="ml-auto text-xs text-muted">
+          <span className="mt-1 w-full text-xs text-muted sm:mt-0 sm:ml-auto sm:w-auto">
             Editing never changes past reservations — they keep their snapshot.
           </span>
         )}

@@ -117,6 +117,28 @@ describe('ReservationsService', () => {
       expect(result.code).toBe('SOFT-ABCD');
       expect(studentCodes.recordUse).toHaveBeenCalledWith('c1');
     });
+
+    it('reserves at the regular price with no code, and never looks one up', async () => {
+      products.findOne.mockResolvedValue({
+        id: 'p1',
+        name: 'Laptop',
+        price: 800,
+        memberDiscount: 15,
+        stock: 3,
+      });
+
+      const result = await service.create({
+        productId: 'p1',
+        studentName: 'Bo',
+        studentContact: '+998900000000',
+      });
+
+      expect(result.unitPrice).toBe(800);
+      expect(result.codeId).toBeNull();
+      expect(result.code).toBe('No code');
+      expect(studentCodes.findActiveByCode).not.toHaveBeenCalled();
+      expect(studentCodes.recordUse).not.toHaveBeenCalled();
+    });
   });
 
   describe('updateStatus', () => {

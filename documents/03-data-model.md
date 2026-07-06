@@ -41,12 +41,12 @@ The heart of v1. One row per student. The code does three jobs: **verify** the s
 | Column | Type | Notes |
 |---|---|---|
 | id | uuid PK | |
-| code_id | uuid FK → student_codes.id | which student reserved |
+| code_id | uuid FK → student_codes.id, nullable | which student reserved — null when reserved without a code, at regular price |
 | student_name | text | captured on the form |
 | student_contact | text, not null | phone / Telegram / whatever the shop uses |
 | product_id | uuid FK → products.id | reference (may later change or be deleted) |
 | product_name | text, not null | **snapshot** of the name at reservation time |
-| unit_price | integer, not null | **snapshot** of the member price paid |
+| unit_price | integer, not null | **snapshot** of the price paid — member price if a code was used, regular price otherwise |
 | quantity | integer, default 1 | |
 | status | text, default 'new' | one of: `new`, `contacted`, `completed`, `cancelled` |
 | note | text | optional student note |

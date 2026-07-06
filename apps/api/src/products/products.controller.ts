@@ -16,15 +16,22 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { extname, resolve } from 'path';
 import { randomUUID } from 'crypto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-// Where uploaded images land on local disk (dev). Served statically in main.ts.
-export const UPLOADS_DIR = 'uploads';
+// Public URL prefix images are served under — always "/uploads/", regardless
+// of where the files physically live on disk (see UPLOADS_DIR below).
+export const UPLOADS_URL_PREFIX = 'uploads';
+
+// Where uploaded images land on disk. Served statically in main.ts. Defaults
+// to a relative dev path; in production this should point at a persistent
+// disk mount (e.g. a Render Disk), since the container's own filesystem is
+// wiped on every deploy/restart. May be relative or absolute.
+export const UPLOADS_DIR = process.env.UPLOADS_DIR ?? 'uploads';
 const ALLOWED_IMAGE = /\.(jpe?g|png|webp|gif)$/i;
 
 @Controller('products')
@@ -52,7 +59,7 @@ export class ProductsController {
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
-        destination: `./${UPLOADS_DIR}`,
+        destination: resolve(UPLOADS_DIR),
         filename: (_req, file, cb) =>
           cb(null, `${randomUUID()}${extname(file.originalname)}`),
       }),
@@ -67,7 +74,7 @@ export class ProductsController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    return { imageUrl: `/${UPLOADS_DIR}/${file.filename}` };
+    return { imageUrl: `/${UPLOADS_URL_PREFIX}/${file.filename}` };
   }
 
   @Get(':id')
