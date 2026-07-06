@@ -5,5 +5,5 @@ const CURRENCY = process.env.NEXT_PUBLIC_CURRENCY ?? "$";
 
 // Prices are whole integers. Group thousands; no decimals.
 export function formatMoney(amount: number): string {
-  return `${CURRENCY}${amount.toLocaleString("en-US")}`;
+  return `${amount.toLocaleString("en-US")}c`;
 }
