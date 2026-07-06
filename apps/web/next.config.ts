@@ -9,6 +9,11 @@ const apiUrl = new URL(
 );
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      { source: "/api/:path*", destination: `${apiUrl.origin}/api/:path*` },
+    ];
+  },
   images: {
     remotePatterns: [
       {
