@@ -12,11 +12,18 @@ import type {
   ValidateCodeResult,
 } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+// On the server (SSR), there's no same-origin proxy to go through, so hit the
+// API directly. In the browser, use the relative /api path that next.config.ts
+// rewrites to the API — this keeps the admin_token cookie same-origin, which
+// Safari/WebKit's ITP requires for it to persist (see auth.ts for the fuller
+// story).
+const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+const API_URL = typeof window === "undefined" ? PUBLIC_API_URL : "/api";
 
 // The API's origin (without the /api prefix), for resolving image URLs like
 // "/uploads/abc.png" that it serves as static files.
-const API_ORIGIN = API_URL.replace(/\/api\/?$/, "");
+const API_ORIGIN = PUBLIC_API_URL.replace(/\/api\/?$/, "");
 
 // Turn a stored image_url into something the browser can load. Absolute URLs
 // pass through; relative "/uploads/..." paths get the API origin.

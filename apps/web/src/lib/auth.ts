@@ -1,6 +1,13 @@
 // Admin auth: the API sets an httpOnly cookie on login, so these calls just
 // need credentials: "include" — there's no token to store client-side.
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+//
+// These calls only ever run in the browser (no server component imports this
+// module), so they always use the relative /api path that next.config.ts
+// rewrites to the real API origin — this keeps the cookie same-origin, which
+// Safari/WebKit's ITP requires for it to persist across page loads.
+const PUBLIC_API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+const API_URL = typeof window === "undefined" ? PUBLIC_API_URL : "/api";
 
 async function errorMessage(res: Response): Promise<string> {
   try {
@@ -30,11 +37,9 @@ export async function logout(): Promise<void> {
   });
 }
 
-// The admin_token cookie is set on the API's own domain, which in production
-// (web on Vercel, API on Render) is a different domain than the web app —
-// so a Next.js proxy/middleware running on the web app's domain can never
-// see it. This is the only reliable way to check the session: ask the API,
-// which does receive the cookie since the request goes straight to it.
+// Ask the API whether the current session is valid. The request goes through
+// the /api rewrite in the browser, so the admin_token cookie (now same-origin
+// post-fix) is sent automatically — no token to manage client-side.
 export async function getCurrentAdmin(): Promise<{ email: string }> {
   const res = await fetch(`${API_URL}/auth/me`, {
     credentials: "include",
