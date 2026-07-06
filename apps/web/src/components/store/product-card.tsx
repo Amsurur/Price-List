@@ -110,7 +110,7 @@ export function ProductCard({
         </p>
       )}
 
-      {unlocked && !outOfStock ? (
+      {!outOfStock ? (
         <button
           type="button"
           onClick={() => setReserving((v) => !v)}
@@ -122,18 +122,14 @@ export function ProductCard({
         <button
           type="button"
           disabled
-          title={
-            !unlocked
-              ? "Enter your Computerra code to reserve."
-              : "Out of stock."
-          }
+          title="Out of stock."
           className="mt-3 w-full cursor-not-allowed rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white opacity-50"
         >
           Reserve
         </button>
       )}
 
-      {reserving && appliedCode && (
+      {reserving && (
         <ReserveForm
           product={product}
           appliedCode={appliedCode}

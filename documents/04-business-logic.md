@@ -63,20 +63,21 @@ States: `new → contacted → completed`, with `cancelled` available from any n
 
 ```
 createReservation(code, product, form):
-    require validateCode(code).ok            # Reserve is blocked without a valid code
+    # code is optional — reserving works without one, at the regular price
+    if code: require validateCode(code).ok
     reservation = {
-        code_id: code.id,
+        code_id: code.id if code else null,
         student_name: form.name,
         student_contact: form.contact,
         product_id: product.id,
         product_name: product.name,          # snapshot
-        unit_price: memberPrice(product, code),  # snapshot
+        unit_price: memberPrice(product, code) if code else product.price,  # snapshot
         quantity: form.quantity or 1,
         status: "new",
         note: form.note,
     }
     insert(reservation)
-    increment code.uses_count; set code.last_used_at
+    if code: increment code.uses_count; set code.last_used_at
     return confirmation
 ```
 

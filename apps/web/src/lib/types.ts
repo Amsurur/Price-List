@@ -71,7 +71,7 @@ export type ReservationStatus = "new" | "contacted" | "completed" | "cancelled";
 // Matches the API's ReservationView (the entity plus the joined code string).
 export interface Reservation {
   id: string;
-  codeId: string;
+  codeId: string | null;
   code: string;
   studentName: string | null;
   studentContact: string;
@@ -86,8 +86,9 @@ export interface Reservation {
 }
 
 // Fields the storefront's Reserve form sends when creating a reservation.
+// `code` is optional — omitted, the reservation is priced at regular price.
 export interface ReservationInput {
-  code: string;
+  code?: string;
   productId: string;
   studentName?: string;
   studentContact: string;

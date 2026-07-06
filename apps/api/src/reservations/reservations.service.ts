@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation, ReservationStatus } from '../entities/reservation.entity';
+import { StudentCode } from '../entities/student-code.entity';
 import { memberPrice } from '../common/pricing';
 import { ProductsService } from '../products/products.service';
 import { StudentCodesService } from '../student-codes/student-codes.service';
@@ -42,18 +43,36 @@ export class ReservationsService {
     private readonly products: ProductsService,
   ) {}
 
+  private codeLabel(
+    codeId: string | null,
+    codes: Record<string, string>,
+  ): string {
+    if (!codeId) return 'No code';
+    return codes[codeId] ?? '—';
+  }
+
   private async toView(reservation: Reservation): Promise<ReservationView> {
-    const codes = await this.studentCodes.findCodeStrings([reservation.codeId]);
-    return { ...reservation, code: codes[reservation.codeId] ?? '—' };
+    const codes = await this.studentCodes.findCodeStrings(
+      reservation.codeId ? [reservation.codeId] : [],
+    );
+    return { ...reservation, code: this.codeLabel(reservation.codeId, codes) };
   }
 
   private async toViews(
     reservations: Reservation[],
   ): Promise<ReservationView[]> {
-    const codes = await this.studentCodes.findCodeStrings([
-      ...new Set(reservations.map((r) => r.codeId)),
-    ]);
-    return reservations.map((r) => ({ ...r, code: codes[r.codeId] ?? '—' }));
+    const ids = [
+      ...new Set(
+        reservations
+          .map((r) => r.codeId)
+          .filter((id): id is string => id != null),
+      ),
+    ];
+    const codes = await this.studentCodes.findCodeStrings(ids);
+    return reservations.map((r) => ({
+      ...r,
+      code: this.codeLabel(r.codeId, codes),
+    }));
   }
 
   async findAll(query: FindReservationsQuery = {}): Promise<ReservationView[]> {
@@ -76,13 +95,19 @@ export class ReservationsService {
     return this.toViews(await qb.getMany());
   }
 
-  // The storefront's create step. Requires a currently-valid code and an
-  // in-stock product; snapshots the product name + member price so later
-  // edits never rewrite this reservation's history.
+  // The storefront's create step. A code is optional — reserving with a
+  // valid code snapshots the member price, reserving without one snapshots
+  // the regular price. Either way requires an in-stock product; snapshots
+  // the product name + price so later edits never rewrite this
+  // reservation's history.
   async create(dto: CreateReservationDto): Promise<ReservationView> {
-    const code = await this.studentCodes.findActiveByCode(dto.code);
-    if (!code) {
-      throw new BadRequestException("That code isn't valid.");
+    const trimmedCode = dto.code?.trim();
+    let code: StudentCode | null = null;
+    if (trimmedCode) {
+      code = await this.studentCodes.findActiveByCode(trimmedCode);
+      if (!code) {
+        throw new BadRequestException("That code isn't valid.");
+      }
     }
 
     const product = await this.products.findOne(dto.productId);
@@ -91,14 +116,14 @@ export class ReservationsService {
     }
 
     const entity = this.reservations.create({
-      codeId: code.id,
-      studentName: dto.studentName?.trim() || code.studentName,
+      codeId: code?.id ?? null,
+      studentName: dto.studentName?.trim() || code?.studentName || null,
       studentContact: dto.studentContact.trim(),
       productId: product.id,
       productName: product.name,
-      unitPrice: memberPrice(product, {
-        discountOverride: code.discountOverride,
-      }),
+      unitPrice: code
+        ? memberPrice(product, { discountOverride: code.discountOverride })
+        : product.price,
       quantity: dto.quantity ?? 1,
       status: 'new',
       note: dto.note?.trim() || null,
@@ -106,7 +131,9 @@ export class ReservationsService {
     const saved = await this.reservations.save(entity);
 
     // A reservation counts as a "use" of the code, same as validate().
-    await this.studentCodes.recordUse(code.id);
+    if (code) {
+      await this.studentCodes.recordUse(code.id);
+    }
 
     return this.toView(saved);
   }

@@ -41,7 +41,7 @@ Everything else in the spec (data model, business logic, design system, screens,
 - One unique code per student = verification **and** discount **and** tracking.
 - Solo operator. The academy is not part of the app.
 - Codes are reusable but tracked and can be disabled.
-- Store is browsable at regular price; the code unlocks the member price and the Reserve button.
+- Store is browsable and reservable at regular price without a code; the code unlocks the member price on a reservation.
 
 ## Conventions
 
