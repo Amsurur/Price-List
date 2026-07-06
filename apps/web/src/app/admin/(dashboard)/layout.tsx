@@ -34,7 +34,7 @@ export default function AdminLayout({
               <Link
                 key={tab.href}
                 href={tab.href}
-                className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-brand-tint hover:text-brand-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="shrink-0 rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-brand-tint hover:text-brand-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 {tab.label}
               </Link>

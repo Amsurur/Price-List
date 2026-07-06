@@ -72,7 +72,7 @@ export default function ProductsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-ink">Products</h1>
           <p className="mt-1 text-sm text-muted">
@@ -191,7 +191,7 @@ function ProductRow({
   const discounted = product.saving > 0;
 
   return (
-    <li className="flex items-center gap-4 rounded-xl border border-line bg-surface p-3 transition-transform hover:-translate-y-0.5">
+    <li className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3 transition-transform hover:-translate-y-0.5">
       <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
         {src ? (
           <Image
@@ -261,13 +261,13 @@ function ProductRow({
           <>
             <button
               onClick={() => onDeleted(product.id)}
-              className="rounded-lg bg-danger px-2.5 py-1.5 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+              className="rounded-lg bg-danger px-3 py-2 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
               Delete
             </button>
             <button
               onClick={() => setConfirming(false)}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Keep
             </button>
@@ -276,13 +276,13 @@ function ProductRow({
           <>
             <Link
               href={`/admin/products/${product.id}/edit`}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Edit
             </Link>
             <button
               onClick={() => setConfirming(true)}
-              className="rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+              className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
               Delete
             </button>
