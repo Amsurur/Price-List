@@ -69,7 +69,7 @@ export function ReservationRow({
         </div>
       </div>
 
-      <div className="hidden text-right text-xs text-muted sm:block">
+      <div className="w-full text-left text-xs text-muted sm:w-auto sm:text-right">
         {new Date(reservation.createdAt).toLocaleString()}
       </div>
 
