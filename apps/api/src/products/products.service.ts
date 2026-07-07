@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
+import { ProductImage } from '../entities/product-image.entity';
 import {
   memberPrice,
   PricingCode,
@@ -11,6 +12,11 @@ import {
 import { StudentCodesService } from '../student-codes/student-codes.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
+// Pulls the DB image id out of a stored `/api/products/images/<id>` URL —
+// used to clean up ProductImage rows once nothing on the product points at
+// them anymore, so deleting/replacing a photo doesn't leak blobs forever.
+const IMAGE_URL_ID = /\/products\/images\/([0-9a-f-]{36})$/i;
 
 // What the API returns: the stored product plus the computed pricing/stock
 // fields, so the web never re-implements the discount maths.
@@ -34,8 +40,20 @@ export class ProductsService {
   constructor(
     @InjectRepository(Product)
     private readonly products: Repository<Product>,
+    @InjectRepository(ProductImage)
+    private readonly productImages: Repository<ProductImage>,
     private readonly studentCodes: StudentCodesService,
   ) {}
+
+  private imageIdsOf(product: Product): string[] {
+    const urls = [
+      ...product.images,
+      ...(product.imageUrl ? [product.imageUrl] : []),
+    ];
+    return urls
+      .map((url) => IMAGE_URL_ID.exec(url)?.[1])
+      .filter((id): id is string => Boolean(id));
+  }
 
   // With no code, this reflects each product's own standard discount — used
   // as-is by the admin view. The storefront only shows it once a student's
@@ -111,15 +129,26 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
+    const beforeIds = this.imageIdsOf(product);
     Object.assign(product, dto);
     const saved = await this.products.save(product);
+    const afterIds = new Set(this.imageIdsOf(saved));
+    const removedIds = beforeIds.filter((imageId) => !afterIds.has(imageId));
+    if (removedIds.length > 0) {
+      await this.productImages.delete(removedIds);
+    }
     return this.toView(saved);
   }
 
   async remove(id: string): Promise<void> {
-    const result = await this.products.delete(id);
-    if (!result.affected) {
+    const product = await this.products.findOne({ where: { id } });
+    if (!product) {
       throw new NotFoundException('Product not found');
+    }
+    const imageIds = this.imageIdsOf(product);
+    await this.products.delete(id);
+    if (imageIds.length > 0) {
+      await this.productImages.delete(imageIds);
     }
   }
 

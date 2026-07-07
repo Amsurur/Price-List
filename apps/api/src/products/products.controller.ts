@@ -5,38 +5,37 @@ import {
   Delete,
   Get,
   HttpCode,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
   Post,
   Query,
+  Res,
   UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname, resolve } from 'path';
-import { randomUUID } from 'crypto';
+import { memoryStorage } from 'multer';
+import type { Response } from 'express';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ProductImage } from '../entities/product-image.entity';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
-// Public URL prefix images are served under — always "/uploads/", regardless
-// of where the files physically live on disk (see UPLOADS_DIR below).
-export const UPLOADS_URL_PREFIX = 'uploads';
-
-// Where uploaded images land on disk. Served statically in main.ts. Defaults
-// to a relative dev path; in production this should point at a persistent
-// disk mount (e.g. a Render Disk), since the container's own filesystem is
-// wiped on every deploy/restart. May be relative or absolute.
-export const UPLOADS_DIR = process.env.UPLOADS_DIR ?? 'uploads';
 const ALLOWED_IMAGE = /\.(jpe?g|png|webp|gif)$/i;
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly products: ProductsService) {}
+  constructor(
+    private readonly products: ProductsService,
+    @InjectRepository(ProductImage)
+    private readonly images: Repository<ProductImage>,
+  ) {}
 
   @Get()
   findAll(
@@ -53,16 +52,14 @@ export class ProductsController {
     });
   }
 
-  // Save an image to local disk and return its public URL.
+  // Save an image's bytes in Postgres (not local disk) and return its public
+  // URL. Hosts like Render's free tier have an ephemeral filesystem, so disk
+  // storage doesn't survive a redeploy — the DB is the one thing that does.
   @UseGuards(JwtAuthGuard)
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: resolve(UPLOADS_DIR),
-        filename: (_req, file, cb) =>
-          cb(null, `${randomUUID()}${extname(file.originalname)}`),
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (_req, file, cb) =>
         ALLOWED_IMAGE.test(file.originalname)
@@ -70,11 +67,26 @@ export class ProductsController {
           : cb(new BadRequestException('Only image files are allowed'), false),
     }),
   )
-  upload(@UploadedFile() file?: Express.Multer.File) {
+  async upload(@UploadedFile() file?: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    return { imageUrl: `/${UPLOADS_URL_PREFIX}/${file.filename}` };
+    const image = await this.images.save(
+      this.images.create({ data: file.buffer, mimeType: file.mimetype }),
+    );
+    return { imageUrl: `/api/products/images/${image.id}` };
+  }
+
+  // Public — the storefront (no login) needs to load these too.
+  @Get('images/:id')
+  async getImage(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
+    const image = await this.images.findOne({ where: { id } });
+    if (!image) {
+      throw new NotFoundException('Image not found');
+    }
+    res.set('Content-Type', image.mimeType);
+    res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    res.send(image.data);
   }
 
   @Get(':id')

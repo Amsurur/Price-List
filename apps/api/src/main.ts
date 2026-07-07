@@ -1,18 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import { resolve } from 'path';
 import { AppModule } from './app.module';
 import { ADMIN_COOKIE_NAME } from './auth/auth.constants';
-import {
-  UPLOADS_DIR,
-  UPLOADS_URL_PREFIX,
-} from './products/products.controller';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule);
 
   // All routes live under /api so the web app can proxy/point cleanly.
   app.setGlobalPrefix('api');
@@ -30,14 +24,6 @@ async function bootstrap() {
     }),
   );
 
-  // Serve uploaded product images from disk. URLs look like /uploads/<file>
-  // — deliberately outside the /api prefix. UPLOADS_DIR may be relative
-  // (dev) or an absolute persistent-disk mount path (production);
-  // path.resolve handles both correctly (path.join does not).
-  app.useStaticAssets(resolve(UPLOADS_DIR), {
-    prefix: `/${UPLOADS_URL_PREFIX}/`,
-  });
-
   // Allow the Next.js origin(s) to call the API from the browser, and let
   // it send/receive the admin auth cookie (credentials). WEB_ORIGIN can be
   // a comma-separated list (e.g. local dev + the deployed Vercel URL) —
@@ -51,9 +37,9 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // API docs, outside the /api prefix like /uploads. Admin auth is a cookie,
-  // not a header, so "Authorize" in the UI just needs you logged in already
-  // (via /api/auth/login) in the same browser tab.
+  // API docs, outside the /api prefix. Admin auth is a cookie, not a header,
+  // so "Authorize" in the UI just needs you logged in already (via
+  // /api/auth/login) in the same browser tab.
   const swaggerDocument = SwaggerModule.createDocument(
     app,
     new DocumentBuilder()

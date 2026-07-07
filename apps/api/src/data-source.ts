@@ -2,6 +2,7 @@ import { config } from 'dotenv';
 import { join } from 'path';
 import { DataSource } from 'typeorm';
 import { Product } from './entities/product.entity';
+import { ProductImage } from './entities/product-image.entity';
 import { StudentCode } from './entities/student-code.entity';
 import { Reservation } from './entities/reservation.entity';
 
@@ -24,6 +25,6 @@ export const dataSource = new DataSource({
         password: process.env.DB_PASSWORD ?? 'softclub',
         database: process.env.DB_NAME ?? 'softclub_store',
       }),
-  entities: [Product, StudentCode, Reservation],
+  entities: [Product, ProductImage, StudentCode, Reservation],
   synchronize: true,
 });

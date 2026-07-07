@@ -22,11 +22,11 @@ const PUBLIC_API_URL =
 const API_URL = typeof window === "undefined" ? PUBLIC_API_URL : "/api";
 
 // The API's origin (without the /api prefix), for resolving image URLs like
-// "/uploads/abc.png" that it serves as static files.
+// "/api/products/images/<id>" that it serves from Postgres.
 const API_ORIGIN = PUBLIC_API_URL.replace(/\/api\/?$/, "");
 
 // Turn a stored image_url into something the browser can load. Absolute URLs
-// pass through; relative "/uploads/..." paths get the API origin.
+// pass through; relative paths get the API origin prepended.
 export function imageSrc(url: string | null | undefined): string | null {
   if (!url) return null;
   if (/^https?:\/\//.test(url)) return url;
