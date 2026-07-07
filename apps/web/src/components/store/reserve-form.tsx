@@ -10,17 +10,20 @@ const inputClass =
   "w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
 const labelClass = "block text-xs font-medium text-muted";
 
-// Inline, expand-in-place form — this app has no modal/dialog primitive
-// anywhere, so the Reserve flow follows the same pattern as admin's
-// generate-code-panel.tsx rather than introducing an overlay.
+// On desktop this expands inline below the product card (following admin's
+// generate-code-panel.tsx pattern). On mobile the card renders it inside a
+// BottomSheet instead — `embedded` drops the form's own box chrome so it
+// doesn't double up with the sheet's.
 export function ReserveForm({
   product,
   appliedCode,
   onClose,
+  embedded = false,
 }: {
   product: Product;
   appliedCode: AppliedCode | null;
   onClose: () => void;
+  embedded?: boolean;
 }) {
   const [name, setName] = useState(appliedCode?.studentName ?? "");
   const [contact, setContact] = useState("");
@@ -86,7 +89,11 @@ export function ReserveForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mt-3 flex flex-col gap-3 rounded-xl border border-line bg-bg p-3"
+      className={
+        embedded
+          ? "flex flex-col gap-3"
+          : "mt-3 flex flex-col gap-3 rounded-xl border border-line bg-bg p-3"
+      }
     >
       {error && (
         <p role="alert" className="text-sm text-danger">
@@ -112,7 +119,7 @@ export function ReserveForm({
           required
         />
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
           <label className={labelClass}>Quantity</label>
           <input
