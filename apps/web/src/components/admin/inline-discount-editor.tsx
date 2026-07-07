@@ -37,7 +37,7 @@ export function InlineDiscountEditor({
 
     const num = Number(trimmed);
     if (!Number.isInteger(num) || num < 0 || num > 90) {
-      setError("Whole number 0–90");
+      setError("Целое число 0–90");
       reset();
       return;
     }
@@ -51,7 +51,7 @@ export function InlineDiscountEditor({
     try {
       await onSave(next);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save");
+      setError(err instanceof Error ? err.message : "Не удалось сохранить");
       reset();
     } finally {
       setSaving(false);
@@ -66,7 +66,7 @@ export function InlineDiscountEditor({
         max={90}
         inputMode="numeric"
         value={text}
-        placeholder={allowNull ? "Standard" : undefined}
+        placeholder={allowNull ? "Стандартная" : undefined}
         onChange={(e) => {
           setError(null);
           setText(e.target.value);
@@ -76,7 +76,7 @@ export function InlineDiscountEditor({
           if (e.key === "Enter") (e.target as HTMLInputElement).blur();
         }}
         disabled={saving}
-        aria-label="Discount percent"
+        aria-label="Процент скидки"
         className="w-20 rounded-[10px] border border-line bg-surface px-2 py-1.5 text-sm tabular text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30 disabled:opacity-60"
       />
       <span className="text-sm text-muted">%</span>

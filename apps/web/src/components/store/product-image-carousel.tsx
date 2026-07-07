@@ -33,7 +33,7 @@ export function ProductImageCarousel({
   if (images.length === 0) {
     return (
       <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
-        <span className="text-xs text-brand-strong">No image</span>
+        <span className="text-xs text-brand-strong">Нет фото</span>
       </div>
     );
   }
@@ -44,7 +44,7 @@ export function ProductImageCarousel({
       <button
         type="button"
         onClick={() => onImageClick?.(0)}
-        aria-label="View full image"
+        aria-label="Открыть фото целиком"
         className="flex aspect-[4/3] w-full items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
         {src ? (
@@ -57,7 +57,7 @@ export function ProductImageCarousel({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="text-xs text-brand-strong">No image</span>
+          <span className="text-xs text-brand-strong">Нет фото</span>
         )}
       </button>
     );
@@ -77,7 +77,7 @@ export function ProductImageCarousel({
                 key={url + index}
                 type="button"
                 onClick={() => onImageClick?.(index)}
-                aria-label={`View image ${index + 1} of ${images.length} full-screen`}
+                aria-label={`Открыть фото ${index + 1} из ${images.length} на весь экран`}
                 className="relative h-full min-w-0 flex-[0_0_100%] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
                 {src && (

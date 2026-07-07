@@ -41,7 +41,7 @@ export function ImageLightbox({
           onClick={onClose}
           className="rounded-full bg-surface/90 px-3 py-1.5 text-sm font-medium text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Close
+          Закрыть
         </button>
       </div>
 
@@ -73,7 +73,7 @@ export function ImageLightbox({
             <button
               key={i}
               type="button"
-              aria-label={`Go to image ${i + 1}`}
+              aria-label={`Перейти к фото ${i + 1}`}
               onClick={() => emblaApi?.scrollTo(i)}
               className={`h-2 w-2 rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
                 i === selected ? "bg-white" : "bg-white/40"

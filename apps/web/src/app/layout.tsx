@@ -10,14 +10,14 @@ const spaceGrotesk = Space_Grotesk({
 
 const inter = Inter({
   variable: "--font-inter",
-  subsets: ["latin"],
+  subsets: ["latin", "cyrillic"],
   weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
   title: "Computerra Store",
   description:
-    "Computerra students unlock a member price with a personal code and reserve computer hardware for pickup.",
+    "Computerra: студенты открывают цену со скидкой по личному коду и бронируют компьютерную технику для получения в магазине.",
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="ru"
       className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>

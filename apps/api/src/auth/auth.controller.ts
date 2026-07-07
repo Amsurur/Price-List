@@ -27,7 +27,7 @@ export class AuthController {
   ) {
     const token = await this.auth.login(dto.email, dto.password);
     if (!token) {
-      throw new UnauthorizedException('Invalid email or password');
+      throw new UnauthorizedException('Неверная почта или пароль');
     }
     res.cookie(ADMIN_COOKIE_NAME, token, adminCookieOptions());
     return { email: dto.email };

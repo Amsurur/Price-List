@@ -51,7 +51,7 @@ export function ReserveForm({
       setError(
         err instanceof Error
           ? err.message
-          : "Couldn't send your reservation — please try again.",
+          : "Не удалось отправить бронирование — попробуйте ещё раз.",
       );
     } finally {
       setSubmitting(false);
@@ -62,11 +62,11 @@ export function ReserveForm({
     return (
       <div className="mt-3 rounded-xl bg-save-tint p-3">
         <p className="text-sm font-semibold text-save">
-          Reservation received.
+          Бронирование получено.
         </p>
         <p className="mt-1 text-sm text-save">
-          The shop will contact you at {reservation.studentContact} to
-          arrange pickup and payment.
+          Магазин свяжется с вами по {reservation.studentContact}, чтобы
+          договориться о получении и оплате.
         </p>
         <p className="mt-2 text-xs text-save">
           {reservation.quantity} × {reservation.productName} —{" "}
@@ -77,7 +77,7 @@ export function ReserveForm({
           onClick={onClose}
           className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Reserve something else
+          Забронировать ещё
         </button>
       </div>
     );
@@ -102,7 +102,7 @@ export function ReserveForm({
       )}
 
       <div>
-        <label className={labelClass}>Name</label>
+        <label className={labelClass}>Имя</label>
         <input
           className={`mt-1 ${inputClass}`}
           value={name}
@@ -111,7 +111,7 @@ export function ReserveForm({
         />
       </div>
       <div>
-        <label className={labelClass}>Contact (phone or Telegram)</label>
+        <label className={labelClass}>Контакт (телефон или Telegram)</label>
         <input
           className={`mt-1 ${inputClass}`}
           value={contact}
@@ -121,7 +121,7 @@ export function ReserveForm({
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div>
-          <label className={labelClass}>Quantity</label>
+          <label className={labelClass}>Количество</label>
           <input
             type="number"
             min={1}
@@ -132,7 +132,7 @@ export function ReserveForm({
           />
         </div>
         <div>
-          <label className={labelClass}>Note (optional)</label>
+          <label className={labelClass}>Комментарий (необязательно)</label>
           <input
             className={`mt-1 ${inputClass}`}
             value={note}
@@ -152,14 +152,14 @@ export function ReserveForm({
           disabled={submitting}
           className="rounded-xl bg-brand px-4 py-2 font-display text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          {submitting ? "Sending…" : "Confirm reservation"}
+          {submitting ? "Отправка…" : "Подтвердить бронирование"}
         </button>
         <button
           type="button"
           onClick={onClose}
           className="rounded-lg border border-line bg-surface px-3 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Cancel
+          Отмена
         </button>
       </div>
     </form>

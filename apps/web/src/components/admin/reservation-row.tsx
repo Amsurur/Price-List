@@ -13,10 +13,10 @@ const STATUS_STYLE: Record<ReservationStatus, string> = {
 };
 
 const STATUS_LABEL: Record<ReservationStatus, string> = {
-  new: "New",
-  contacted: "Contacted",
-  completed: "Completed",
-  cancelled: "Cancelled",
+  new: "Новая",
+  contacted: "Связались",
+  completed: "Завершено",
+  cancelled: "Отменено",
 };
 
 export function ReservationRow({
@@ -36,7 +36,7 @@ export function ReservationRow({
       const updated = await updateReservationStatus(reservation.id, status);
       onChanged(updated);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not update");
+      setError(err instanceof Error ? err.message : "Не удалось обновить");
     } finally {
       setUpdating(false);
     }
@@ -49,7 +49,7 @@ export function ReservationRow({
     <li className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3">
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-ink">
-          {reservation.studentName || "No name"}
+          {reservation.studentName || "Без имени"}
         </div>
         <div className="text-xs text-muted">{reservation.studentContact}</div>
         {error && (
@@ -70,7 +70,7 @@ export function ReservationRow({
       </div>
 
       <div className="w-full text-left text-xs text-muted sm:w-auto sm:text-right">
-        {new Date(reservation.createdAt).toLocaleString()}
+        {new Date(reservation.createdAt).toLocaleString("ru")}
       </div>
 
       <span
@@ -87,7 +87,7 @@ export function ReservationRow({
               disabled={updating}
               className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Mark contacted
+              Отметить «Связались»
             </button>
           )}
           {reservation.status === "contacted" && (
@@ -96,7 +96,7 @@ export function ReservationRow({
               disabled={updating}
               className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Mark completed
+              Отметить «Завершено»
             </button>
           )}
           <button
@@ -104,7 +104,7 @@ export function ReservationRow({
             disabled={updating}
             className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-danger hover:bg-danger/5 disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
           >
-            Cancel
+            Отменить
           </button>
         </div>
       )}

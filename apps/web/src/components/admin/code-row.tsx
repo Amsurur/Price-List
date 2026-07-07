@@ -62,7 +62,7 @@ export function CodeRow({
       onChanged(updated);
       setEditing(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save");
+      setError(err instanceof Error ? err.message : "Не удалось сохранить");
     } finally {
       setSaving(false);
     }
@@ -88,7 +88,7 @@ export function CodeRow({
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <label className="block text-xs font-medium text-muted">
-              Student name
+              Имя студента
             </label>
             <input
               className={`mt-1 ${inputClass}`}
@@ -98,7 +98,7 @@ export function CodeRow({
           </div>
           <div>
             <label className="block text-xs font-medium text-muted">
-              Discount override % (blank = standard)
+              Персональная скидка, % (пусто = стандартная)
             </label>
             <input
               type="number"
@@ -111,7 +111,7 @@ export function CodeRow({
           </div>
           <div>
             <label className="block text-xs font-medium text-muted">
-              Note
+              Комментарий
             </label>
             <input
               className={`mt-1 ${inputClass}`}
@@ -126,13 +126,13 @@ export function CodeRow({
             disabled={saving}
             className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            {saving ? "Saving…" : "Save"}
+            {saving ? "Сохранение…" : "Сохранить"}
           </button>
           <button
             onClick={() => setEditing(false)}
             className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            Cancel
+            Отмена
           </button>
         </div>
       </li>
@@ -143,30 +143,30 @@ export function CodeRow({
     <li className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3">
       <button
         onClick={handleCopy}
-        title="Copy code"
+        title="Скопировать код"
         className="rounded-full bg-brand-tint px-3 py-1.5 font-display text-sm font-semibold text-brand-strong hover:bg-brand/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
-        {copied ? "Copied!" : code.code}
+        {copied ? "Скопировано!" : code.code}
       </button>
 
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-ink">
-          {code.studentName || "No name"}
+          {code.studentName || "Без имени"}
         </div>
         <div className="text-xs text-muted">
           {code.discountOverride != null
-            ? `${code.discountOverride}% override`
-            : "Standard discount"}
+            ? `Скидка ${code.discountOverride}%`
+            : "Стандартная скидка"}
           {code.note ? ` · ${code.note}` : ""}
         </div>
       </div>
 
       <div className="w-full text-left text-xs text-muted sm:w-auto sm:text-right">
-        <div>{code.usesCount} uses</div>
+        <div>Использований: {code.usesCount}</div>
         <div>
           {code.lastUsedAt
-            ? `Last used ${new Date(code.lastUsedAt).toLocaleDateString()}`
-            : "Never used"}
+            ? `Использован ${new Date(code.lastUsedAt).toLocaleDateString("ru")}`
+            : "Ещё не использован"}
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export function CodeRow({
             : "bg-danger/10 text-danger"
         }`}
       >
-        {code.active ? "Active" : "Disabled"}
+        {code.active ? "Активен" : "Отключён"}
       </button>
 
       <div className="flex items-center gap-2">
@@ -188,13 +188,13 @@ export function CodeRow({
               onClick={handleDelete}
               className="rounded-lg bg-danger px-3 py-2 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
-              Delete
+              Удалить
             </button>
             <button
               onClick={() => setConfirming(false)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Keep
+              Оставить
             </button>
           </>
         ) : (
@@ -203,13 +203,13 @@ export function CodeRow({
               onClick={() => setEditing(true)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Edit
+              Изменить
             </button>
             <button
               onClick={() => setConfirming(true)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
-              Delete
+              Удалить
             </button>
           </>
         )}

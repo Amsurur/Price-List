@@ -46,7 +46,7 @@ export function ProductForm({ product }: { product?: Product }) {
       }
       setImages((prev) => [...prev, ...uploaded]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Image upload failed");
+      setError(err instanceof Error ? err.message : "Не удалось загрузить фото");
     } finally {
       setUploading(false);
     }
@@ -93,7 +93,7 @@ export function ProductForm({ product }: { product?: Product }) {
       router.push("/admin/products");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save product");
+      setError(err instanceof Error ? err.message : "Не удалось сохранить товар");
       setSaving(false);
     }
   }
@@ -112,7 +112,7 @@ export function ProductForm({ product }: { product?: Product }) {
       <div className="grid gap-5">
         <div>
           <label htmlFor="name" className={labelClass}>
-            Name
+            Название
           </label>
           <input
             id="name"
@@ -127,26 +127,26 @@ export function ProductForm({ product }: { product?: Product }) {
         <div className="grid gap-5 sm:grid-cols-2">
           <div>
             <label htmlFor="category" className={labelClass}>
-              Category
+              Категория
             </label>
             <input
               id="category"
               className={`mt-1 ${inputClass}`}
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              placeholder="e.g. Laptops"
+              placeholder="например, Ноутбуки"
             />
           </div>
           <div>
             <label htmlFor="tags" className={labelClass}>
-              Tags
+              Теги
             </label>
             <input
               id="tags"
               className={`mt-1 ${inputClass}`}
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              placeholder="comma separated, e.g. laptop, design"
+              placeholder="через запятую, например: ноутбук, дизайн"
             />
           </div>
         </div>
@@ -154,7 +154,7 @@ export function ProductForm({ product }: { product?: Product }) {
         <div className="grid gap-5 sm:grid-cols-3">
           <div>
             <label htmlFor="price" className={labelClass}>
-              Regular price
+              Обычная цена
             </label>
             <input
               id="price"
@@ -168,7 +168,7 @@ export function ProductForm({ product }: { product?: Product }) {
           </div>
           <div>
             <label htmlFor="discount" className={labelClass}>
-              Member discount %
+              Скидка для студентов, %
             </label>
             <input
               id="discount"
@@ -182,7 +182,7 @@ export function ProductForm({ product }: { product?: Product }) {
           </div>
           <div>
             <label htmlFor="stock" className={labelClass}>
-              Stock
+              Остаток
             </label>
             <input
               id="stock"
@@ -196,9 +196,9 @@ export function ProductForm({ product }: { product?: Product }) {
         </div>
 
         <div>
-          <span className={labelClass}>Photos</span>
+          <span className={labelClass}>Фото</span>
           <p className="mt-1 text-xs text-muted">
-            The first photo is the cover shown on the storefront card.
+            Первое фото используется как обложка на карточке в магазине.
           </p>
           {images.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-3">
@@ -219,7 +219,7 @@ export function ProductForm({ product }: { product?: Product }) {
                       )}
                       {index === 0 && (
                         <span className="absolute left-1 top-1 rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">
-                          Cover
+                          Обложка
                         </span>
                       )}
                     </div>
@@ -228,7 +228,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         type="button"
                         onClick={() => moveImage(index, -1)}
                         disabled={index === 0}
-                        aria-label="Move earlier"
+                        aria-label="Переместить раньше"
                         className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                       >
                         ←
@@ -236,7 +236,7 @@ export function ProductForm({ product }: { product?: Product }) {
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        aria-label="Remove photo"
+                        aria-label="Удалить фото"
                         className="rounded px-1 text-xs text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
                       >
                         ×
@@ -245,7 +245,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         type="button"
                         onClick={() => moveImage(index, 1)}
                         disabled={index === images.length - 1}
-                        aria-label="Move later"
+                        aria-label="Переместить позже"
                         className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                       >
                         →
@@ -270,14 +270,14 @@ export function ProductForm({ product }: { product?: Product }) {
               className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand-tint file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-strong"
             />
             {uploading && (
-              <span className="text-xs text-muted">Uploading…</span>
+              <span className="text-xs text-muted">Загрузка…</span>
             )}
           </div>
         </div>
 
         <div>
           <label htmlFor="description" className={labelClass}>
-            Description
+            Описание
           </label>
           <textarea
             id="description"
@@ -285,7 +285,7 @@ export function ProductForm({ product }: { product?: Product }) {
             className={`mt-1 ${inputClass}`}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="Short text shown on the card"
+            placeholder="Короткий текст на карточке товара"
           />
         </div>
 
@@ -296,7 +296,7 @@ export function ProductForm({ product }: { product?: Product }) {
             onChange={(e) => setActive(e.target.checked)}
             className="h-4 w-4 accent-brand"
           />
-          Active (visible in the store)
+          Активен (виден в магазине)
         </label>
       </div>
 
@@ -306,18 +306,19 @@ export function ProductForm({ product }: { product?: Product }) {
           disabled={saving || uploading}
           className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          {saving ? "Saving…" : "Save product"}
+          {saving ? "Сохранение…" : "Сохранить товар"}
         </button>
         <button
           type="button"
           onClick={() => router.push("/admin/products")}
           className="rounded-xl border border-line px-4 py-2.5 font-display text-sm font-semibold text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Cancel
+          Отмена
         </button>
         {editing && (
           <span className="mt-1 w-full text-xs text-muted sm:mt-0 sm:ml-auto sm:w-auto">
-            Editing never changes past reservations — they keep their snapshot.
+            Изменения не влияют на прошлые брони — у них сохраняется снимок
+            данных на момент бронирования.
           </span>
         )}
       </div>

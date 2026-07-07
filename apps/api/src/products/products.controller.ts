@@ -64,12 +64,12 @@ export class ProductsController {
       fileFilter: (_req, file, cb) =>
         ALLOWED_IMAGE.test(file.originalname)
           ? cb(null, true)
-          : cb(new BadRequestException('Only image files are allowed'), false),
+          : cb(new BadRequestException('Разрешены только файлы изображений'), false),
     }),
   )
   async upload(@UploadedFile() file?: Express.Multer.File) {
     if (!file) {
-      throw new BadRequestException('No file uploaded');
+      throw new BadRequestException('Файл не загружен');
     }
     const image = await this.images.save(
       this.images.create({ data: file.buffer, mimeType: file.mimetype }),
@@ -82,7 +82,7 @@ export class ProductsController {
   async getImage(@Param('id', ParseUUIDPipe) id: string, @Res() res: Response) {
     const image = await this.images.findOne({ where: { id } });
     if (!image) {
-      throw new NotFoundException('Image not found');
+      throw new NotFoundException('Изображение не найдено');
     }
     res.set('Content-Type', image.mimeType);
     res.set('Cache-Control', 'public, max-age=31536000, immutable');

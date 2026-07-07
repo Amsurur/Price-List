@@ -8,13 +8,13 @@ export default function NewProductPage() {
         href="/admin/products"
         className="text-sm text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
-        ← Back to products
+        ← Назад к товарам
       </Link>
       <h1 className="mt-3 font-display text-2xl font-bold text-ink">
-        Add product
+        Добавить товар
       </h1>
       <p className="mt-1 mb-6 text-sm text-muted">
-        Fill in the details students will see on the card.
+        Заполните данные, которые студенты увидят на карточке.
       </p>
       <ProductForm />
     </div>

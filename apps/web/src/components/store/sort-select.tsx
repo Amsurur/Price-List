@@ -1,10 +1,10 @@
 export type SortOption = "featured" | "price-asc" | "price-desc" | "name-asc";
 
 const OPTIONS: { value: SortOption; label: string }[] = [
-  { value: "featured", label: "Featured" },
-  { value: "price-asc", label: "Price: low to high" },
-  { value: "price-desc", label: "Price: high to low" },
-  { value: "name-asc", label: "Name A–Z" },
+  { value: "featured", label: "Рекомендуемые" },
+  { value: "price-asc", label: "Цена: по возрастанию" },
+  { value: "price-desc", label: "Цена: по убыванию" },
+  { value: "name-asc", label: "Название А–Я" },
 ];
 
 export function SortSelect({
@@ -17,7 +17,7 @@ export function SortSelect({
   return (
     <div
       role="group"
-      aria-label="Sort products"
+      aria-label="Сортировка товаров"
       className="inline-flex flex-wrap gap-1 rounded-xl border border-line bg-surface p-1"
     >
       {OPTIONS.map((opt) => (

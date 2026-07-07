@@ -32,8 +32,8 @@ export function CodeUnlockStrip({
     if (!result.ok) {
       setError(
         result.reason === "disabled"
-          ? "That code has expired."
-          : "That code isn't valid.",
+          ? "Срок действия кода истёк."
+          : "Код недействителен.",
       );
     } else {
       setInput("");
@@ -44,15 +44,15 @@ export function CodeUnlockStrip({
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-brand px-4 py-3">
         <p className="text-sm font-medium text-white">
-          ✓ {applied.code} applied
-          {applied.studentName ? ` — welcome, ${applied.studentName}` : ""}
+          ✓ Код {applied.code} применён
+          {applied.studentName ? ` — добро пожаловать, ${applied.studentName}` : ""}
         </p>
         <button
           type="button"
           onClick={onRemove}
           className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white hover:bg-white/25 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >
-          Remove ✕
+          Убрать ✕
         </button>
       </div>
     );
@@ -61,14 +61,14 @@ export function CodeUnlockStrip({
   return (
     <div className="rounded-xl bg-brand-tint px-4 py-3">
       <p className="text-sm font-medium text-brand-strong">
-        Computerra student? Enter your code to unlock your member price.
+        Студент Computerra? Введите код, чтобы открыть цену со скидкой.
       </p>
       <form onSubmit={handleSubmit} className="mt-2 flex flex-wrap gap-2">
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="e.g. SOFT-7K2Q"
-          aria-label="Computerra code"
+          placeholder="например, SOFT-7K2Q"
+          aria-label="Код Computerra"
           className="w-full max-w-[220px] rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
         />
         <button
@@ -76,7 +76,7 @@ export function CodeUnlockStrip({
           disabled={checking || !input.trim()}
           className="rounded-xl bg-brand px-4 py-2 font-display text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          {checking ? "Checking…" : "Apply"}
+          {checking ? "Проверка…" : "Применить"}
         </button>
       </form>
       {error && (

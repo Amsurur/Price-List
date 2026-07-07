@@ -34,7 +34,7 @@ export default function Home() {
     } catch (err) {
       setState({
         kind: "error",
-        message: err instanceof Error ? err.message : "Could not load products",
+        message: err instanceof Error ? err.message : "Не удалось загрузить товары",
       });
     }
   }
@@ -128,8 +128,8 @@ export default function Home() {
             type="search"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by name, category, or tag"
-            aria-label="Search products"
+            placeholder="Поиск по названию, категории или тегу"
+            aria-label="Поиск товаров"
             className="w-full max-w-sm rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
           />
 
@@ -154,7 +154,7 @@ export default function Home() {
               onClick={retry}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -163,15 +163,15 @@ export default function Home() {
           <div className="rounded-xl border border-line bg-surface px-4 py-16 text-center">
             <p className="text-sm text-muted">
               {products.length === 0
-                ? "No products yet — check back soon."
-                : "No products match your search."}
+                ? "Пока нет товаров — загляните позже."
+                : "Ничего не найдено по вашему запросу."}
             </p>
             {products.length > 0 && (
               <button
                 onClick={resetFilters}
                 className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
-                Reset filters
+                Сбросить фильтры
               </button>
             )}
           </div>
@@ -191,7 +191,7 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line py-6 text-center text-xs text-muted">
-        Computerra Store · reserve online, pick up at the shop
+        Computerra Store · бронируйте онлайн, забирайте в магазине
       </footer>
     </div>
   );
