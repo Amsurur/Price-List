@@ -22,7 +22,7 @@ export function LogoutButton() {
       disabled={loggingOut}
       className="text-sm font-medium text-muted hover:text-ink disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
     >
-      {loggingOut ? "Logging out…" : "Log out"}
+      {loggingOut ? "Выход…" : "Выйти"}
     </button>
   );
 }

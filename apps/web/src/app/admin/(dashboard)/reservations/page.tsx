@@ -11,11 +11,11 @@ type State =
   | { kind: "ready"; reservations: Reservation[] };
 
 const STATUS_FILTERS: { label: string; value: ReservationStatus | null }[] = [
-  { label: "All", value: null },
-  { label: "New", value: "new" },
-  { label: "Contacted", value: "contacted" },
-  { label: "Completed", value: "completed" },
-  { label: "Cancelled", value: "cancelled" },
+  { label: "Все", value: null },
+  { label: "Новые", value: "new" },
+  { label: "Связались", value: "contacted" },
+  { label: "Завершено", value: "completed" },
+  { label: "Отменено", value: "cancelled" },
 ];
 
 export default function ReservationsPage() {
@@ -33,7 +33,7 @@ export default function ReservationsPage() {
       setState({
         kind: "error",
         message:
-          err instanceof Error ? err.message : "Could not load reservations",
+          err instanceof Error ? err.message : "Не удалось загрузить брони",
       });
     }
   }
@@ -70,10 +70,10 @@ export default function ReservationsPage() {
     <div>
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">
-          Reservations
+          Брони
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Work new reservations through to completed — that&apos;s the sale.
+          Проведите новые брони до статуса «Завершено» — это и есть продажа.
         </p>
       </div>
 
@@ -97,7 +97,7 @@ export default function ReservationsPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name or contact"
+          placeholder="Поиск по имени или контакту"
           className="w-full max-w-sm rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
         />
       </div>
@@ -112,7 +112,7 @@ export default function ReservationsPage() {
               onClick={load}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -121,8 +121,8 @@ export default function ReservationsPage() {
           <div className="rounded-xl border border-line bg-surface px-4 py-12 text-center">
             <p className="text-sm text-muted">
               {reservations.length === 0
-                ? "No reservations yet — they'll appear here when a student reserves."
-                : "No reservations match your filters."}
+                ? "Пока нет броней — они появятся здесь, когда студент забронирует товар."
+                : "Ничего не найдено по заданным фильтрам."}
             </p>
           </div>
         )}

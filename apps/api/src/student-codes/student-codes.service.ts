@@ -96,7 +96,7 @@ export class StudentCodesService {
   async update(id: string, dto: UpdateStudentCodeDto): Promise<StudentCode> {
     const row = await this.codes.findOne({ where: { id } });
     if (!row) {
-      throw new NotFoundException('Student code not found');
+      throw new NotFoundException('Код студента не найден');
     }
     if (dto.studentName !== undefined) {
       row.studentName = dto.studentName.trim() || null;
@@ -116,7 +116,7 @@ export class StudentCodesService {
   async remove(id: string): Promise<void> {
     const result = await this.codes.delete(id);
     if (!result.affected) {
-      throw new NotFoundException('Student code not found');
+      throw new NotFoundException('Код студента не найден');
     }
   }
 
@@ -179,20 +179,20 @@ export class StudentCodesService {
   async exportCsv(): Promise<string> {
     const rows = await this.findAll();
     const header = [
-      'code',
-      'student_name',
-      'discount_override',
-      'active',
-      'uses_count',
-      'last_used_at',
-      'note',
+      'код',
+      'имя_студента',
+      'персональная_скидка',
+      'статус',
+      'использований',
+      'последнее_использование',
+      'комментарий',
     ];
     const lines = rows.map((r) =>
       [
         r.code,
         r.studentName ?? '',
         r.discountOverride != null ? String(r.discountOverride) : '',
-        r.active ? 'active' : 'disabled',
+        r.active ? 'активен' : 'отключён',
         String(r.usesCount),
         r.lastUsedAt ? r.lastUsedAt.toISOString() : '',
         r.note ?? '',

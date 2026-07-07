@@ -9,7 +9,7 @@ export function TagFilterChips({
 }) {
   return (
     <div className="flex flex-wrap gap-2">
-      <Chip label="All" active={activeTag === null} onClick={() => onSelect(null)} />
+      <Chip label="Все" active={activeTag === null} onClick={() => onSelect(null)} />
       {tags.map((tag) => (
         <Chip
           key={tag}

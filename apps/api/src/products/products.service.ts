@@ -113,7 +113,7 @@ export class ProductsService {
   async findOne(id: string): Promise<ProductView> {
     const product = await this.products.findOne({ where: { id } });
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Товар не найден');
     }
     return this.toView(product);
   }
@@ -127,7 +127,7 @@ export class ProductsService {
   async update(id: string, dto: UpdateProductDto): Promise<ProductView> {
     const product = await this.products.findOne({ where: { id } });
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Товар не найден');
     }
     const beforeIds = this.imageIdsOf(product);
     Object.assign(product, dto);
@@ -143,7 +143,7 @@ export class ProductsService {
   async remove(id: string): Promise<void> {
     const product = await this.products.findOne({ where: { id } });
     if (!product) {
-      throw new NotFoundException('Product not found');
+      throw new NotFoundException('Товар не найден');
     }
     const imageIds = this.imageIdsOf(product);
     await this.products.delete(id);

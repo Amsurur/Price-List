@@ -44,7 +44,7 @@ async function bootstrap() {
     app,
     new DocumentBuilder()
       .setTitle('Softclub Store API')
-      .setDescription('Storefront + admin API for Softclub Store')
+      .setDescription('API магазина и админ-панели Softclub Store')
       .setVersion('1.0')
       .addCookieAuth(ADMIN_COOKIE_NAME)
       .build(),

@@ -31,7 +31,7 @@ export default function DiscountsPage() {
       setState({
         kind: "error",
         message:
-          err instanceof Error ? err.message : "Could not load discounts",
+          err instanceof Error ? err.message : "Не удалось загрузить скидки",
       });
     }
   }
@@ -68,11 +68,11 @@ export default function DiscountsPage() {
     <div>
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">
-          Discounts
+          Скидки
         </h1>
         <p className="mt-1 text-sm text-muted">
-          See and adjust every discount setting in one place — each product&apos;s
-          standard member discount, and any per-student override.
+          Все настройки скидок в одном месте — стандартная скидка каждого
+          товара и персональные переопределения по кодам студентов.
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export default function DiscountsPage() {
               onClick={load}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -95,15 +95,15 @@ export default function DiscountsPage() {
           <div className="flex flex-col gap-8">
             <section>
               <h2 className="font-display text-lg font-semibold text-ink">
-                Product discounts
+                Скидки на товары
               </h2>
               <p className="mt-1 text-sm text-muted">
-                The standard member discount applied to each product, unless a
-                student&apos;s code has its own override below.
+                Стандартная скидка для студентов, применяемая к каждому
+                товару, если у кода студента ниже не задано своё значение.
               </p>
               {state.products.length === 0 ? (
                 <div className="mt-3 rounded-xl border border-line bg-surface px-4 py-8 text-center">
-                  <p className="text-sm text-muted">No products yet.</p>
+                  <p className="text-sm text-muted">Пока нет товаров.</p>
                 </div>
               ) : (
                 <ul className="mt-3 flex flex-col gap-2">
@@ -117,7 +117,7 @@ export default function DiscountsPage() {
                           {product.name}
                         </div>
                         <div className="text-xs text-muted">
-                          {product.category ?? "Uncategorised"} ·{" "}
+                          {product.category ?? "Без категории"} ·{" "}
                           {formatMoney(product.price)}
                         </div>
                       </div>
@@ -140,24 +140,24 @@ export default function DiscountsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h2 className="font-display text-lg font-semibold text-ink">
-                    Student code overrides
+                    Переопределения по кодам студентов
                   </h2>
                   <p className="mt-1 text-sm text-muted">
-                    If set, this percent replaces the product discount for
-                    every item that student reserves. Leave blank for the
-                    standard discount.
+                    Если задано, этот процент заменяет скидку товара для всех
+                    позиций, которые бронирует этот студент. Оставьте пустым
+                    для стандартной скидки.
                   </p>
                 </div>
                 <Link
                   href="/admin/codes"
                   className="shrink-0 text-sm font-medium text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 >
-                  Manage codes
+                  Управление кодами
                 </Link>
               </div>
               {state.codes.length === 0 ? (
                 <div className="mt-3 rounded-xl border border-line bg-surface px-4 py-8 text-center">
-                  <p className="text-sm text-muted">No student codes yet.</p>
+                  <p className="text-sm text-muted">Пока нет кодов студентов.</p>
                 </div>
               ) : (
                 <ul className="mt-3 flex flex-col gap-2">
@@ -168,7 +168,7 @@ export default function DiscountsPage() {
                     >
                       <div className="min-w-0 flex-1">
                         <div className="truncate font-display font-semibold text-ink">
-                          {code.studentName || "No name"}
+                          {code.studentName || "Без имени"}
                         </div>
                         <div className="text-xs text-muted">{code.code}</div>
                       </div>

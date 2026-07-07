@@ -24,7 +24,7 @@ export default function ProductsPage() {
     } catch (err) {
       setState({
         kind: "error",
-        message: err instanceof Error ? err.message : "Could not load products",
+        message: err instanceof Error ? err.message : "Не удалось загрузить товары",
       });
     }
   }
@@ -74,16 +74,16 @@ export default function ProductsPage() {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold text-ink">Products</h1>
+          <h1 className="font-display text-2xl font-bold text-ink">Товары</h1>
           <p className="mt-1 text-sm text-muted">
-            Manage the catalogue students browse.
+            Управляйте каталогом, который видят студенты.
           </p>
         </div>
         <Link
           href="/admin/products/new"
           className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Add product
+          Добавить товар
         </Link>
       </div>
 
@@ -92,13 +92,13 @@ export default function ProductsPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by name, category, or tag"
+          placeholder="Поиск по названию, категории или тегу"
           className="w-full max-w-sm rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
         />
         {allTags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <TagChip
-              label="All"
+              label="Все"
               active={activeTag === null}
               onClick={() => setActiveTag(null)}
             />
@@ -124,7 +124,7 @@ export default function ProductsPage() {
               onClick={load}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -133,8 +133,8 @@ export default function ProductsPage() {
           <div className="rounded-xl border border-line bg-surface px-4 py-12 text-center">
             <p className="text-sm text-muted">
               {products.length === 0
-                ? "No products yet — add your first one."
-                : "No products match your search."}
+                ? "Пока нет товаров — добавьте первый."
+                : "Ничего не найдено по вашему запросу."}
             </p>
           </div>
         )}
@@ -203,7 +203,7 @@ function ProductRow({
             className="h-full w-full object-cover"
           />
         ) : (
-          <span className="text-[10px] text-brand-strong">No image</span>
+          <span className="text-[10px] text-brand-strong">Нет фото</span>
         )}
       </div>
 
@@ -214,7 +214,7 @@ function ProductRow({
           </span>
           {!product.active && (
             <span className="rounded-full bg-bg px-2 py-0.5 text-[11px] font-medium text-muted">
-              Hidden
+              Скрыт
             </span>
           )}
         </div>
@@ -241,7 +241,7 @@ function ProductRow({
             {product.stockLabel}
           </span>
         ) : (
-          <span className="text-xs text-muted">{product.stock} in stock</span>
+          <span className="text-xs text-muted">В наличии: {product.stock}</span>
         )}
       </div>
 
@@ -263,13 +263,13 @@ function ProductRow({
               onClick={() => onDeleted(product.id)}
               className="rounded-lg bg-danger px-3 py-2 text-xs font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
-              Delete
+              Удалить
             </button>
             <button
               onClick={() => setConfirming(false)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Keep
+              Оставить
             </button>
           </>
         ) : (
@@ -278,13 +278,13 @@ function ProductRow({
               href={`/admin/products/${product.id}/edit`}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Edit
+              Изменить
             </Link>
             <button
               onClick={() => setConfirming(true)}
               className="rounded-lg border border-line px-3 py-2 text-xs font-medium text-danger hover:bg-danger/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
             >
-              Delete
+              Удалить
             </button>
           </>
         )}

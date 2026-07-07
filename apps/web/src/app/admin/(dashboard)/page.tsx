@@ -41,7 +41,7 @@ export default function AdminHomePage() {
     } catch (err) {
       setState({
         kind: "error",
-        message: err instanceof Error ? err.message : "Could not load stats",
+        message: err instanceof Error ? err.message : "Не удалось загрузить статистику",
       });
     }
   }
@@ -53,9 +53,9 @@ export default function AdminHomePage() {
   return (
     <div>
       <div>
-        <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
+        <h1 className="font-display text-2xl font-bold text-ink">Панель управления</h1>
         <p className="mt-1 text-sm text-muted">
-          A quick look at the shop, at a glance.
+          Краткий обзор магазина.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export default function AdminHomePage() {
               onClick={load}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -77,22 +77,22 @@ export default function AdminHomePage() {
         {state.kind === "ready" && (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard
-              label="Products"
+              label="Товары"
               value={state.stats.totalProducts}
               href="/admin/products"
             />
             <StatCard
-              label="In stock"
+              label="В наличии"
               value={state.stats.inStock}
               href="/admin/products"
             />
             <StatCard
-              label="Active codes"
+              label="Активные коды"
               value={state.stats.activeCodes}
               href="/admin/codes"
             />
             <StatCard
-              label="Open reservations"
+              label="Открытые брони"
               value={state.stats.openReservations}
               href="/admin/reservations"
             />

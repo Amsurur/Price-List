@@ -94,13 +94,13 @@ export function ProductCard({
 
       {hasSaving && (
         <span className="mt-2 inline-block w-fit rounded-full bg-save-tint px-2 py-0.5 text-xs font-medium text-save">
-          Save {formatMoney(product.saving)}
+          Экономия {formatMoney(product.saving)}
         </span>
       )}
 
       {!unlocked && (
         <p className="mt-1 text-xs text-muted">
-          Have a Computerra code? Enter it to see your member price.
+          Есть код Computerra? Введите его, чтобы увидеть цену со скидкой.
         </p>
       )}
 
@@ -110,16 +110,16 @@ export function ProductCard({
           onClick={() => setReserving((v) => !v)}
           className="mt-3 w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          {reserving ? "Close" : "Reserve"}
+          {reserving ? "Закрыть" : "Забронировать"}
         </button>
       ) : (
         <button
           type="button"
           disabled
-          title="Out of stock."
+          title="Нет в наличии."
           className="mt-3 w-full cursor-not-allowed rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white opacity-50"
         >
-          Reserve
+          Забронировать
         </button>
       )}
 
@@ -140,7 +140,7 @@ export function ProductCard({
             id={reserveSheetTitleId}
             className="mb-3 font-display text-base font-semibold text-ink"
           >
-            Reserve {product.name}
+            Забронировать «{product.name}»
           </h3>
           <ReserveForm
             product={product}

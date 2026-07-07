@@ -28,7 +28,7 @@ export function AdminAuthGuard({ children }: { children: React.ReactNode }) {
   if (!checked) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-sm text-muted">Checking your session…</p>
+        <p className="text-sm text-muted">Проверка сеанса…</p>
       </div>
     );
   }

@@ -24,17 +24,17 @@ export default async function EditProductPage({
           href="/admin/products"
           className="text-sm text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          ← Back to products
+          ← Назад к товарам
         </Link>
         <div className="mt-6 rounded-xl border border-danger/30 bg-danger/5 px-4 py-6 text-center">
           <p className="text-sm text-danger">
-            {err instanceof Error ? err.message : "Could not load this product"}
+            {err instanceof Error ? err.message : "Не удалось загрузить этот товар"}
           </p>
           <Link
             href={`/admin/products/${id}/edit`}
             className="mt-3 inline-block rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            Try again
+            Повторить
           </Link>
         </div>
       </div>
@@ -47,10 +47,10 @@ export default async function EditProductPage({
         href="/admin/products"
         className="text-sm text-brand-strong hover:underline"
       >
-        ← Back to products
+        ← Назад к товарам
       </Link>
       <h1 className="mt-3 font-display text-2xl font-bold text-ink">
-        Edit product
+        Изменить товар
       </h1>
       <p className="mt-1 mb-6 text-sm text-muted">{product.name}</p>
       <ProductForm product={product} />

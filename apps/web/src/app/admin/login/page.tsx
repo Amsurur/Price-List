@@ -25,7 +25,7 @@ export default function AdminLoginPage() {
       router.push("/admin");
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not log in");
+      setError(err instanceof Error ? err.message : "Не удалось войти");
       setSubmitting(false);
     }
   }
@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
         <div className="mb-6 flex flex-col items-center gap-3">
           <Seal />
           <h1 className="font-display text-xl font-bold text-ink">
-            Computerra admin
+            Computerra админ
           </h1>
         </div>
 
@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
           <div className="grid gap-4">
             <div>
               <label htmlFor="email" className={labelClass}>
-                Email
+                Электронная почта
               </label>
               <input
                 id="email"
@@ -70,7 +70,7 @@ export default function AdminLoginPage() {
             </div>
             <div>
               <label htmlFor="password" className={labelClass}>
-                Password
+                Пароль
               </label>
               <input
                 id="password"
@@ -89,7 +89,7 @@ export default function AdminLoginPage() {
             disabled={submitting}
             className="mt-6 w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            {submitting ? "Logging in…" : "Log in"}
+            {submitting ? "Вход…" : "Войти"}
           </button>
         </form>
       </div>

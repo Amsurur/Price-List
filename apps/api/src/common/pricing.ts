@@ -52,7 +52,7 @@ export function saving(
 // Badge text for stock, or null for no badge. Out-of-stock items stay visible
 // but can't be reserved (enforced elsewhere).
 export function stockLabel(stock: number): string | null {
-  if (stock <= 0) return 'Out of stock';
-  if (stock <= 3) return `Only ${stock} left`;
+  if (stock <= 0) return 'Нет в наличии';
+  if (stock <= 3) return `Осталось ${stock}`;
   return null;
 }

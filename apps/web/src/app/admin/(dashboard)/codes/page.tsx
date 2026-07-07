@@ -22,7 +22,7 @@ export default function StudentCodesPage() {
     } catch (err) {
       setState({
         kind: "error",
-        message: err instanceof Error ? err.message : "Could not load student codes",
+        message: err instanceof Error ? err.message : "Не удалось загрузить коды студентов",
       });
     }
   }
@@ -70,17 +70,18 @@ export default function StudentCodesPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-bold text-ink">
-            Student codes
+            Коды студентов
           </h1>
           <p className="mt-1 text-sm text-muted">
-            Generate codes, set discount overrides, and track use.
+            Создавайте коды, задавайте персональные скидки и отслеживайте
+            использование.
           </p>
         </div>
         <a
           href={studentCodesExportUrl()}
           className="rounded-xl border border-line bg-surface px-4 py-2.5 font-display text-sm font-semibold text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Export CSV
+          Экспорт в CSV
         </a>
       </div>
 
@@ -93,7 +94,7 @@ export default function StudentCodesPage() {
           type="search"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by code, name, or note"
+          placeholder="Поиск по коду, имени или комментарию"
           className="w-full max-w-sm rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30"
         />
       </div>
@@ -108,7 +109,7 @@ export default function StudentCodesPage() {
               onClick={load}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Try again
+              Повторить
             </button>
           </div>
         )}
@@ -117,8 +118,8 @@ export default function StudentCodesPage() {
           <div className="rounded-xl border border-line bg-surface px-4 py-12 text-center">
             <p className="text-sm text-muted">
               {codes.length === 0
-                ? "No codes yet — generate your first one."
-                : "No codes match your search."}
+                ? "Пока нет кодов — создайте первый."
+                : "Ничего не найдено по вашему запросу."}
             </p>
           </div>
         )}

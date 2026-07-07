@@ -47,7 +47,7 @@ export class ReservationsService {
     codeId: string | null,
     codes: Record<string, string>,
   ): string {
-    if (!codeId) return 'No code';
+    if (!codeId) return 'Без кода';
     return codes[codeId] ?? '—';
   }
 
@@ -106,13 +106,13 @@ export class ReservationsService {
     if (trimmedCode) {
       code = await this.studentCodes.findActiveByCode(trimmedCode);
       if (!code) {
-        throw new BadRequestException("That code isn't valid.");
+        throw new BadRequestException('Код недействителен.');
       }
     }
 
     const product = await this.products.findOne(dto.productId);
     if (product.stock <= 0) {
-      throw new BadRequestException('That item is out of stock.');
+      throw new BadRequestException('Этого товара нет в наличии.');
     }
 
     const entity = this.reservations.create({
@@ -146,13 +146,13 @@ export class ReservationsService {
   ): Promise<ReservationView> {
     const reservation = await this.reservations.findOne({ where: { id } });
     if (!reservation) {
-      throw new NotFoundException('Reservation not found');
+      throw new NotFoundException('Бронь не найдена');
     }
 
     const allowed = ALLOWED_TRANSITIONS[reservation.status];
     if (!allowed.includes(dto.status)) {
       throw new BadRequestException(
-        `Can't change a ${reservation.status} reservation.`,
+        `Нельзя изменить бронь со статусом «${reservation.status}».`,
       );
     }
 

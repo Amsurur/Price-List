@@ -63,7 +63,7 @@ export function GenerateCodePanel({
       }
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Could not generate code",
+        err instanceof Error ? err.message : "Не удалось создать код",
       );
     } finally {
       setGenerating(false);
@@ -81,7 +81,7 @@ export function GenerateCodePanel({
           }}
           className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Generate code
+          Создать код
         </button>
         <button
           onClick={() => {
@@ -91,7 +91,7 @@ export function GenerateCodePanel({
           }}
           className="rounded-xl border border-line bg-surface px-4 py-2.5 font-display text-sm font-semibold text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Generate batch
+          Создать пакет кодов
         </button>
       </div>
     );
@@ -101,13 +101,13 @@ export function GenerateCodePanel({
     <div className="rounded-xl border border-line bg-surface p-4">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-sm font-semibold text-ink">
-          {mode === "single" ? "Generate a code" : "Generate a batch"}
+          {mode === "single" ? "Создать код" : "Создать пакет кодов"}
         </h2>
         <button
           onClick={() => setOpen(false)}
           className="text-sm text-muted hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          Close
+          Закрыть
         </button>
       </div>
 
@@ -121,8 +121,8 @@ export function GenerateCodePanel({
         <div className="mt-3 rounded-lg bg-save-tint p-3">
           <p className="text-sm font-medium text-save">
             {justGenerated.length === 1
-              ? "Code generated:"
-              : `${justGenerated.length} codes generated:`}
+              ? "Код создан:"
+              : `Создано кодов: ${justGenerated.length}`}
           </p>
           <ul className="mt-2 flex flex-wrap gap-2">
             {justGenerated.map((c) => (
@@ -136,14 +136,14 @@ export function GenerateCodePanel({
             }}
             className="mt-3 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           >
-            Generate another
+            Создать ещё
           </button>
         </div>
       ) : (
         <form onSubmit={handleGenerate} className="mt-3 grid gap-3">
           {mode === "single" ? (
             <div>
-              <label className={labelClass}>Student name (optional)</label>
+              <label className={labelClass}>Имя студента (необязательно)</label>
               <input
                 className={`mt-1 ${inputClass}`}
                 value={studentName}
@@ -152,7 +152,7 @@ export function GenerateCodePanel({
             </div>
           ) : (
             <div>
-              <label className={labelClass}>How many?</label>
+              <label className={labelClass}>Сколько?</label>
               <input
                 type="number"
                 min={1}
@@ -168,7 +168,7 @@ export function GenerateCodePanel({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>
-                Discount override % (optional)
+                Персональная скидка, % (необязательно)
               </label>
               <input
                 type="number"
@@ -177,11 +177,11 @@ export function GenerateCodePanel({
                 className={`mt-1 tabular ${inputClass}`}
                 value={discountOverride}
                 onChange={(e) => setDiscountOverride(e.target.value)}
-                placeholder="Leave blank for standard"
+                placeholder="Оставьте пустым для стандартной"
               />
             </div>
             <div>
-              <label className={labelClass}>Note (optional)</label>
+              <label className={labelClass}>Комментарий (необязательно)</label>
               <input
                 className={`mt-1 ${inputClass}`}
                 value={note}
@@ -196,7 +196,7 @@ export function GenerateCodePanel({
               disabled={generating}
               className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              {generating ? "Generating…" : "Generate"}
+              {generating ? "Создание…" : "Создать"}
             </button>
           </div>
         </form>
@@ -224,7 +224,7 @@ function CopyPill({ code }: { code: string }) {
         onClick={handleCopy}
         className="rounded-full bg-surface px-3 py-1.5 font-display text-sm font-semibold text-save shadow-sm hover:bg-brand-tint focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
       >
-        {copied ? "Copied!" : code}
+        {copied ? "Скопировано!" : code}
       </button>
     </li>
   );

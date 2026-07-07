@@ -7,11 +7,11 @@ import { Seal } from "@/components/seal";
 // /admin/login when the session check fails; the JwtAuthGuard on the API
 // enforces it on every actual request regardless.
 const tabs = [
-  { href: "/admin", label: "Dashboard" },
-  { href: "/admin/products", label: "Products" },
-  { href: "/admin/discounts", label: "Discounts" },
-  { href: "/admin/codes", label: "Student codes" },
-  { href: "/admin/reservations", label: "Reservations" },
+  { href: "/admin", label: "Панель" },
+  { href: "/admin/products", label: "Товары" },
+  { href: "/admin/discounts", label: "Скидки" },
+  { href: "/admin/codes", label: "Коды студентов" },
+  { href: "/admin/reservations", label: "Брони" },
 ];
 
 export default function AdminLayout({
@@ -27,7 +27,7 @@ export default function AdminLayout({
           >
             <Seal />
             <span className="font-display text-lg font-semibold text-ink">
-              Computerra admin
+              Computerra админ
             </span>
           </Link>
           <nav className="-mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 sm:ml-4 sm:flex-none">
@@ -46,7 +46,7 @@ export default function AdminLayout({
               href="/"
               className="text-sm font-medium text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              View store
+              В магазин
             </Link>
             <LogoutButton />
           </div>
