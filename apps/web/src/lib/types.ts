@@ -10,7 +10,8 @@ export interface Product {
   price: number;
   memberDiscount: number;
   stock: number;
-  imageUrl: string | null;
+  // Photo URLs in display order; the first is the cover shown on the card.
+  images: string[];
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -29,7 +30,7 @@ export interface ProductInput {
   price: number;
   memberDiscount?: number;
   stock?: number;
-  imageUrl?: string;
+  images?: string[];
   active?: boolean;
 }
 

@@ -187,7 +187,7 @@ function ProductRow({
   onDeleted: (id: string) => void;
 }) {
   const [confirming, setConfirming] = useState(false);
-  const src = imageSrc(product.imageUrl);
+  const src = imageSrc(product.images[0] ?? null);
   const discounted = product.saving > 0;
 
   return (
@@ -231,7 +231,7 @@ function ProductRow({
         </div>
       </div>
 
-      <div className="hidden text-right sm:block">
+      <div className="w-full text-left sm:w-auto sm:text-right">
         {product.stockLabel ? (
           <span
             className={`text-xs font-medium ${

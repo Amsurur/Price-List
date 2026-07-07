@@ -30,24 +30,40 @@ export function ProductForm({ product }: { product?: Product }) {
   const [stock, setStock] = useState(String(product?.stock ?? 0));
   const [description, setDescription] = useState(product?.description ?? "");
   const [active, setActive] = useState(product?.active ?? true);
-  const [imageUrl, setImageUrl] = useState<string | null>(
-    product?.imageUrl ?? null,
-  );
+  const [images, setImages] = useState<string[]>(product?.images ?? []);
 
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleImage(file: File) {
+  async function handleImages(files: File[]) {
     setError(null);
     setUploading(true);
     try {
-      setImageUrl(await uploadProductImage(file));
+      const uploaded: string[] = [];
+      for (const file of files) {
+        uploaded.push(await uploadProductImage(file));
+      }
+      setImages((prev) => [...prev, ...uploaded]);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Image upload failed");
     } finally {
       setUploading(false);
     }
+  }
+
+  function removeImage(index: number) {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function moveImage(index: number, direction: -1 | 1) {
+    setImages((prev) => {
+      const target = index + direction;
+      if (target < 0 || target >= prev.length) return prev;
+      const next = [...prev];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -66,7 +82,7 @@ export function ProductForm({ product }: { product?: Product }) {
       stock: Number(stock),
       description: description.trim() || undefined,
       active,
-      imageUrl: imageUrl ?? undefined,
+      images,
     };
     try {
       if (product) {
@@ -81,8 +97,6 @@ export function ProductForm({ product }: { product?: Product }) {
       setSaving(false);
     }
   }
-
-  const preview = imageSrc(imageUrl);
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl">
@@ -182,46 +196,82 @@ export function ProductForm({ product }: { product?: Product }) {
         </div>
 
         <div>
-          <span className={labelClass}>Image</span>
-          <div className="mt-1 flex flex-wrap items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
-              {preview ? (
-                <Image
-                  src={preview}
-                  alt="Product preview"
-                  width={80}
-                  height={80}
-                  unoptimized
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <span className="text-xs text-brand-strong">No image</span>
-              )}
+          <span className={labelClass}>Photos</span>
+          <p className="mt-1 text-xs text-muted">
+            The first photo is the cover shown on the storefront card.
+          </p>
+          {images.length > 0 && (
+            <div className="mt-2 flex flex-wrap gap-3">
+              {images.map((url, index) => {
+                const preview = imageSrc(url);
+                return (
+                  <div key={url + index} className="flex flex-col gap-1">
+                    <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
+                      {preview && (
+                        <Image
+                          src={preview}
+                          alt=""
+                          width={80}
+                          height={80}
+                          unoptimized
+                          className="h-full w-full object-cover"
+                        />
+                      )}
+                      {index === 0 && (
+                        <span className="absolute left-1 top-1 rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-medium text-white">
+                          Cover
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, -1)}
+                        disabled={index === 0}
+                        aria-label="Move earlier"
+                        className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      >
+                        ←
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        aria-label="Remove photo"
+                        className="rounded px-1 text-xs text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+                      >
+                        ×
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 1)}
+                        disabled={index === images.length - 1}
+                        aria-label="Move later"
+                        className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                      >
+                        →
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="flex flex-col gap-1">
-              <input
-                id="image"
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImage(file);
-                }}
-                className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand-tint file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-strong"
-              />
-              {uploading && (
-                <span className="text-xs text-muted">Uploading…</span>
-              )}
-              {imageUrl && !uploading && (
-                <button
-                  type="button"
-                  onClick={() => setImageUrl(null)}
-                  className="self-start text-xs text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
-                >
-                  Remove image
-                </button>
-              )}
-            </div>
+          )}
+          <div className="mt-3 flex flex-col gap-1">
+            <input
+              id="images"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={(e) => {
+                const files = Array.from(e.target.files ?? []);
+                if (files.length > 0) handleImages(files);
+                e.target.value = "";
+              }}
+              className="text-sm text-muted file:mr-3 file:rounded-full file:border-0 file:bg-brand-tint file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-brand-strong"
+            />
+            {uploading && (
+              <span className="text-xs text-muted">Uploading…</span>
+            )}
           </div>
         </div>
 

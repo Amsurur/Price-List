@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsInt,
@@ -56,6 +57,14 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   imageUrl?: string;
+
+  // Photo URLs in display order; the first is the cover. Capped at 8 — a
+  // handful of angles is plenty for a shop item.
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(8)
+  @IsString({ each: true })
+  images?: string[];
 
   @IsOptional()
   @IsBoolean()
