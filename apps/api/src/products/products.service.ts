@@ -46,6 +46,15 @@ export class ProductsService {
   ): ProductView {
     return {
       ...product,
+      // Derived live so correctness never depends on the backfill script's
+      // timing: falls back to the legacy single imageUrl until images is
+      // populated (see backfill-product-images.ts).
+      images:
+        product.images.length > 0
+          ? product.images
+          : product.imageUrl
+            ? [product.imageUrl]
+            : [],
       memberPrice: memberPrice(product, code),
       saving: saving(product, code),
       stockLabel: stockLabel(product.stock),

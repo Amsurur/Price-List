@@ -9,6 +9,7 @@ import { Seal } from "@/components/seal";
 const tabs = [
   { href: "/admin", label: "Dashboard" },
   { href: "/admin/products", label: "Products" },
+  { href: "/admin/discounts", label: "Discounts" },
   { href: "/admin/codes", label: "Student codes" },
   { href: "/admin/reservations", label: "Reservations" },
 ];

@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
-import { imageSrc } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
+import { useIsMobile } from "@/lib/use-is-mobile";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { AppliedCode } from "./code-unlock-strip";
+import { ImageLightbox } from "./image-lightbox";
+import { ProductImageCarousel } from "./product-image-carousel";
 import { ReserveForm } from "./reserve-form";
 import type { Product } from "@/lib/types";
 
@@ -19,8 +21,10 @@ export function ProductCard({
   appliedCode: AppliedCode | null;
 }) {
   const [reserving, setReserving] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const isMobile = useIsMobile();
+  const reserveSheetTitleId = `reserve-sheet-${product.id}`;
   const unlocked = Boolean(appliedCode);
-  const src = imageSrc(product.imageUrl);
   const outOfStock = product.stock <= 0;
   const hasSaving = unlocked && product.saving > 0;
   const discountPercent =
@@ -30,20 +34,10 @@ export function ProductCard({
 
   return (
     <li className="flex flex-col rounded-xl border border-line bg-surface p-4 transition-transform hover:-translate-y-0.5">
-      <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
-        {src ? (
-          <Image
-            src={src}
-            alt=""
-            width={250}
-            height={188}
-            unoptimized
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <span className="text-xs text-brand-strong">No image</span>
-        )}
-      </div>
+      <ProductImageCarousel
+        images={product.images}
+        onImageClick={(index) => setLightboxIndex(index)}
+      />
 
       {(product.tags.length > 0 || hasSaving) && (
         <div className="mt-3 flex flex-wrap gap-1.5">
@@ -129,11 +123,39 @@ export function ProductCard({
         </button>
       )}
 
-      {reserving && (
+      {reserving && !isMobile && (
         <ReserveForm
           product={product}
           appliedCode={appliedCode}
           onClose={() => setReserving(false)}
+        />
+      )}
+
+      {reserving && isMobile && (
+        <BottomSheet
+          onClose={() => setReserving(false)}
+          labelledBy={reserveSheetTitleId}
+        >
+          <h3
+            id={reserveSheetTitleId}
+            className="mb-3 font-display text-base font-semibold text-ink"
+          >
+            Reserve {product.name}
+          </h3>
+          <ReserveForm
+            product={product}
+            appliedCode={appliedCode}
+            onClose={() => setReserving(false)}
+            embedded
+          />
+        </BottomSheet>
+      )}
+
+      {lightboxIndex !== null && (
+        <ImageLightbox
+          images={product.images}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
         />
       )}
     </li>

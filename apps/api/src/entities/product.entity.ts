@@ -40,6 +40,12 @@ export class Product {
   @Column('text', { name: 'image_url', nullable: true })
   imageUrl: string | null;
 
+  // Photo URLs in display order; the first is the cover shown on the card.
+  // imageUrl is kept for one transitional slice — see toView() in
+  // products.service.ts for the derivation used until it's dropped.
+  @Column('text', { array: true, default: () => "'{}'" })
+  images: string[];
+
   // Hide from the store without deleting.
   @Column('boolean', { default: true })
   active: boolean;
