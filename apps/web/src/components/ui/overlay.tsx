@@ -18,7 +18,7 @@ export function Overlay({
   children,
 }: {
   onClose: () => void;
-  align?: "center" | "bottom";
+  align?: "center" | "bottom" | "right";
   labelledBy?: string;
   contentClassName?: string;
   children: React.ReactNode;
@@ -60,9 +60,11 @@ export function Overlay({
     };
   }, [onClose]);
 
+  const edgeAligned = align === "bottom" || align === "right";
+
   return createPortal(
     <div
-      className={`fixed inset-0 z-50 flex flex-col ${align === "bottom" ? "" : "p-4"}`}
+      className={`fixed inset-0 z-50 flex flex-col ${edgeAligned ? "" : "p-4"}`}
     >
       <button
         type="button"
@@ -75,7 +77,9 @@ export function Overlay({
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`relative focus:outline-none ${align === "bottom" ? "mt-auto" : "m-auto"} ${contentClassName ?? ""}`}
+        className={`relative focus:outline-none ${
+          align === "bottom" ? "mt-auto" : align === "right" ? "ml-auto h-full" : "m-auto"
+        } ${contentClassName ?? ""}`}
       >
         {children}
       </div>

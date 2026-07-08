@@ -9,11 +9,21 @@ import {
   updateProduct,
   uploadProductImage,
 } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
 import type { Product, ProductInput } from "@/lib/types";
 
 const inputClass =
   "w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
 const labelClass = "block text-sm font-medium text-ink";
+
+// Display-only preview mirroring the API's memberPrice formula
+// (apps/api/src/common/pricing.ts) so the owner can see the effect of a
+// discount as they type it — the API remains the sole source of truth for
+// money at save/reservation time.
+function previewMemberPrice(price: number, discount: number): number {
+  const clamped = Math.min(90, Math.max(0, Math.round(discount) || 0));
+  return Math.round(price * (1 - clamped / 100));
+}
 
 // Shared create/edit form. `product` present → edit; absent → create.
 export function ProductForm({ product }: { product?: Product }) {
@@ -159,6 +169,7 @@ export function ProductForm({ product }: { product?: Product }) {
             <input
               id="price"
               type="number"
+              inputMode="numeric"
               min={0}
               className={`mt-1 tabular ${inputClass}`}
               value={price}
@@ -173,12 +184,18 @@ export function ProductForm({ product }: { product?: Product }) {
             <input
               id="discount"
               type="number"
+              inputMode="numeric"
               min={0}
               max={90}
               className={`mt-1 tabular ${inputClass}`}
               value={memberDiscount}
               onChange={(e) => setMemberDiscount(e.target.value)}
             />
+            <p className="mt-1 text-xs text-muted">
+              {Number(memberDiscount) > 0 && Number(price) > 0
+                ? `Студент увидит: ${formatMoney(previewMemberPrice(Number(price), Number(memberDiscount)))} вместо ${formatMoney(Number(price))}`
+                : "Скидка не установлена — цена будет обычной"}
+            </p>
           </div>
           <div>
             <label htmlFor="stock" className={labelClass}>
@@ -187,6 +204,7 @@ export function ProductForm({ product }: { product?: Product }) {
             <input
               id="stock"
               type="number"
+              inputMode="numeric"
               min={0}
               className={`mt-1 tabular ${inputClass}`}
               value={stock}
@@ -223,13 +241,13 @@ export function ProductForm({ product }: { product?: Product }) {
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-center gap-1">
+                    <div className="flex items-center justify-center">
                       <button
                         type="button"
                         onClick={() => moveImage(index, -1)}
                         disabled={index === 0}
                         aria-label="Переместить раньше"
-                        className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        className="flex h-10 w-10 items-center justify-center rounded text-sm text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                       >
                         ←
                       </button>
@@ -237,7 +255,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         type="button"
                         onClick={() => removeImage(index)}
                         aria-label="Удалить фото"
-                        className="rounded px-1 text-xs text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+                        className="flex h-10 w-10 items-center justify-center rounded text-sm text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
                       >
                         ×
                       </button>
@@ -246,7 +264,7 @@ export function ProductForm({ product }: { product?: Product }) {
                         onClick={() => moveImage(index, 1)}
                         disabled={index === images.length - 1}
                         aria-label="Переместить позже"
-                        className="rounded px-1 text-xs text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                        className="flex h-10 w-10 items-center justify-center rounded text-sm text-muted hover:text-ink disabled:cursor-not-allowed disabled:opacity-30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                       >
                         →
                       </button>
@@ -300,7 +318,7 @@ export function ProductForm({ product }: { product?: Product }) {
         </label>
       </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
+      <div className="sticky bottom-0 -mx-6 mt-6 flex flex-wrap items-center gap-3 border-t border-line bg-surface px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">
         <button
           type="submit"
           disabled={saving || uploading}

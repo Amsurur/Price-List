@@ -123,7 +123,7 @@ describe('ReservationsService', () => {
       expect(telegram.notify.mock.calls[0][0]).toContain('Laptop');
     });
 
-    it('reserves at the regular price with no code, and never looks one up', async () => {
+    it("reserves at the product's own member price with no code, and never looks one up", async () => {
       products.findOne.mockResolvedValue({
         id: 'p1',
         name: 'Laptop',
@@ -138,7 +138,7 @@ describe('ReservationsService', () => {
         studentContact: '+998900000000',
       });
 
-      expect(result.unitPrice).toBe(800);
+      expect(result.unitPrice).toBe(680); // 800 * (1 - 15/100)
       expect(result.codeId).toBeNull();
       expect(result.code).toBe('Без кода');
       expect(studentCodes.findActiveByCode).not.toHaveBeenCalled();

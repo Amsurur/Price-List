@@ -55,9 +55,9 @@ export class ProductsService {
       .filter((id): id is string => Boolean(id));
   }
 
-  // With no code, this reflects each product's own standard discount — used
-  // as-is by the admin view. The storefront only shows it once a student's
-  // code is applied; it decides that gating itself.
+  // With no code, this reflects each product's own standard discount, which
+  // is always shown on the storefront. A code only matters when it carries
+  // a personal discountOverride bigger than the product's own discount.
   private toView(
     product: Product,
     code: PricingCode | null = null,

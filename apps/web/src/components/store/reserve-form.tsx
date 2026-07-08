@@ -83,7 +83,7 @@ export function ReserveForm({
     );
   }
 
-  const unitPrice = appliedCode ? product.memberPrice : product.price;
+  const unitPrice = product.memberPrice;
   const total = unitPrice * (Number(quantity) || 0);
 
   return (
