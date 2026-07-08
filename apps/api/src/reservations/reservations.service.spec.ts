@@ -29,6 +29,7 @@ describe('ReservationsService', () => {
     findCodeStrings: jest.Mock;
   };
   let products: { findOne: jest.Mock; decrementStock: jest.Mock };
+  let telegram: { notify: jest.Mock };
 
   beforeEach(() => {
     reservations = {
@@ -45,11 +46,13 @@ describe('ReservationsService', () => {
       findOne: jest.fn(),
       decrementStock: jest.fn(() => Promise.resolve(undefined)),
     };
+    telegram = { notify: jest.fn(() => Promise.resolve(undefined)) };
 
     service = new ReservationsService(
       reservations as never,
       studentCodes as never,
       products as never,
+      telegram as never,
     );
   });
 
@@ -116,6 +119,8 @@ describe('ReservationsService', () => {
       expect(result.status).toBe('new');
       expect(result.code).toBe('SOFT-ABCD');
       expect(studentCodes.recordUse).toHaveBeenCalledWith('c1');
+      expect(telegram.notify).toHaveBeenCalledTimes(1);
+      expect(telegram.notify.mock.calls[0][0]).toContain('Laptop');
     });
 
     it('reserves at the regular price with no code, and never looks one up', async () => {
@@ -135,7 +140,7 @@ describe('ReservationsService', () => {
 
       expect(result.unitPrice).toBe(800);
       expect(result.codeId).toBeNull();
-      expect(result.code).toBe('No code');
+      expect(result.code).toBe('Без кода');
       expect(studentCodes.findActiveByCode).not.toHaveBeenCalled();
       expect(studentCodes.recordUse).not.toHaveBeenCalled();
     });
@@ -159,6 +164,9 @@ describe('ReservationsService', () => {
 
       expect(result.status).toBe('contacted');
       expect(products.decrementStock).not.toHaveBeenCalled();
+      expect(telegram.notify).toHaveBeenCalledTimes(1);
+      expect(telegram.notify.mock.calls[0][0]).toContain('new');
+      expect(telegram.notify.mock.calls[0][0]).toContain('contacted');
     });
 
     it('decrements stock by the reserved quantity on contacted → completed', async () => {
@@ -191,6 +199,7 @@ describe('ReservationsService', () => {
         service.updateStatus('r1', { status: 'completed' }),
       ).rejects.toThrow(BadRequestException);
       expect(products.decrementStock).not.toHaveBeenCalled();
+      expect(telegram.notify).not.toHaveBeenCalled();
     });
 
     it('rejects re-completing an already-completed reservation (idempotency guard)', async () => {

@@ -10,6 +10,11 @@ import { StudentCode } from '../entities/student-code.entity';
 import { memberPrice } from '../common/pricing';
 import { ProductsService } from '../products/products.service';
 import { StudentCodesService } from '../student-codes/student-codes.service';
+import { TelegramService } from '../telegram/telegram.service';
+import {
+  newReservationMessage,
+  reservationStatusMessage,
+} from '../telegram/telegram-messages';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { UpdateReservationStatusDto } from './dto/update-reservation-status.dto';
 
@@ -41,6 +46,7 @@ export class ReservationsService {
     private readonly reservations: Repository<Reservation>,
     private readonly studentCodes: StudentCodesService,
     private readonly products: ProductsService,
+    private readonly telegram: TelegramService,
   ) {}
 
   private codeLabel(
@@ -135,7 +141,19 @@ export class ReservationsService {
       await this.studentCodes.recordUse(code.id);
     }
 
-    return this.toView(saved);
+    const view = await this.toView(saved);
+    await this.telegram.notify(
+      newReservationMessage({
+        productName: view.productName,
+        quantity: view.quantity,
+        unitPrice: view.unitPrice,
+        studentName: view.studentName,
+        code: view.code,
+        studentContact: view.studentContact,
+        note: view.note,
+      }),
+    );
+    return view;
   }
 
   // The admin status pipeline: new → contacted → completed, cancelled from
@@ -156,6 +174,8 @@ export class ReservationsService {
       );
     }
 
+    const previousStatus = reservation.status;
+
     if (dto.status === 'completed' && reservation.productId) {
       await this.products.decrementStock(
         reservation.productId,
@@ -165,6 +185,14 @@ export class ReservationsService {
 
     reservation.status = dto.status;
     const saved = await this.reservations.save(reservation);
+    await this.telegram.notify(
+      reservationStatusMessage({
+        id: saved.id,
+        productName: saved.productName,
+        from: previousStatus,
+        to: saved.status,
+      }),
+    );
     return this.toView(saved);
   }
 }

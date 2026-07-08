@@ -84,7 +84,7 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 
 Keep these out of v1. They're listed so nothing gets forgotten.
 
-- **Phase 2:** "notify me when back in stock"; promo *campaign* codes (shared, with expiry + usage caps) stacking on the member price; product detail pages with full specs + a "compare laptops" tool; a real analytics dashboard; QR generator in-app; Telegram/WhatsApp notification when a reservation arrives.
+- **Phase 2:** "notify me when back in stock"; promo *campaign* codes (shared, with expiry + usage caps) stacking on the member price; product detail pages with full specs + a "compare laptops" tool; a real analytics dashboard; QR generator in-app; ~~Telegram/WhatsApp notification when a reservation arrives~~ (done — admin gets a Telegram message on reservation create + status change).
 - **Phase 3:** online payment / deposit / installments; course bundles ("Design course → recommended kit at a package price"); referral rewards; student reviews; repair/service booking and trade-in; opening the store to other academies.
 
 ## 7. Definition of Done (applies to every task)
