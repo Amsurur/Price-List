@@ -1,18 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { formatMoney } from "@/lib/format";
-import { useIsMobile } from "@/lib/use-is-mobile";
-import { BottomSheet } from "@/components/ui/bottom-sheet";
 import type { AppliedCode } from "./code-unlock-strip";
 import { ImageLightbox } from "./image-lightbox";
+import { ProductDetailSheet } from "./product-detail-sheet";
 import { ProductImageCarousel } from "./product-image-carousel";
-import { ReserveForm } from "./reserve-form";
+import { DiscountBadge, ProductPrice, SavingsPill, hasDiscount } from "./product-price";
 import type { Product } from "@/lib/types";
 
-// `unlocked` reflects whether a valid Computerra code is currently applied in
-// this session — never inferred from product.saving, since the API returns
-// a non-zero saving for admin/reference purposes even with no code applied.
+// A product's discount always shows, whether or not a Computerra code is
+// applied — the code only matters when it unlocks a bigger personal
+// discountOverride. `unlocked` here only affects the code-hint copy.
 export function ProductCard({
   product,
   appliedCode,
@@ -20,17 +18,11 @@ export function ProductCard({
   product: Product;
   appliedCode: AppliedCode | null;
 }) {
-  const [reserving, setReserving] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const isMobile = useIsMobile();
-  const reserveSheetTitleId = `reserve-sheet-${product.id}`;
   const unlocked = Boolean(appliedCode);
   const outOfStock = product.stock <= 0;
-  const hasSaving = unlocked && product.saving > 0;
-  const discountPercent =
-    hasSaving && product.price > 0
-      ? Math.round((product.saving / product.price) * 100)
-      : 0;
+  const showBadge = hasDiscount(product);
 
   return (
     <li className="flex flex-col rounded-xl border border-line bg-surface p-4 transition-transform hover:-translate-y-0.5">
@@ -39,13 +31,9 @@ export function ProductCard({
         onImageClick={(index) => setLightboxIndex(index)}
       />
 
-      {(product.tags.length > 0 || hasSaving) && (
+      {(product.tags.length > 0 || showBadge) && (
         <div className="mt-3 flex flex-wrap gap-1.5">
-          {hasSaving && (
-            <span className="rounded-full bg-brand-tint px-2 py-0.5 text-xs font-medium text-brand-strong">
-              Computerra −{discountPercent}%
-            </span>
-          )}
+          {showBadge && <DiscountBadge product={product} />}
           {product.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
@@ -66,51 +54,29 @@ export function ProductCard({
         </p>
       )}
 
-      <div className="mt-3 flex items-center justify-between gap-2">
-        {hasSaving ? (
-          <div className="flex flex-col">
-            <span className="text-xs text-muted line-through">
-              {formatMoney(product.price)}
-            </span>
-            <span className="tabular font-display text-lg font-semibold text-ink">
-              {formatMoney(product.memberPrice)}
-            </span>
-          </div>
-        ) : (
-          <span className="tabular font-display text-lg font-semibold text-ink">
-            {formatMoney(product.price)}
-          </span>
-        )}
-        {product.stockLabel && (
-          <span
-            className={`text-xs font-medium ${
-              outOfStock ? "text-danger" : "text-warn"
-            }`}
-          >
-            {product.stockLabel}
-          </span>
-        )}
+      <div className="mt-3">
+        <ProductPrice product={product} />
       </div>
 
-      {hasSaving && (
-        <span className="mt-2 inline-block w-fit rounded-full bg-save-tint px-2 py-0.5 text-xs font-medium text-save">
-          Экономия {formatMoney(product.saving)}
-        </span>
+      {showBadge && (
+        <div className="mt-2">
+          <SavingsPill product={product} />
+        </div>
       )}
 
       {!unlocked && (
         <p className="mt-1 text-xs text-muted">
-          Есть код Computerra? Введите его, чтобы увидеть цену со скидкой.
+          Есть личный код Computerra? Он может дать скидку больше.
         </p>
       )}
 
       {!outOfStock ? (
         <button
           type="button"
-          onClick={() => setReserving((v) => !v)}
+          onClick={() => setDetailOpen(true)}
           className="mt-3 w-full rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
         >
-          {reserving ? "Закрыть" : "Забронировать"}
+          Забронировать
         </button>
       ) : (
         <button
@@ -123,32 +89,12 @@ export function ProductCard({
         </button>
       )}
 
-      {reserving && !isMobile && (
-        <ReserveForm
+      {detailOpen && (
+        <ProductDetailSheet
           product={product}
           appliedCode={appliedCode}
-          onClose={() => setReserving(false)}
+          onClose={() => setDetailOpen(false)}
         />
-      )}
-
-      {reserving && isMobile && (
-        <BottomSheet
-          onClose={() => setReserving(false)}
-          labelledBy={reserveSheetTitleId}
-        >
-          <h3
-            id={reserveSheetTitleId}
-            className="mb-3 font-display text-base font-semibold text-ink"
-          >
-            Забронировать «{product.name}»
-          </h3>
-          <ReserveForm
-            product={product}
-            appliedCode={appliedCode}
-            onClose={() => setReserving(false)}
-            embedded
-          />
-        </BottomSheet>
       )}
 
       {lightboxIndex !== null && (

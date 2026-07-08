@@ -101,11 +101,11 @@ export class ReservationsService {
     return this.toViews(await qb.getMany());
   }
 
-  // The storefront's create step. A code is optional — reserving with a
-  // valid code snapshots the member price, reserving without one snapshots
-  // the regular price. Either way requires an in-stock product; snapshots
-  // the product name + price so later edits never rewrite this
-  // reservation's history.
+  // The storefront's create step. A code is optional — it only matters when
+  // it carries a personal discountOverride, which takes priority over the
+  // product's own memberDiscount (same fallback as ProductsService.toView).
+  // Either way requires an in-stock product; snapshots the product name +
+  // price so later edits never rewrite this reservation's history.
   async create(dto: CreateReservationDto): Promise<ReservationView> {
     const trimmedCode = dto.code?.trim();
     let code: StudentCode | null = null;
@@ -127,9 +127,10 @@ export class ReservationsService {
       studentContact: dto.studentContact.trim(),
       productId: product.id,
       productName: product.name,
-      unitPrice: code
-        ? memberPrice(product, { discountOverride: code.discountOverride })
-        : product.price,
+      unitPrice: memberPrice(
+        product,
+        code ? { discountOverride: code.discountOverride } : null,
+      ),
       quantity: dto.quantity ?? 1,
       status: 'new',
       note: dto.note?.trim() || null,

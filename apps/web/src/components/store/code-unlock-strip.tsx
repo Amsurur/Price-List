@@ -61,7 +61,8 @@ export function CodeUnlockStrip({
   return (
     <div className="rounded-xl bg-brand-tint px-4 py-3">
       <p className="text-sm font-medium text-brand-strong">
-        Студент Computerra? Введите код, чтобы открыть цену со скидкой.
+        Есть личный код Computerra? Примените его — скидка может быть ещё
+        больше.
       </p>
       <form onSubmit={handleSubmit} className="mt-2 flex flex-wrap gap-2">
         <input
