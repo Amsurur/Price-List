@@ -73,7 +73,7 @@ softclub-store/
 - The storefront must **never** query `student_codes` directly. Code validation goes through `api/validate-code` (or a Supabase RPC) using the service role, returning only `{ ok, student_name, discount }`.
 - RLS: public read of active products only; reservations insert-only from the public side; codes and reservation reads/updates admin-only.
 - Snapshot product name + price on reservations (see `03`/`04`).
-- Keep the pricing and code logic in `lib/` and unit-test the maths (rounding, override vs standard discount, out-of-stock, completed→stock-decrement idempotency).
+- Keep the pricing and code logic in `lib/` and unit-test the maths (rounding, extra discount stacking on standard discount, out-of-stock, completed→stock-decrement idempotency).
 
 ## Testing (light but real)
 

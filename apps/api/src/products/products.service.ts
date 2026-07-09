@@ -30,8 +30,8 @@ export interface FindProductsQuery {
   search?: string;
   tag?: string;
   active?: boolean;
-  // A validated student code, to price the listing for that student's
-  // discount override (falls back to each product's own discount if unset).
+  // A validated student code, to price the listing with that student's
+  // extra discount stacked on top of each product's own discount.
   code?: string;
 }
 
@@ -56,8 +56,8 @@ export class ProductsService {
   }
 
   // With no code, this reflects each product's own standard discount, which
-  // is always shown on the storefront. A code only matters when it carries
-  // a personal discountOverride bigger than the product's own discount.
+  // is always shown on the storefront. A code adds its own extraDiscount on
+  // top of that (see pricing.ts) — bigger for the student, never smaller.
   private toView(
     product: Product,
     code: PricingCode | null = null,
@@ -105,7 +105,7 @@ export class ProductsService {
       ? await this.studentCodes.findActiveByCode(query.code)
       : null;
     const pricingCode: PricingCode | null = code
-      ? { discountOverride: code.discountOverride }
+      ? { extraDiscount: code.extraDiscount }
       : null;
     return rows.map((p) => this.toView(p, pricingCode));
   }

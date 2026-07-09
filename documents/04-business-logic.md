@@ -13,10 +13,8 @@ The effective discount for a student on a given product:
 
 ```
 effectiveDiscount(product, code):
-    if code.discount_override is not null:
-        return code.discount_override        # special student, same % on everything
-    else:
-        return product.member_discount        # standard per-product discount
+    bonus = code.extra_discount if code and code.extra_discount is not null else 0
+    return clamp(product.member_discount + bonus, 0, 90)  # code stacks on top of the product's own discount
 ```
 
 Member price:

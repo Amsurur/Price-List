@@ -19,7 +19,7 @@ export function GenerateCodePanel({
   const [mode, setMode] = useState<Mode>("single");
 
   const [studentName, setStudentName] = useState("");
-  const [discountOverride, setDiscountOverride] = useState("");
+  const [extraDiscount, setExtraDiscount] = useState("");
   const [note, setNote] = useState("");
   const [count, setCount] = useState("10");
 
@@ -29,7 +29,7 @@ export function GenerateCodePanel({
 
   function reset() {
     setStudentName("");
-    setDiscountOverride("");
+    setExtraDiscount("");
     setNote("");
     setCount("10");
     setError(null);
@@ -45,8 +45,8 @@ export function GenerateCodePanel({
       if (mode === "single") {
         const created = await createStudentCode({
           studentName: studentName.trim() || undefined,
-          discountOverride:
-            discountOverride.trim() === "" ? undefined : Number(discountOverride),
+          extraDiscount:
+            extraDiscount.trim() === "" ? undefined : Number(extraDiscount),
           note: note.trim() || undefined,
         });
         setJustGenerated([created]);
@@ -54,8 +54,8 @@ export function GenerateCodePanel({
       } else {
         const created = await createStudentCodeBatch({
           count: Number(count),
-          discountOverride:
-            discountOverride.trim() === "" ? undefined : Number(discountOverride),
+          extraDiscount:
+            extraDiscount.trim() === "" ? undefined : Number(extraDiscount),
           note: note.trim() || undefined,
         });
         setJustGenerated(created);
@@ -168,16 +168,16 @@ export function GenerateCodePanel({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <label className={labelClass}>
-                Персональная скидка, % (необязательно)
+                Дополнительная скидка, % (необязательно)
               </label>
               <input
                 type="number"
                 min={0}
                 max={90}
                 className={`mt-1 tabular ${inputClass}`}
-                value={discountOverride}
-                onChange={(e) => setDiscountOverride(e.target.value)}
-                placeholder="Оставьте пустым для стандартной"
+                value={extraDiscount}
+                onChange={(e) => setExtraDiscount(e.target.value)}
+                placeholder="Добавится к скидке товара, оставьте пустым, если не нужна"
               />
             </div>
             <div>

@@ -24,7 +24,7 @@ These were already decided with the client. Do not re-open them without asking.
 | How a student proves they're from Softclub | **A unique code per student.** The same code also applies their discount and lets the owner see who is shopping. |
 | Who runs the app | **The shop owner alone.** Softclub (the academy) is *not* part of the app. |
 | Are codes single-use? | **No — reusable** by that one student, but every use is tracked and the owner can switch a code off instantly. |
-| Is the store locked? | **No.** Anyone can browse and see each product's member price and Reserve at it — no code needed. A personal code only matters when it carries a bigger discount override than the product's own. |
+| Is the store locked? | **No.** Anyone can browse and see each product's member price and Reserve at it — no code needed. A personal code only matters when it carries an extra discount, which stacks on top of the product's own. |
 | Stock behaviour | Reservations do **not** hold stock automatically. Stock decreases when a reservation is marked **completed**. |
 
 ## 4. Documentation map
@@ -62,8 +62,8 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - **Done when:** a visitor can browse the real catalogue with no code. ✅
 
 ### M3 — Student codes + member pricing
-- [x] Admin: generate codes (single or batch), set per-student discount override, activate/deactivate, view use count, **export list** (CSV).
-- [x] Storefront: every product always shows its member price and savings (falls back to the product's own discount); code entry validates a personal code that unlocks a bigger discount override where set (logic in `docs/04-business-logic.md`).
+- [x] Admin: generate codes (single or batch), set a per-student extra discount, activate/deactivate, view use count, **export list** (CSV).
+- [x] Storefront: every product always shows its member price and savings (falls back to the product's own discount); code entry validates a personal code that stacks its extra discount on top where set (logic in `docs/04-business-logic.md`).
 - [x] Each product card shows regular price struck out, member price, and savings.
 - **Done when:** a valid code changes prices; an invalid or disabled code is politely rejected. ✅
 

@@ -73,7 +73,7 @@ describe('ReservationsService', () => {
       studentCodes.findActiveByCode.mockResolvedValue({
         id: 'c1',
         studentName: 'Ada',
-        discountOverride: null,
+        extraDiscount: null,
       });
       products.findOne.mockResolvedValue({
         id: 'p1',
@@ -96,7 +96,7 @@ describe('ReservationsService', () => {
       studentCodes.findActiveByCode.mockResolvedValue({
         id: 'c1',
         studentName: 'Ada',
-        discountOverride: 25,
+        extraDiscount: 10,
       });
       products.findOne.mockResolvedValue({
         id: 'p1',
@@ -114,7 +114,7 @@ describe('ReservationsService', () => {
       });
 
       expect(result.productName).toBe('Laptop');
-      expect(result.unitPrice).toBe(600); // 800 * (1 - 25/100)
+      expect(result.unitPrice).toBe(600); // 800 * (1 - (15 own + 10 code)/100)
       expect(result.quantity).toBe(2);
       expect(result.status).toBe('new');
       expect(result.code).toBe('SOFT-ABCD');

@@ -55,6 +55,7 @@ export default function Home() {
       setAppliedCode({
         code: code.trim().toUpperCase(),
         studentName: result.studentName,
+        extraDiscount: result.extraDiscount,
       });
       await fetchProducts(code);
     }

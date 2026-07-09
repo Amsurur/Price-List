@@ -29,7 +29,7 @@ The heart of v1. One row per student. The code does three jobs: **verify** the s
 | id | uuid PK | |
 | code | text, unique, not null | readable, e.g. `SOFT-7K2Q`; compared case-insensitively |
 | student_name | text | optional label for the owner |
-| discount_override | integer, nullable | if set, this % applies to **all** products for this student; if null, each product's `member_discount` applies |
+| extra_discount | integer, nullable | if set, this % stacks **on top of** each product's own `member_discount` (e.g. product 10% + code 5% = 15%, clamped at 90); if null, only the product's own discount applies |
 | active | boolean, default true | toggle off to disable instantly |
 | note | text | admin-only note |
 | uses_count | integer, default 0 | incremented each time the code successfully unlocks pricing or makes a reservation (see logic doc) |
@@ -85,4 +85,4 @@ A student code has many reservations. A product has many reservations. Reservati
 
 ## Seed data
 
-Reuse the sample catalogue from the prototype (laptops, desktops, a monitor, printers, accessories) and a few example codes (one standard, one with a discount override, one disabled) so screens aren't empty during development. Keep seeds in a script, not in app code.
+Reuse the sample catalogue from the prototype (laptops, desktops, a monitor, printers, accessories) and a few example codes (one standard, one with an extra discount, one disabled) so screens aren't empty during development. Keep seeds in a script, not in app code.

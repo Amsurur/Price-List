@@ -3,14 +3,14 @@
 // Keep this dependency-free (plain numbers in, plain numbers out) so it is
 // trivial to unit-test and reuse.
 
-// A product's discount inputs, and a student code's optional override.
+// A product's discount inputs, and a student code's optional bonus.
 export interface PricingProduct {
   price: number;
   memberDiscount: number;
 }
 
 export interface PricingCode {
-  discountOverride: number | null;
+  extraDiscount: number | null;
 }
 
 // Keep every discount within 0–90 so a price can never go negative or free.
@@ -19,17 +19,15 @@ export function clampDiscount(percent: number): number {
   return Math.min(90, Math.max(0, Math.round(percent)));
 }
 
-// A student with an override gets that % on everything; otherwise each product's
-// standard member discount applies. No code → pass code = null → the product's own.
+// A code's extraDiscount stacks on top of the product's own member discount
+// (e.g. product 10% + code 5% = 15%), clamped so the sum can never exceed 90.
+// No code, or a code with no bonus → just the product's own discount.
 export function effectiveDiscount(
   product: PricingProduct,
   code: PricingCode | null,
 ): number {
-  const raw =
-    code && code.discountOverride != null
-      ? code.discountOverride
-      : product.memberDiscount;
-  return clampDiscount(raw);
+  const bonus = code?.extraDiscount ?? 0;
+  return clampDiscount(product.memberDiscount + bonus);
 }
 
 // Member price, rounded to a whole unit so students never see 679.15.

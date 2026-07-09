@@ -33,7 +33,7 @@ The app's job is to make every step frictionless and to lose no one in the middl
 **In:**
 - Product catalogue with categories, tags, search, filter, sort, stock display.
 - Regular price for everyone; member price unlocked by a valid personal code.
-- Unique student codes: generate (single + batch), per-student discount override, activate/deactivate, usage tracking, CSV export.
+- Unique student codes: generate (single + batch), per-student extra discount (stacks on top of each product's own), activate/deactivate, usage tracking, CSV export.
 - Reserve flow (no payment) + a reservations queue in admin with statuses.
 - Admin login; product management with image upload.
 - Responsive, accessible, deployed.

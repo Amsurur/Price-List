@@ -5,12 +5,18 @@ import type { AppliedCode } from "./code-unlock-strip";
 import { ImageLightbox } from "./image-lightbox";
 import { ProductDetailSheet } from "./product-detail-sheet";
 import { ProductImageCarousel } from "./product-image-carousel";
-import { DiscountBadge, ProductPrice, SavingsPill, hasDiscount } from "./product-price";
+import {
+  DiscountBadge,
+  DiscountBreakdown,
+  ProductPrice,
+  SavingsPill,
+  hasDiscount,
+} from "./product-price";
 import type { Product } from "@/lib/types";
 
 // A product's discount always shows, whether or not a Computerra code is
-// applied — the code only matters when it unlocks a bigger personal
-// discountOverride. `unlocked` here only affects the code-hint copy.
+// applied — a code adds its own extraDiscount on top. `unlocked` here only
+// affects the code-hint copy.
 export function ProductCard({
   product,
   appliedCode,
@@ -59,8 +65,9 @@ export function ProductCard({
       </div>
 
       {showBadge && (
-        <div className="mt-2">
+        <div className="mt-2 flex flex-col gap-1">
           <SavingsPill product={product} />
+          <DiscountBreakdown product={product} appliedCode={appliedCode} />
         </div>
       )}
 

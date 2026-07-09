@@ -13,9 +13,10 @@ type State =
   | { kind: "ready"; products: Product[]; codes: StudentCode[] };
 
 // One screen that surfaces every discount-related setting — the per-product
-// standard discount and the per-code override — so the owner doesn't have to
-// jump between Products and Student codes to see the full pricing picture.
-// This is additive: the fields still exist on the product form and code row.
+// standard discount and the per-code extra discount that stacks on top of it
+// — so the owner doesn't have to jump between Products and Student codes to
+// see the full pricing picture. This is additive: the fields still exist on
+// the product form and code row.
 export default function DiscountsPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
 
@@ -72,7 +73,8 @@ export default function DiscountsPage() {
         </h1>
         <p className="mt-1 text-sm text-muted">
           Все настройки скидок в одном месте — стандартная скидка каждого
-          товара и персональные переопределения по кодам студентов.
+          товара и дополнительные скидки по кодам студентов, которые
+          складываются с ней.
         </p>
       </div>
 
@@ -140,12 +142,13 @@ export default function DiscountsPage() {
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <h2 className="font-display text-lg font-semibold text-ink">
-                    Переопределения по кодам студентов
+                    Дополнительные скидки по кодам студентов
                   </h2>
                   <p className="mt-1 text-sm text-muted">
-                    Если задано, этот процент заменяет скидку товара для всех
-                    позиций, которые бронирует этот студент. Оставьте пустым
-                    для стандартной скидки.
+                    Если задано, этот процент добавляется к скидке товара для
+                    всех позиций, которые бронирует этот студент (например,
+                    10% товара + 5% кода = 15%). Оставьте пустым, если бонус
+                    не нужен.
                   </p>
                 </div>
                 <Link
@@ -173,11 +176,11 @@ export default function DiscountsPage() {
                         <div className="text-xs text-muted">{code.code}</div>
                       </div>
                       <InlineDiscountEditor
-                        value={code.discountOverride}
+                        value={code.extraDiscount}
                         allowNull
                         onSave={async (value) => {
                           const updated = await updateStudentCode(code.id, {
-                            discountOverride: value,
+                            extraDiscount: value,
                           });
                           handleCodeSaved(updated);
                         }}

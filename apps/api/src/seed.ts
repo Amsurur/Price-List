@@ -71,8 +71,8 @@ const codes: Partial<StudentCode>[] = [
   {
     code: 'SOFT-VIP1',
     studentName: 'Ali (top student)',
-    discountOverride: 25,
-    note: '25% on everything.',
+    extraDiscount: 10,
+    note: '+10% on top of each product’s own discount.',
   },
   {
     code: 'SOFT-OFF0',
