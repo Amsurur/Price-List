@@ -13,12 +13,13 @@ export class CreateStudentCodeDto {
   @MaxLength(200)
   studentName?: string;
 
-  // If set, this % applies to all products for this student (see pricing.ts).
+  // If set, this % stacks on top of each product's own member discount
+  // (see pricing.ts).
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(90)
-  discountOverride?: number;
+  extraDiscount?: number;
 
   @IsOptional()
   @IsString()

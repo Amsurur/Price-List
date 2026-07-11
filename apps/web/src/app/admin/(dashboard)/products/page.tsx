@@ -79,12 +79,20 @@ export default function ProductsPage() {
             Управляйте каталогом, который видят студенты.
           </p>
         </div>
-        <Link
-          href="/admin/products/new"
-          className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-        >
-          Добавить товар
-        </Link>
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href="/admin/products/bulk"
+            className="rounded-xl border border-line px-4 py-2.5 font-display text-sm font-semibold text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            Загрузить из файла
+          </Link>
+          <Link
+            href="/admin/products/new"
+            className="rounded-xl bg-brand px-4 py-2.5 font-display text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          >
+            Добавить товар
+          </Link>
+        </div>
       </div>
 
       <div className="mt-6 flex flex-col gap-3">

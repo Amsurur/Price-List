@@ -19,7 +19,7 @@ function randomSuffix(length = 4): string {
 
 export type ValidateCodeResult =
   | { ok: false; reason: 'empty' | 'invalid' | 'disabled' }
-  | { ok: true; studentName: string | null; discountOverride: number | null };
+  | { ok: true; studentName: string | null; extraDiscount: number | null };
 
 function csvEscape(value: string): string {
   if (/[",\n]/.test(value)) {
@@ -70,7 +70,7 @@ export class StudentCodesService {
     const entity = this.codes.create({
       code,
       studentName: dto.studentName?.trim() || null,
-      discountOverride: dto.discountOverride ?? null,
+      extraDiscount: dto.extraDiscount ?? null,
       note: dto.note?.trim() || null,
     });
     return this.codes.save(entity);
@@ -85,7 +85,7 @@ export class StudentCodesService {
       entities.push(
         this.codes.create({
           code,
-          discountOverride: dto.discountOverride ?? null,
+          extraDiscount: dto.extraDiscount ?? null,
           note: dto.note?.trim() || null,
         }),
       );
@@ -101,8 +101,8 @@ export class StudentCodesService {
     if (dto.studentName !== undefined) {
       row.studentName = dto.studentName.trim() || null;
     }
-    if (dto.discountOverride !== undefined) {
-      row.discountOverride = dto.discountOverride;
+    if (dto.extraDiscount !== undefined) {
+      row.extraDiscount = dto.extraDiscount;
     }
     if (dto.note !== undefined) {
       row.note = dto.note.trim() || null;
@@ -141,7 +141,7 @@ export class StudentCodesService {
     return {
       ok: true,
       studentName: row.studentName,
-      discountOverride: row.discountOverride,
+      extraDiscount: row.extraDiscount,
     };
   }
 
@@ -181,7 +181,7 @@ export class StudentCodesService {
     const header = [
       'код',
       'имя_студента',
-      'персональная_скидка',
+      'дополнительная_скидка',
       'статус',
       'использований',
       'последнее_использование',
@@ -191,7 +191,7 @@ export class StudentCodesService {
       [
         r.code,
         r.studentName ?? '',
-        r.discountOverride != null ? String(r.discountOverride) : '',
+        r.extraDiscount != null ? String(r.extraDiscount) : '',
         r.active ? 'активен' : 'отключён',
         String(r.usesCount),
         r.lastUsedAt ? r.lastUsedAt.toISOString() : '',

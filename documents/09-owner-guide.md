@@ -25,7 +25,7 @@ Stock only goes down automatically when you mark a reservation **completed** (se
 3. Copy the code (click it to copy) and give it to the student — in person, by message, however's easiest.
 4. The student enters that code on the store's home page to unlock their member price and the **Reserve** button.
 
-**Discount override:** every code uses the standard member discount unless you set an override % when generating or editing it (0–90). Use this for a student with a special deal.
+**Extra discount:** every code uses each product's standard member discount, plus an optional bonus % you set when generating or editing the code (0–90) — it stacks on top (e.g. a 10% product + a 5% code bonus = 15% for that student). Use this for a student with a special deal.
 
 **Turning a code off:** if a code is being misused or a student leaves, click its status pill (**Active** / **Disabled**) to toggle it — no need to delete it, and you keep its history.
 

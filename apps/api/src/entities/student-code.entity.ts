@@ -20,10 +20,11 @@ export class StudentCode {
   @Column('text', { name: 'student_name', nullable: true })
   studentName: string | null;
 
-  // If set, this % applies to all products for this student; if null, each
-  // product's member_discount applies.
-  @Column('integer', { name: 'discount_override', nullable: true })
-  discountOverride: number | null;
+  // If set, this % stacks on top of each product's own member_discount
+  // (e.g. product 10% + code 5% = 15%, clamped at 90); if null, only the
+  // product's own discount applies.
+  @Column('integer', { name: 'extra_discount', nullable: true })
+  extraDiscount: number | null;
 
   // Toggle off to disable instantly.
   @Column('boolean', { default: true })

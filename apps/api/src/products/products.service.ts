@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { ProductImage } from '../entities/product-image.entity';
@@ -26,12 +28,22 @@ export interface ProductView extends Product {
   stockLabel: string | null;
 }
 
+// One row's outcome from a bulk upload — created rows carry the saved
+// product, error rows carry a reason so the admin can fix and retry just
+// that row without re-submitting the whole batch.
+export interface BulkCreateResultItem {
+  index: number;
+  status: 'created' | 'error';
+  product?: ProductView;
+  error?: string;
+}
+
 export interface FindProductsQuery {
   search?: string;
   tag?: string;
   active?: boolean;
-  // A validated student code, to price the listing for that student's
-  // discount override (falls back to each product's own discount if unset).
+  // A validated student code, to price the listing with that student's
+  // extra discount stacked on top of each product's own discount.
   code?: string;
 }
 
@@ -56,8 +68,8 @@ export class ProductsService {
   }
 
   // With no code, this reflects each product's own standard discount, which
-  // is always shown on the storefront. A code only matters when it carries
-  // a personal discountOverride bigger than the product's own discount.
+  // is always shown on the storefront. A code adds its own extraDiscount on
+  // top of that (see pricing.ts) — bigger for the student, never smaller.
   private toView(
     product: Product,
     code: PricingCode | null = null,
@@ -105,7 +117,7 @@ export class ProductsService {
       ? await this.studentCodes.findActiveByCode(query.code)
       : null;
     const pricingCode: PricingCode | null = code
-      ? { discountOverride: code.discountOverride }
+      ? { extraDiscount: code.extraDiscount }
       : null;
     return rows.map((p) => this.toView(p, pricingCode));
   }
@@ -122,6 +134,42 @@ export class ProductsService {
     const product = this.products.create(dto);
     const saved = await this.products.save(product);
     return this.toView(saved);
+  }
+
+  // Bulk upload from the admin's spreadsheet/JSON review screen. Each row is
+  // validated and saved independently — one bad row (bad price, missing
+  // name) shouldn't block the rest of a 50-row batch, so this doesn't run
+  // inside a transaction and never throws for a row-level problem.
+  async bulkCreate(
+    items: Record<string, unknown>[],
+  ): Promise<BulkCreateResultItem[]> {
+    const results: BulkCreateResultItem[] = [];
+    for (const [index, raw] of items.entries()) {
+      const dto = plainToInstance(CreateProductDto, raw);
+      const errors = await validate(dto, { whitelist: true });
+      if (errors.length > 0) {
+        const reason = errors
+          .flatMap((e) => Object.values(e.constraints ?? {}))
+          .join('; ');
+        results.push({
+          index,
+          status: 'error',
+          error: reason || 'Неверные данные',
+        });
+        continue;
+      }
+      try {
+        const product = await this.create(dto);
+        results.push({ index, status: 'created', product });
+      } catch {
+        results.push({
+          index,
+          status: 'error',
+          error: 'Не удалось сохранить товар',
+        });
+      }
+    }
+    return results;
   }
 
   async update(id: string, dto: UpdateProductDto): Promise<ProductView> {

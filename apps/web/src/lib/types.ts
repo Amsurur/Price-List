@@ -34,12 +34,22 @@ export interface ProductInput {
   active?: boolean;
 }
 
+// One row's outcome from POST /products/bulk (apps/api ProductsService.bulkCreate).
+export interface BulkCreateResult {
+  index: number;
+  status: "created" | "error";
+  product?: Product;
+  error?: string;
+}
+
 // Matches the API's StudentCode entity.
 export interface StudentCode {
   id: string;
   code: string;
   studentName: string | null;
-  discountOverride: number | null;
+  // Stacks on top of each product's own memberDiscount (e.g. product 10% +
+  // code 5% = 15%), clamped at 90. Null means no bonus — just the product's own.
+  extraDiscount: number | null;
   active: boolean;
   note: string | null;
   usesCount: number;
@@ -50,14 +60,14 @@ export interface StudentCode {
 // Fields the admin form sends when generating or editing a code.
 export interface StudentCodeInput {
   studentName?: string;
-  discountOverride?: number | null;
+  extraDiscount?: number | null;
   note?: string;
   active?: boolean;
 }
 
 export interface BatchStudentCodeInput {
   count: number;
-  discountOverride?: number | null;
+  extraDiscount?: number | null;
   note?: string;
 }
 
@@ -65,7 +75,7 @@ export interface BatchStudentCodeInput {
 // never the full student_codes table.
 export type ValidateCodeResult =
   | { ok: false; reason: "empty" | "invalid" | "disabled" }
-  | { ok: true; studentName: string | null; discountOverride: number | null };
+  | { ok: true; studentName: string | null; extraDiscount: number | null };
 
 export type ReservationStatus = "new" | "contacted" | "completed" | "cancelled";
 

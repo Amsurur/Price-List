@@ -14,12 +14,12 @@ export class UpdateStudentCodeDto {
   @MaxLength(200)
   studentName?: string;
 
-  // null clears the override so the product's own member_discount applies again.
+  // null clears the bonus so only the product's own member_discount applies.
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(90)
-  discountOverride?: number | null;
+  extraDiscount?: number | null;
 
   @IsOptional()
   @IsString()

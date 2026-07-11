@@ -23,8 +23,8 @@ export function CodeRow({
   const [error, setError] = useState<string | null>(null);
 
   const [studentName, setStudentName] = useState(code.studentName ?? "");
-  const [discountOverride, setDiscountOverride] = useState(
-    code.discountOverride != null ? String(code.discountOverride) : "",
+  const [extraDiscount, setExtraDiscount] = useState(
+    code.extraDiscount != null ? String(code.extraDiscount) : "",
   );
   const [note, setNote] = useState(code.note ?? "");
 
@@ -55,8 +55,8 @@ export function CodeRow({
     try {
       const updated = await updateStudentCode(code.id, {
         studentName: studentName.trim() || undefined,
-        discountOverride:
-          discountOverride.trim() === "" ? null : Number(discountOverride),
+        extraDiscount:
+          extraDiscount.trim() === "" ? null : Number(extraDiscount),
         note: note.trim() || undefined,
       });
       onChanged(updated);
@@ -98,15 +98,15 @@ export function CodeRow({
           </div>
           <div>
             <label className="block text-xs font-medium text-muted">
-              Персональная скидка, % (пусто = стандартная)
+              Дополнительная скидка, % (пусто = без бонуса)
             </label>
             <input
               type="number"
               min={0}
               max={90}
               className={`mt-1 tabular ${inputClass}`}
-              value={discountOverride}
-              onChange={(e) => setDiscountOverride(e.target.value)}
+              value={extraDiscount}
+              onChange={(e) => setExtraDiscount(e.target.value)}
             />
           </div>
           <div>
@@ -154,9 +154,9 @@ export function CodeRow({
           {code.studentName || "Без имени"}
         </div>
         <div className="text-xs text-muted">
-          {code.discountOverride != null
-            ? `Скидка ${code.discountOverride}%`
-            : "Стандартная скидка"}
+          {code.extraDiscount != null
+            ? `+${code.extraDiscount}% к скидке товара`
+            : "Без дополнительной скидки"}
           {code.note ? ` · ${code.note}` : ""}
         </div>
       </div>

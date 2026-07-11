@@ -1,10 +1,10 @@
 import { formatMoney } from "@/lib/format";
+import type { AppliedCode } from "./code-unlock-strip";
 import type { Product } from "@/lib/types";
 
 // A product's discount is always priced by the API (falls back to the
 // product's own memberDiscount even with no code applied), so it's always
-// shown here — a code only matters when it unlocks a bigger personal
-// discountOverride.
+// shown here — a code just adds its own extraDiscount on top.
 export function hasDiscount(product: Product): boolean {
   return product.saving > 0;
 }
@@ -54,6 +54,28 @@ export function ProductPrice({
         </span>
       )}
     </div>
+  );
+}
+
+// Shows how the total discount is made up, when a code with its own bonus is
+// applied — e.g. "10% товара + 5% по коду = 15%". Own/code % are shown as
+// entered; the total is clamped the same way the API clamps pricing (0–90),
+// so the label never claims more than the price actually reflects.
+export function DiscountBreakdown({
+  product,
+  appliedCode,
+}: {
+  product: Product;
+  appliedCode: AppliedCode | null;
+}) {
+  if (!appliedCode?.extraDiscount) return null;
+  const total = Math.min(90, product.memberDiscount + appliedCode.extraDiscount);
+  return (
+    <p className="text-xs text-muted">
+      {product.memberDiscount}% товара + {appliedCode.extraDiscount}% по коду
+      {" = "}
+      <span className="font-medium text-ink">{total}%</span>
+    </p>
   );
 }
 

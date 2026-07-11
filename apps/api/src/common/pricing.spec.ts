@@ -24,20 +24,23 @@ describe('pricing', () => {
       expect(effectiveDiscount(product, null)).toBe(15);
     });
 
-    it('uses the product discount when the code has no override', () => {
-      expect(effectiveDiscount(product, { discountOverride: null })).toBe(15);
+    it('uses the product discount when the code has no bonus', () => {
+      expect(effectiveDiscount(product, { extraDiscount: null })).toBe(15);
     });
 
-    it('uses the code override when set (applies to everything)', () => {
-      expect(effectiveDiscount(product, { discountOverride: 25 })).toBe(25);
+    it('adds the code bonus on top of the product discount', () => {
+      // 10% own + 5% code = 15%
+      expect(
+        effectiveDiscount({ price: 1000, memberDiscount: 10 }, { extraDiscount: 5 }),
+      ).toBe(15);
     });
 
-    it('treats an override of 0 as a real 0 (not "unset")', () => {
-      expect(effectiveDiscount(product, { discountOverride: 0 })).toBe(0);
+    it('treats a bonus of 0 as no extra (not "unset")', () => {
+      expect(effectiveDiscount(product, { extraDiscount: 0 })).toBe(15);
     });
 
-    it('clamps an out-of-range override', () => {
-      expect(effectiveDiscount(product, { discountOverride: 200 })).toBe(90);
+    it('clamps the combined discount at 90', () => {
+      expect(effectiveDiscount(product, { extraDiscount: 200 })).toBe(90);
     });
   });
 
@@ -69,13 +72,13 @@ describe('pricing', () => {
 
   describe('stockLabel', () => {
     it('flags out of stock at 0 or below', () => {
-      expect(stockLabel(0)).toBe('Out of stock');
-      expect(stockLabel(-2)).toBe('Out of stock');
+      expect(stockLabel(0)).toBe('Нет в наличии');
+      expect(stockLabel(-2)).toBe('Нет в наличии');
     });
 
     it('warns on low stock (1–3)', () => {
-      expect(stockLabel(1)).toBe('Only 1 left');
-      expect(stockLabel(3)).toBe('Only 3 left');
+      expect(stockLabel(1)).toBe('Осталось 1');
+      expect(stockLabel(3)).toBe('Осталось 3');
     });
 
     it('shows no badge when there is plenty', () => {

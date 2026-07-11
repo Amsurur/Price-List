@@ -5,7 +5,7 @@ import { useIsMobile } from "@/lib/use-is-mobile";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { SideDrawer } from "@/components/ui/side-drawer";
 import type { AppliedCode } from "./code-unlock-strip";
-import { DiscountBadge, ProductPrice, SavingsPill } from "./product-price";
+import { DiscountBadge, DiscountBreakdown, ProductPrice, SavingsPill } from "./product-price";
 import { ImageLightbox } from "./image-lightbox";
 import { ProductImageCarousel } from "./product-image-carousel";
 import { ReserveForm } from "./reserve-form";
@@ -71,6 +71,7 @@ export function ProductDetailSheet({
       <div className="flex flex-col gap-2">
         <ProductPrice product={product} />
         <SavingsPill product={product} />
+        <DiscountBreakdown product={product} appliedCode={appliedCode} />
         {!unlocked && (
           <p className="text-xs text-muted">
             Есть личный код Computerra? Он может дать скидку больше.

@@ -6,6 +6,8 @@ import type { ValidateCodeResult } from "@/lib/types";
 export interface AppliedCode {
   code: string;
   studentName: string | null;
+  // The extra % this code adds on top of each product's own discount.
+  extraDiscount: number | null;
 }
 
 export function CodeUnlockStrip({
@@ -46,6 +48,7 @@ export function CodeUnlockStrip({
         <p className="text-sm font-medium text-white">
           ✓ Код {applied.code} применён
           {applied.studentName ? ` — добро пожаловать, ${applied.studentName}` : ""}
+          {applied.extraDiscount ? ` (+${applied.extraDiscount}% к скидке каждого товара)` : ""}
         </p>
         <button
           type="button"

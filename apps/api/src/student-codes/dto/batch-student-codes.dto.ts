@@ -14,12 +14,12 @@ export class BatchStudentCodesDto {
   @Max(200)
   count: number;
 
-  // Shared discount override applied to every code in the batch, if set.
+  // Shared extra discount applied to every code in the batch, if set.
   @IsOptional()
   @IsInt()
   @Min(0)
   @Max(90)
-  discountOverride?: number;
+  extraDiscount?: number;
 
   @IsOptional()
   @IsString()

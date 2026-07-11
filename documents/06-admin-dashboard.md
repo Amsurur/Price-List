@@ -36,17 +36,17 @@ Actions: **Save product** (create or update) · **Delete** (confirm). Deleting m
 The verification + discount engine. Make generating and handing out codes effortless.
 
 ### List
-- Rows: the code (as a copyable pill), student name, effective discount (override % or "standard"), **active toggle**, use count + last used, Edit / Delete.
+- Rows: the code (as a copyable pill), student name, extra discount (bonus % on top of each product's own, or "none"), **active toggle**, use count + last used, Edit / Delete.
 - Tools: search, "Generate code", "Generate batch", **Export CSV**.
 
 ### Generate
-- **Single:** optional student name, optional discount override %, note → creates one unique, readable code (e.g. `SOFT-7K2Q`). Show it prominently with a copy button.
-- **Batch:** "How many?" → generates N unique codes at once (optionally a shared discount override). List them; **Export CSV** to print/hand out.
+- **Single:** optional student name, optional extra discount %, note → creates one unique, readable code (e.g. `SOFT-7K2Q`). Show it prominently with a copy button.
+- **Batch:** "How many?" → generates N unique codes at once (optionally a shared extra discount). List them; **Export CSV** to print/hand out.
 - Codes are unique (DB-enforced); regenerate on any collision.
 
 ### Manage
 - **Toggle active** disables/enables a code instantly in the store.
-- **Discount override**: set → that student gets this % on everything; clear → they get each product's standard member discount.
+- **Extra discount**: set → that student gets this % on top of each product's own member discount (clamped at 90); clear → they just get each product's standard member discount.
 - Owner watches `use count` / `last used`; if a code looks shared/abused, toggle it off. (Hard caps are Phase 2.)
 
 ## Reservations tab

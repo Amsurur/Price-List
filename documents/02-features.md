@@ -41,7 +41,7 @@ Each feature is a checklist. A feature is done when every box is true. Grouped b
 
 ### F7 — Manage student codes
 - [ ] Generate a single code or a **batch** (e.g. "create 20"); codes are unique and readable.
-- [ ] Each code has: the code string, student name (optional), an optional discount override %, active toggle, note, and a use count.
+- [ ] Each code has: the code string, student name (optional), an optional extra discount % that stacks on top of each product's own, active toggle, note, and a use count.
 - [ ] Toggle a code off to instantly disable it in the store.
 - [ ] **Export** the list of codes (CSV) to hand out to students.
 

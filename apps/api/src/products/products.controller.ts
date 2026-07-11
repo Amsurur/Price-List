@@ -24,6 +24,7 @@ import { Repository } from 'typeorm';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProductImage } from '../entities/product-image.entity';
 import { ProductsService } from './products.service';
+import { BulkCreateProductsDto } from './dto/bulk-create-products.dto';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -64,7 +65,10 @@ export class ProductsController {
       fileFilter: (_req, file, cb) =>
         ALLOWED_IMAGE.test(file.originalname)
           ? cb(null, true)
-          : cb(new BadRequestException('Разрешены только файлы изображений'), false),
+          : cb(
+              new BadRequestException('Разрешены только файлы изображений'),
+              false,
+            ),
     }),
   )
   async upload(@UploadedFile() file?: Express.Multer.File) {
@@ -98,6 +102,15 @@ export class ProductsController {
   @Post()
   create(@Body() dto: CreateProductDto) {
     return this.products.create(dto);
+  }
+
+  // Bulk upload from the admin's review screen — each row is validated and
+  // saved independently, so the response reports per-row success/failure
+  // instead of accepting or rejecting the whole batch.
+  @UseGuards(JwtAuthGuard)
+  @Post('bulk')
+  bulkCreate(@Body() dto: BulkCreateProductsDto) {
+    return this.products.bulkCreate(dto.items);
   }
 
   @UseGuards(JwtAuthGuard)
