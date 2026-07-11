@@ -2,6 +2,7 @@
 // the web app only reads/writes through it.
 import type {
   BatchStudentCodeInput,
+  BulkCreateResult,
   Product,
   ProductInput,
   Reservation,
@@ -112,6 +113,18 @@ export function updateProduct(
 
 export function deleteProduct(id: string): Promise<void> {
   return request<void>(`/products/${id}`, { method: "DELETE" });
+}
+
+// Bulk upload from the review screen — each item is validated and saved
+// independently on the API, so the response reports per-row success/failure
+// rather than accepting or rejecting the whole batch.
+export function createProductsBulk(
+  items: ProductInput[],
+): Promise<BulkCreateResult[]> {
+  return request<BulkCreateResult[]>(`/products/bulk`, {
+    method: "POST",
+    body: JSON.stringify({ items }),
+  });
 }
 
 // Upload an image file; returns the stored URL to save on the product.

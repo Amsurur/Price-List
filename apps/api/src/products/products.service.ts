@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
 import { Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { ProductImage } from '../entities/product-image.entity';
@@ -24,6 +26,16 @@ export interface ProductView extends Product {
   memberPrice: number;
   saving: number;
   stockLabel: string | null;
+}
+
+// One row's outcome from a bulk upload — created rows carry the saved
+// product, error rows carry a reason so the admin can fix and retry just
+// that row without re-submitting the whole batch.
+export interface BulkCreateResultItem {
+  index: number;
+  status: 'created' | 'error';
+  product?: ProductView;
+  error?: string;
 }
 
 export interface FindProductsQuery {
@@ -122,6 +134,42 @@ export class ProductsService {
     const product = this.products.create(dto);
     const saved = await this.products.save(product);
     return this.toView(saved);
+  }
+
+  // Bulk upload from the admin's spreadsheet/JSON review screen. Each row is
+  // validated and saved independently — one bad row (bad price, missing
+  // name) shouldn't block the rest of a 50-row batch, so this doesn't run
+  // inside a transaction and never throws for a row-level problem.
+  async bulkCreate(
+    items: Record<string, unknown>[],
+  ): Promise<BulkCreateResultItem[]> {
+    const results: BulkCreateResultItem[] = [];
+    for (const [index, raw] of items.entries()) {
+      const dto = plainToInstance(CreateProductDto, raw);
+      const errors = await validate(dto, { whitelist: true });
+      if (errors.length > 0) {
+        const reason = errors
+          .flatMap((e) => Object.values(e.constraints ?? {}))
+          .join('; ');
+        results.push({
+          index,
+          status: 'error',
+          error: reason || 'Неверные данные',
+        });
+        continue;
+      }
+      try {
+        const product = await this.create(dto);
+        results.push({ index, status: 'created', product });
+      } catch {
+        results.push({
+          index,
+          status: 'error',
+          error: 'Не удалось сохранить товар',
+        });
+      }
+    }
+    return results;
   }
 
   async update(id: string, dto: UpdateProductDto): Promise<ProductView> {

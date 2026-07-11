@@ -34,6 +34,14 @@ export interface ProductInput {
   active?: boolean;
 }
 
+// One row's outcome from POST /products/bulk (apps/api ProductsService.bulkCreate).
+export interface BulkCreateResult {
+  index: number;
+  status: "created" | "error";
+  product?: Product;
+  error?: string;
+}
+
 // Matches the API's StudentCode entity.
 export interface StudentCode {
   id: string;
