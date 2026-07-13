@@ -318,7 +318,7 @@ function BulkRow({
         <button
           type="button"
           onClick={onToggle}
-          className="flex flex-1 items-center gap-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+          className="flex min-w-0 flex-1 items-center gap-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
           aria-expanded={row.expanded}
         >
           <span className={`inline-block transition-transform ${row.expanded ? "rotate-90" : ""}`} aria-hidden>
@@ -333,15 +333,15 @@ function BulkRow({
             </span>
           </span>
           {created ? (
-            <span className="rounded-full bg-save-tint px-2 py-0.5 text-[11px] font-medium text-ink">
+            <span className="shrink-0 rounded-full bg-save-tint px-2 py-0.5 text-[11px] font-medium text-ink">
               Создан
             </span>
           ) : result?.status === "error" ? (
-            <span className="rounded-full bg-danger/10 px-2 py-0.5 text-[11px] font-medium text-danger">
+            <span className="shrink-0 rounded-full bg-danger/10 px-2 py-0.5 text-[11px] font-medium text-danger">
               Ошибка
             </span>
           ) : issues.length > 0 ? (
-            <span className="rounded-full bg-warn-tint px-2 py-0.5 text-[11px] font-medium text-ink">
+            <span className="shrink-0 rounded-full bg-warn-tint px-2 py-0.5 text-[11px] font-medium text-ink">
               Проверьте
             </span>
           ) : null}
@@ -351,7 +351,7 @@ function BulkRow({
             type="button"
             onClick={onRemove}
             aria-label="Убрать из списка"
-            className="flex h-8 w-8 items-center justify-center rounded text-sm text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-sm text-danger hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger"
           >
             ×
           </button>
