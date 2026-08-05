@@ -78,7 +78,7 @@ Ship each milestone as a working, deployed slice. Don't build ahead.
 - [x] Empty states, error states, loading states (see writing rules in the design doc).
 - [x] Low-stock badges; simple admin dashboard stats (products, in-stock, active codes, open reservations).
 - [x] Owner guide: how to add products, hand out codes, print a QR to the store.
-- **Done when:** the owner can run the whole loop end-to-end and the app is live. *(loop verified end-to-end locally; hosted deploy still open — see stack override in root `CLAUDE.md`)*
+- **Done when:** the owner can run the whole loop end-to-end and the app is live. *(loop verified end-to-end locally; now also live on the owner's own VPS at `http://193.24.233.18` — plain HTTP, fresh DB, no domain/HTTPS yet. See `documents/10-deployment-guide.md` "Executed 2026-08-05" section for what's done vs. still open.)*
 
 ## 6. Later (Phase 2 / 3 — do NOT build yet)
 

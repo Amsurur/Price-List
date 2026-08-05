@@ -30,8 +30,10 @@ import { StudentCodesModule } from './student-codes/student-codes.module';
         const base = {
           type: 'postgres' as const,
           autoLoadEntities: true,
-          // M0 dev convenience only. Replaced by migrations in M1.
-          synchronize: true,
+          // Dev convenience only (no migrations exist yet) — must be off
+          // wherever real data lives, since a drift between entities and
+          // the actual schema could silently alter or drop columns.
+          synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
           ssl,
         };
         if (url) {

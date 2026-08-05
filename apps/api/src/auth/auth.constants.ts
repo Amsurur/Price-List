@@ -7,15 +7,18 @@ export function adminCookieOptions() {
     process.env.JWT_EXPIRES_IN_SECONDS ?? '604800',
     10,
   );
-  // In production the web app (Vercel) and API (Render) are on different
-  // domains, which browsers treat as cross-site — a "Lax" cookie is dropped
-  // on cross-site fetch() calls, so login would silently not stick. "None"
-  // requires Secure, which is only available over the HTTPS we get in prod.
-  const isProduction = process.env.NODE_ENV === 'production';
+  // When the web app and API are on different domains (e.g. Vercel + Render),
+  // browsers treat that as cross-site — a "Lax" cookie is dropped on
+  // cross-site fetch() calls, so login would silently not stick. "None"
+  // requires Secure, which needs HTTPS. Driven by its own env var (not
+  // NODE_ENV) because a production build can still be served over plain
+  // HTTP (e.g. a bare-IP deploy before a domain/TLS exists) — a Secure
+  // cookie would be silently refused by the browser in that case.
+  const cookieSecure = process.env.COOKIE_SECURE === 'true';
   return {
     httpOnly: true,
-    sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
-    secure: isProduction,
+    sameSite: (cookieSecure ? 'none' : 'lax') as 'none' | 'lax',
+    secure: cookieSecure,
     path: '/',
     maxAge: expiresInSeconds * 1000,
   };
