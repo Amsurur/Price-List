@@ -328,10 +328,18 @@ Phases 1-2 above. What actually happened, differences noted:
   rewrite (`/api/:path*` → the API origin) is used, with `NEXT_PUBLIC_API_URL`
   pointed at the **internal** Docker service (`http://api:3001/api`), not a
   public address — the API container isn't exposed to the host at all, only
-  port 80 (web) is. Only works because all browser-side API calls already go
-  through the relative `/api` path (confirmed in `apps/web/src/lib/api.ts`
-  and `auth.ts`) and images render via `next/image` (server-side fetch, not
-  a direct browser request to the API origin).
+  port 80 (web) is.
+
+  **This only holds if every browser-facing URL stays relative** — API calls
+  *and* product images alike. `NEXT_PUBLIC_API_URL` is not resolvable from a
+  browser here, so anything that leaks it into the page breaks. Corrected
+  2026-08-12: this note originally claimed images were safe because
+  `next/image` fetches them server-side. That was wrong — all `<Image>` call
+  sites pass `unoptimized`, so Next emits the raw URL and no `/_next/image`
+  proxy is involved. `imageSrc()` in `apps/web/src/lib/api.ts` was prepending
+  the API origin, which put `http://api:3001/...` in front of the browser and
+  broke every product image on this server. It now returns the API's relative
+  path untouched.
 - **Data: fresh empty database, not a Render migration** — the user decided
   against migrating real data for this pass (Render's Postgres also had
   Access Control blocking external connections, which would've needed a

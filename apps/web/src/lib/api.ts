@@ -22,16 +22,18 @@ const PUBLIC_API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
 const API_URL = typeof window === "undefined" ? PUBLIC_API_URL : "/api";
 
-// The API's origin (without the /api prefix), for resolving image URLs like
-// "/api/products/images/<id>" that it serves from Postgres.
-const API_ORIGIN = PUBLIC_API_URL.replace(/\/api\/?$/, "");
-
-// Turn a stored image_url into something the browser can load. Absolute URLs
-// pass through; relative paths get the API origin prepended.
+// Turn a stored image_url into something the browser can load.
+//
+// Never prepend the API origin here. The API stores relative paths like
+// "/api/products/images/<id>", and this value is only ever used as an <img>
+// src — the browser resolves it against the page origin and next.config.ts's
+// /api rewrite forwards it to the API. NEXT_PUBLIC_API_URL is not necessarily
+// reachable from the browser: in the Docker deploy it's the internal service
+// name http://api:3001/api, which no browser can resolve. (Every <Image> here
+// passes `unoptimized`, so there's no /_next/image proxy to paper over it.)
+// Legacy absolute http(s) URLs already work as-is.
 export function imageSrc(url: string | null | undefined): string | null {
-  if (!url) return null;
-  if (/^https?:\/\//.test(url)) return url;
-  return `${API_ORIGIN}${url}`;
+  return url || null;
 }
 
 // Thrown by request() on a non-ok response. Callers that need to tell a 404
