@@ -117,6 +117,15 @@ export function deleteProduct(id: string): Promise<void> {
   return request<void>(`/products/${id}`, { method: "DELETE" });
 }
 
+// Admin drag-and-drop reorder. `ids` must be every product id, in the new
+// display order — the API rejects a list that doesn't match its own count.
+export function reorderProducts(ids: string[]): Promise<void> {
+  return request<void>(`/products/reorder`, {
+    method: "PATCH",
+    body: JSON.stringify({ ids }),
+  });
+}
+
 // Bulk upload from the review screen — each item is validated and saved
 // independently on the API, so the response reports per-row success/failure
 // rather than accepting or rejecting the whole batch.

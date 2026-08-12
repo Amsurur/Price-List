@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Product } from '../entities/product.entity';
 import { ProductImage } from '../entities/product-image.entity';
 import {
@@ -55,7 +55,19 @@ export class ProductsService {
     @InjectRepository(ProductImage)
     private readonly productImages: Repository<ProductImage>,
     private readonly studentCodes: StudentCodesService,
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
+
+  // New rows land after the current last item instead of colliding at 0.
+  private async nextSortOrder(): Promise<number> {
+    const row = await this.products
+      .createQueryBuilder('p')
+      .select('MAX(p.sort_order)', 'max')
+      .getRawOne<{ max: string | null }>();
+    const max = row?.max;
+    return (max === null || max === undefined ? -1 : Number(max)) + 1;
+  }
 
   private imageIdsOf(product: Product): string[] {
     const urls = [
@@ -94,7 +106,8 @@ export class ProductsService {
   async findAll(query: FindProductsQuery = {}): Promise<ProductView[]> {
     const qb = this.products
       .createQueryBuilder('p')
-      .orderBy('p.created_at', 'DESC');
+      .orderBy('p.sort_order', 'ASC')
+      .addOrderBy('p.created_at', 'DESC');
 
     if (query.search) {
       const term = `%${query.search.toLowerCase()}%`;
@@ -131,7 +144,8 @@ export class ProductsService {
   }
 
   async create(dto: CreateProductDto): Promise<ProductView> {
-    const product = this.products.create(dto);
+    const sortOrder = await this.nextSortOrder();
+    const product = this.products.create({ ...dto, sortOrder });
     const saved = await this.products.save(product);
     return this.toView(saved);
   }
@@ -170,6 +184,37 @@ export class ProductsService {
       }
     }
     return results;
+  }
+
+  // Admin drag-and-drop reorder. `ids` must be every product id, in the new
+  // display order — unlike bulkCreate, a partial reorder would leave the
+  // table in an inconsistent order, so this runs as one transaction and
+  // rejects outright if the list doesn't match what's actually in the DB
+  // (e.g. a second admin tab added a product mid-drag).
+  async reorder(ids: string[]): Promise<void> {
+    const total = await this.products.count();
+    if (ids.length !== total) {
+      throw new BadRequestException('Список товаров устарел — обновите страницу');
+    }
+    await this.dataSource.transaction(async (manager) => {
+      const found = await manager
+        .createQueryBuilder(Product, 'p')
+        .where('p.id IN (:...ids)', { ids })
+        .getCount();
+      if (found !== ids.length) {
+        throw new BadRequestException('Список товаров устарел — обновите страницу');
+      }
+      await Promise.all(
+        ids.map((id, index) =>
+          manager
+            .createQueryBuilder()
+            .update(Product)
+            .set({ sortOrder: index })
+            .where('id = :id', { id })
+            .execute(),
+        ),
+      );
+    });
   }
 
   async update(id: string, dto: UpdateProductDto): Promise<ProductView> {

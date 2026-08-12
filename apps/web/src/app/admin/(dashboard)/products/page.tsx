@@ -3,7 +3,23 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { deleteProduct, imageSrc, listProducts } from "@/lib/api";
+import {
+  DndContext,
+  PointerSensor,
+  TouchSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  useSortable,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { deleteProduct, imageSrc, listProducts, reorderProducts } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { Product } from "@/lib/types";
 
@@ -70,6 +86,30 @@ export default function ProductsPage() {
     }
   }
 
+  // Dragging only makes sense over the full, unfiltered catalogue — a
+  // search/tag filter shows a subset, and splicing a partial reorder back
+  // into the full list is ambiguous, so filtering just disables dragging.
+  const canReorder = search.trim() === "" && activeTag === null;
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 4 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } }),
+  );
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (state.kind !== "ready" || !over || active.id === over.id) return;
+    const oldIndex = state.products.findIndex((p) => p.id === active.id);
+    const newIndex = state.products.findIndex((p) => p.id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+    const reordered = arrayMove(state.products, oldIndex, newIndex);
+    setState({ kind: "ready", products: reordered });
+    reorderProducts(reordered.map((p) => p.id)).catch(() => {
+      // Reload to restore truth if the reorder failed on the server.
+      load();
+    });
+  }
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -120,6 +160,11 @@ export default function ProductsPage() {
             ))}
           </div>
         )}
+        {!canReorder && products.length > 0 && (
+          <p className="text-xs text-muted">
+            Очистите поиск и фильтр, чтобы менять порядок перетаскиванием.
+          </p>
+        )}
       </div>
 
       <div className="mt-6">
@@ -148,15 +193,27 @@ export default function ProductsPage() {
         )}
 
         {state.kind === "ready" && filtered.length > 0 && (
-          <ul className="flex flex-col gap-3">
-            {filtered.map((product) => (
-              <ProductRow
-                key={product.id}
-                product={product}
-                onDeleted={handleDeleted}
-              />
-            ))}
-          </ul>
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={filtered.map((p) => p.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ul className="flex flex-col gap-3">
+                {filtered.map((product) => (
+                  <ProductRow
+                    key={product.id}
+                    product={product}
+                    canReorder={canReorder}
+                    onDeleted={handleDeleted}
+                  />
+                ))}
+              </ul>
+            </SortableContext>
+          </DndContext>
         )}
       </div>
     </div>
@@ -189,17 +246,57 @@ function TagChip({
 
 function ProductRow({
   product,
+  canReorder,
   onDeleted,
 }: {
   product: Product;
+  canReorder: boolean;
   onDeleted: (id: string) => void;
 }) {
   const [confirming, setConfirming] = useState(false);
   const src = imageSrc(product.images[0] ?? null);
   const discounted = product.saving > 0;
 
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: product.id, disabled: !canReorder });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
   return (
-    <li className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3 transition-transform hover:-translate-y-0.5">
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3 transition-transform hover:-translate-y-0.5 ${
+        isDragging ? "relative z-10 opacity-90 shadow-lg" : ""
+      }`}
+    >
+      {canReorder && (
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label="Перетащить, чтобы изменить порядок"
+          style={{ touchAction: "none" }}
+          className="flex h-8 w-6 flex-shrink-0 cursor-grab items-center justify-center rounded-md text-muted hover:bg-bg hover:text-ink active:cursor-grabbing focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+        >
+          <svg
+            width="10"
+            height="16"
+            viewBox="0 0 10 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <circle cx="2" cy="2" r="1.5" />
+            <circle cx="8" cy="2" r="1.5" />
+            <circle cx="2" cy="8" r="1.5" />
+            <circle cx="8" cy="8" r="1.5" />
+            <circle cx="2" cy="14" r="1.5" />
+            <circle cx="8" cy="14" r="1.5" />
+          </svg>
+        </button>
+      )}
       <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-line bg-brand-tint">
         {src ? (
           <Image

@@ -31,6 +31,7 @@ import { ProductImage } from '../entities/product-image.entity';
 import { ProductsService } from './products.service';
 import { BulkCreateProductsDto } from './dto/bulk-create-products.dto';
 import { CreateProductDto } from './dto/create-product.dto';
+import { ReorderProductsDto } from './dto/reorder-products.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
 const ALLOWED_IMAGE = /\.(jpe?g|png|webp|gif)$/i;
@@ -142,6 +143,14 @@ export class ProductsController {
   @Post('bulk')
   bulkCreate(@Body() dto: BulkCreateProductsDto) {
     return this.products.bulkCreate(dto.items);
+  }
+
+  // Must come before `@Patch(':id')` — otherwise ParseUUIDPipe would try to
+  // parse the literal "reorder" as a product id and 400 it.
+  @UseGuards(JwtAuthGuard)
+  @Patch('reorder')
+  reorder(@Body() dto: ReorderProductsDto) {
+    return this.products.reorder(dto.ids);
   }
 
   @UseGuards(JwtAuthGuard)

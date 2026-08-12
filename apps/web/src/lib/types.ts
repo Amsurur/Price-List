@@ -13,6 +13,8 @@ export interface Product {
   // Photo URLs in display order; the first is the cover shown on the card.
   images: string[];
   active: boolean;
+  // Manual display order set via admin drag-and-drop; lower sorts first.
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
   // Computed by the API (never recompute discount maths in the web app).
