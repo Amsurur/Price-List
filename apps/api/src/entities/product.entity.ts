@@ -50,6 +50,11 @@ export class Product {
   @Column('boolean', { default: true })
   active: boolean;
 
+  // Manual display order (admin drag-and-drop). Lower sorts first; ties break
+  // on created_at. New products are appended after the current max.
+  @Column('integer', { name: 'sort_order', default: 0 })
+  sortOrder: number;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
 

@@ -12,6 +12,7 @@ import {
   SavingsPill,
   hasDiscount,
 } from "./product-price";
+import { Tooltip } from "@/components/ui/tooltip";
 import type { Product } from "@/lib/types";
 
 // A product's discount always shows, whether or not a Computerra code is
@@ -51,13 +52,17 @@ export function ProductCard({
         </div>
       )}
 
-      <h3 className="mt-2 font-display font-semibold text-ink">
-        {product.name}
-      </h3>
+      <Tooltip content={product.name} className="mt-2 w-full">
+        <h3 className="line-clamp-2 font-display font-semibold text-ink">
+          {product.name}
+        </h3>
+      </Tooltip>
       {product.description && (
-        <p className="mt-1 line-clamp-2 text-sm text-muted">
-          {product.description}
-        </p>
+        <Tooltip content={product.description} className="mt-1 w-full">
+          <p className="line-clamp-2 text-sm text-muted">
+            {product.description}
+          </p>
+        </Tooltip>
       )}
 
       <div className="mt-3">
