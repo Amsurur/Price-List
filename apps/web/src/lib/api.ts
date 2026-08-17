@@ -1,6 +1,7 @@
 // Thin REST client for the NestJS API. The API is the single source of truth;
 // the web app only reads/writes through it.
 import type {
+  AnalyticsSummary,
   BatchStudentCodeInput,
   BulkCreateResult,
   Product,
@@ -236,4 +237,8 @@ export function updateReservationStatus(
     method: "PATCH",
     body: JSON.stringify({ status }),
   });
+}
+
+export function getAnalyticsSummary(days = 30): Promise<AnalyticsSummary> {
+  return request<AnalyticsSummary>(`/analytics/summary?days=${days}`);
 }

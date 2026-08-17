@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
@@ -54,6 +55,7 @@ import { StudentCodesModule } from './student-codes/student-codes.module';
     ProductsModule,
     StudentCodesModule,
     ReservationsModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

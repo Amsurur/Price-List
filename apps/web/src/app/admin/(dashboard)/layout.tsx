@@ -12,6 +12,7 @@ const tabs = [
   { href: "/admin/discounts", label: "Скидки" },
   { href: "/admin/codes", label: "Коды студентов" },
   { href: "/admin/reservations", label: "Брони" },
+  { href: "/admin/analytics", label: "Аналитика" },
 ];
 
 export default function AdminLayout({
