@@ -108,3 +108,12 @@ export interface ReservationInput {
   quantity?: number;
   note?: string;
 }
+
+// Matches the API's AnalyticsSummary (GET /analytics/summary).
+export interface AnalyticsSummary {
+  days: number;
+  totalViews: number;
+  uniqueVisitors: number;
+  topPaths: { path: string; views: number }[];
+  daily: { date: string; views: number; uniqueVisitors: number }[];
+}

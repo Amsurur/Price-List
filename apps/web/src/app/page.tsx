@@ -191,7 +191,8 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t border-line py-6 text-center text-xs text-muted">
+      <footer className="flex flex-col items-center gap-2 border-t border-line py-6 text-center text-xs text-muted">
+        <Seal />
         Computerra Store · бронируйте онлайн, забирайте в магазине
       </footer>
     </div>
