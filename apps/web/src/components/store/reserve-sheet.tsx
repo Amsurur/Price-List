@@ -5,7 +5,7 @@ import { imageSrc } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { useIsMobile } from "@/lib/use-is-mobile";
 import type { AppliedCode } from "@/lib/use-applied-code";
-import type { Product } from "@/lib/types";
+import type { Product, Selection } from "@/lib/types";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { SideDrawer } from "@/components/ui/side-drawer";
 import { CloseIcon } from "@/components/ui/icons";
@@ -16,16 +16,20 @@ import { ReserveForm } from "./reserve-form";
 // laptop — picked from the same breakpoint the CSS uses (useIsMobile).
 export function ReserveSheet({
   product,
+  selection,
   appliedCode,
   onClose,
 }: {
   product: Product;
+  selection: Selection;
   appliedCode: AppliedCode | null;
   onClose: () => void;
 }) {
   const isMobile = useIsMobile();
   const titleId = `reserve-${product.id}`;
-  const cover = imageSrc(product.images[0]);
+  const colorImages = product.colors.find((c) => c.name === selection.color)?.images ?? [];
+  const cover = imageSrc(colorImages[0] ?? product.images[0]);
+  const variant = [selection.color, selection.config].filter(Boolean).join(" · ");
 
   const content = (
     <div className="flex flex-col gap-4">
@@ -53,10 +57,12 @@ export function ReserveSheet({
         </div>
         <div className="min-w-0 flex-1">
           <p className="line-clamp-2 text-sm font-semibold text-ink">{product.name}</p>
-          {product.category && <p className="text-xs text-muted">{product.category}</p>}
+          {(variant || product.category) && (
+            <p className="text-xs text-muted">{variant || product.category}</p>
+          )}
         </div>
         <span className="tabular shrink-0 font-display font-bold text-save">
-          {formatMoney(product.memberPrice)}
+          {formatMoney(selection.price.memberPrice)}
         </span>
       </div>
 
@@ -74,7 +80,7 @@ export function ReserveSheet({
         </div>
       )}
 
-      <ReserveForm product={product} appliedCode={appliedCode} onClose={onClose} />
+      <ReserveForm product={product} selection={selection} appliedCode={appliedCode} onClose={onClose} />
     </div>
   );
 

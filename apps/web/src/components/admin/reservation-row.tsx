@@ -49,6 +49,7 @@ export function ReservationRow({
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm text-ink">
           {reservation.quantity} × {reservation.productName}
+          {reservation.variant ? ` · ${reservation.variant}` : ""}
         </div>
         <div className="text-xs text-muted">
           {formatMoney(reservation.unitPrice * reservation.quantity)} ·{" "}

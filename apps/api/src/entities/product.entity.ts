@@ -6,6 +6,27 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+// One colour a product comes in. extraPrice is added to the base price;
+// images (a subset of the product's photos) show when the colour is picked.
+export interface ProductColor {
+  name: string;
+  hex: string;
+  extraPrice: number;
+  images: string[];
+}
+
+// One configuration (e.g. "16 ГБ / 512 ГБ"), priced on top of the base.
+export interface ProductConfig {
+  label: string;
+  extraPrice: number;
+}
+
+// One row of the specification table, e.g. { label: 'Экран', value: '13.6″' }.
+export interface ProductSpec {
+  label: string;
+  value: string;
+}
+
 // Catalogue item. Money is a whole-unit integer; member_discount is a percent 0–90.
 // See documents/03-data-model.md.
 @Entity('products')
@@ -21,6 +42,10 @@ export class Product {
 
   @Column('text', { nullable: true })
   category: string | null;
+
+  // Manufacturer, e.g. "Apple". Drives the storefront's brand tiles.
+  @Column('text', { nullable: true })
+  brand: string | null;
 
   // Lowercased tags used by storefront filters, e.g. {laptop, design, i7}.
   @Column('text', { array: true, default: () => "'{}'" })
@@ -45,6 +70,18 @@ export class Product {
   // products.service.ts for the derivation used until it's dropped.
   @Column('text', { array: true, default: () => "'{}'" })
   images: string[];
+
+  // Options and specs are small, product-owned lists, so they live as
+  // jsonb on the product rather than separate tables. Empty by default, so
+  // existing rows are unaffected when the columns are added.
+  @Column('jsonb', { default: () => "'[]'" })
+  colors: ProductColor[];
+
+  @Column('jsonb', { default: () => "'[]'" })
+  configs: ProductConfig[];
+
+  @Column('jsonb', { default: () => "'[]'" })
+  specs: ProductSpec[];
 
   // Hide from the store without deleting.
   @Column('boolean', { default: true })

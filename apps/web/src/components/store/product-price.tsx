@@ -9,8 +9,8 @@ export function hasDiscount(product: Product): boolean {
   return product.saving > 0;
 }
 
-export function discountPercent(product: Product): number {
-  return product.price > 0 ? Math.round((product.saving / product.price) * 100) : 0;
+export function discountPercent(product: Pick<Product, "listPrice" | "saving">): number {
+  return product.listPrice > 0 ? Math.round((product.saving / product.listPrice) * 100) : 0;
 }
 
 export function DiscountBadge({ product }: { product: Product }) {
@@ -36,7 +36,7 @@ export function ProductPrice({
     <div className="flex flex-col">
       {discounted && (
         <span className="tabular text-sm text-muted line-through">
-          {formatMoney(product.price)}
+          {formatMoney(product.listPrice)}
         </span>
       )}
       <span
@@ -44,7 +44,7 @@ export function ProductPrice({
           discounted ? "text-save" : "text-ink"
         }`}
       >
-        {formatMoney(discounted ? product.memberPrice : product.price)}
+        {formatMoney(discounted ? product.memberPrice : product.listPrice)}
       </span>
     </div>
   );

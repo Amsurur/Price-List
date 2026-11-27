@@ -47,6 +47,65 @@ export function saving(
   return product.price - memberPrice(product, code);
 }
 
+// A product with options: the chosen colour and configuration each add their
+// extraPrice to the base price; the discount then applies to the total.
+export interface PricingOptions {
+  colors: { name: string; extraPrice: number }[];
+  configs: { label: string; extraPrice: number }[];
+}
+
+export interface VariantPrice {
+  color: string | null;
+  config: string | null;
+  price: number;
+  memberPrice: number;
+  saving: number;
+}
+
+// Base price plus the chosen options' extras. Unknown names add nothing —
+// callers that must reject unknown options check that themselves.
+export function optionsPrice(
+  product: PricingProduct & PricingOptions,
+  color: string | null,
+  config: string | null,
+): number {
+  const c = product.colors.find((x) => x.name === color);
+  const k = product.configs.find((x) => x.label === config);
+  return product.price + (c?.extraPrice ?? 0) + (k?.extraPrice ?? 0);
+}
+
+// Every colour × configuration combination, priced. Products have a handful
+// of options at most, so the full table is small and lets the storefront show
+// the right price for any pick without redoing the discount maths.
+export function variantPrices(
+  product: PricingProduct & PricingOptions,
+  code: PricingCode | null,
+): VariantPrice[] {
+  const colors = product.colors.length
+    ? product.colors.map((c) => c.name)
+    : [null];
+  const configs = product.configs.length
+    ? product.configs.map((c) => c.label)
+    : [null];
+  const rows: VariantPrice[] = [];
+  for (const color of colors) {
+    for (const config of configs) {
+      const priced = {
+        price: optionsPrice(product, color, config),
+        memberDiscount: product.memberDiscount,
+      };
+      rows.push({
+        color,
+        config,
+        price: priced.price,
+        memberPrice: memberPrice(priced, code),
+        saving: saving(priced, code),
+      });
+    }
+  }
+  return rows;
+}
+
 // Badge text for stock, or null for no badge. Out-of-stock items stay visible
 // but can't be reserved (enforced elsewhere).
 export function stockLabel(stock: number): string | null {

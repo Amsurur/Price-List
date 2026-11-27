@@ -35,6 +35,11 @@ export class Reservation {
   @Column('text', { name: 'product_name' })
   productName: string;
 
+  // Snapshot of the chosen colour / configuration, e.g. "Серебристый · 16/512".
+  // Null for products without options.
+  @Column('text', { nullable: true })
+  variant: string | null;
+
   // Snapshot of the member price paid (whole-unit integer).
   @Column('integer', { name: 'unit_price' })
   unitPrice: number;

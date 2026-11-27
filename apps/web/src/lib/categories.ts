@@ -30,3 +30,14 @@ export function plural(n: number, one: string, few: string, many: string): strin
   if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
   return many;
 }
+
+export function brandsOf(products: Product[]): CategoryCount[] {
+  const counts = new Map<string, number>();
+  for (const p of products) {
+    const name = p.brand?.trim();
+    if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "ru"));
+}

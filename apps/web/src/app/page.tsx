@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { listProducts } from "@/lib/api";
-import { catalogHref, categoriesOf, plural } from "@/lib/categories";
+import { brandsOf, catalogHref, categoriesOf, plural } from "@/lib/categories";
 import { useAppliedCode } from "@/lib/use-applied-code";
 import type { Product } from "@/lib/types";
 import { SearchIcon } from "@/components/ui/icons";
@@ -41,6 +41,7 @@ function HomeContent() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [search, setSearch] = useState(urlQuery);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const [sort, setSort] = useState<SortOption>("featured");
 
   // The header's search box navigates here with ?q=…; mirror it. A new
@@ -48,7 +49,10 @@ function HomeContent() {
   const [seen, setSeen] = useState({ q: urlQuery, category: activeCategory });
   if (seen.q !== urlQuery || seen.category !== activeCategory) {
     if (seen.q !== urlQuery) setSearch(urlQuery);
-    if (seen.category !== activeCategory) setActiveTag(null);
+    if (seen.category !== activeCategory) {
+      setActiveTag(null);
+      setActiveBrand(null);
+    }
     setSeen({ q: urlQuery, category: activeCategory });
   }
 
@@ -70,6 +74,15 @@ function HomeContent() {
     };
   }, [ready, code]);
 
+  // A link to /#catalog lands before products load, so the browser scrolls
+  // to a still-empty section. Once the catalogue is in, scroll there again.
+  const loaded = state.kind === "ready";
+  useEffect(() => {
+    if (loaded && window.location.hash === "#catalog") {
+      document.getElementById("catalog")?.scrollIntoView();
+    }
+  }, [loaded]);
+
   function retry() {
     setState({ kind: "loading" });
     listProducts({ active: true, code })
@@ -90,6 +103,8 @@ function HomeContent() {
     [products, activeCategory],
   );
 
+  const brands = useMemo(() => brandsOf(inCategory), [inCategory]);
+
   // The most-used tags in view, so the chip row stays short.
   const allTags = useMemo(() => {
     const counts = new Map<string, number>();
@@ -104,13 +119,15 @@ function HomeContent() {
     const term = search.trim().toLowerCase();
     const matches = inCategory.filter((p) => {
       const matchesTag = !activeTag || p.tags.includes(activeTag);
+      const matchesBrand = !activeBrand || p.brand === activeBrand;
       const matchesSearch =
         !term ||
         p.name.toLowerCase().includes(term) ||
         (p.description ?? "").toLowerCase().includes(term) ||
         (p.category ?? "").toLowerCase().includes(term) ||
+        (p.brand ?? "").toLowerCase().includes(term) ||
         p.tags.some((t) => t.toLowerCase().includes(term));
-      return matchesTag && matchesSearch;
+      return matchesTag && matchesBrand && matchesSearch;
     });
     const sorted = [...matches];
     if (sort === "price-asc") sorted.sort((a, b) => a.memberPrice - b.memberPrice);
@@ -118,13 +135,14 @@ function HomeContent() {
     else if (sort === "name-asc") sorted.sort((a, b) => a.name.localeCompare(b.name, "ru"));
     // "featured" keeps the API's order (the admin's drag-and-drop order).
     return sorted;
-  }, [inCategory, search, activeTag, sort]);
+  }, [inCategory, search, activeTag, activeBrand, sort]);
 
-  const filtering = Boolean(activeCategory || search.trim() || activeTag);
+  const filtering = Boolean(activeCategory || search.trim() || activeTag || activeBrand);
 
   function resetFilters() {
     setSearch("");
     setActiveTag(null);
+    setActiveBrand(null);
     router.replace("/#catalog", { scroll: false });
   }
 
@@ -249,7 +267,7 @@ function HomeContent() {
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <h2 id="catalog-title" className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
-                {activeCategory ?? "Весь каталог"}
+                {[activeBrand, activeCategory].filter(Boolean).join(" · ") || "Весь каталог"}
               </h2>
               {state.kind === "ready" && (
                 <p className="tabular text-sm text-muted">
@@ -271,6 +289,29 @@ function HomeContent() {
               <SortSelect value={sort} onChange={setSort} />
             </div>
           </div>
+
+          {brands.length > 1 && (
+            <ul aria-label="Бренды" className="no-scrollbar -mx-3 flex gap-2 overflow-x-auto px-3 sm:mx-0 sm:grid sm:grid-cols-4 sm:px-0 lg:grid-cols-8">
+              {brands.map((b) => {
+                const on = activeBrand === b.name;
+                return (
+                  <li key={b.name} className="shrink-0">
+                    <button
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => setActiveBrand(on ? null : b.name)}
+                      className={`flex h-16 w-24 flex-col items-center justify-center rounded-2xl border transition-colors sm:w-full ${
+                        on ? "border-brand bg-brand-tint" : "border-line bg-surface hover:border-brand/40"
+                      }`}
+                    >
+                      <span className="font-display text-[15px] font-bold text-ink">{b.name}</span>
+                      <span className="tabular text-[11px] text-muted">{b.count}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
 
           {allTags.length > 0 && (
             <TagFilterChips tags={allTags} activeTag={activeTag} onSelect={setActiveTag} />

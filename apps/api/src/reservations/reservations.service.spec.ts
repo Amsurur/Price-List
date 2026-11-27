@@ -10,6 +10,7 @@ function makeReservation(overrides: Partial<Reservation> = {}): Reservation {
     studentContact: '+998900000000',
     productId: 'p1',
     productName: 'Laptop',
+    variant: null,
     unitPrice: 679,
     quantity: 2,
     status: 'new',
@@ -78,6 +79,8 @@ describe('ReservationsService', () => {
       products.findOne.mockResolvedValue({
         id: 'p1',
         name: 'Laptop',
+        colors: [],
+        configs: [],
         price: 799,
         memberDiscount: 15,
         stock: 0,
@@ -101,6 +104,8 @@ describe('ReservationsService', () => {
       products.findOne.mockResolvedValue({
         id: 'p1',
         name: 'Laptop',
+        colors: [],
+        configs: [],
         price: 800,
         memberDiscount: 15,
         stock: 3,
@@ -127,6 +132,8 @@ describe('ReservationsService', () => {
       products.findOne.mockResolvedValue({
         id: 'p1',
         name: 'Laptop',
+        colors: [],
+        configs: [],
         price: 800,
         memberDiscount: 15,
         stock: 3,
@@ -143,6 +150,54 @@ describe('ReservationsService', () => {
       expect(result.code).toBe('Без кода');
       expect(studentCodes.findActiveByCode).not.toHaveBeenCalled();
       expect(studentCodes.recordUse).not.toHaveBeenCalled();
+    });
+
+    const withOptions = {
+      id: 'p1',
+      name: 'Laptop',
+      colors: [
+        { name: 'Серый', hex: '#5B6070', extraPrice: 0, images: [] },
+        { name: 'Серебристый', hex: '#C9CCD3', extraPrice: 100, images: [] },
+      ],
+      configs: [
+        { label: '16/512', extraPrice: 0 },
+        { label: '24/1TB', extraPrice: 300 },
+      ],
+      price: 800,
+      memberDiscount: 20,
+      stock: 3,
+    };
+
+    it('prices the picked colour and configuration and snapshots them', async () => {
+      products.findOne.mockResolvedValue(withOptions);
+
+      const result = await service.create({
+        productId: 'p1',
+        studentContact: '@ada',
+        color: 'Серебристый',
+        config: '24/1TB',
+      });
+
+      expect(result.variant).toBe('Серебристый · 24/1TB');
+      expect(result.unitPrice).toBe(960); // (800 + 100 + 300) * 0.8
+      expect(telegram.notify.mock.calls[0][0]).toContain('Серебристый · 24/1TB');
+    });
+
+    it('falls back to the first options when none are picked', async () => {
+      products.findOne.mockResolvedValue(withOptions);
+
+      const result = await service.create({ productId: 'p1', studentContact: '@ada' });
+
+      expect(result.variant).toBe('Серый · 16/512');
+      expect(result.unitPrice).toBe(640);
+    });
+
+    it('rejects an option the product does not offer', async () => {
+      products.findOne.mockResolvedValue(withOptions);
+
+      await expect(
+        service.create({ productId: 'p1', studentContact: '@ada', color: 'Золотой' }),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 

@@ -10,6 +10,8 @@ import {
   PricingCode,
   saving,
   stockLabel,
+  VariantPrice,
+  variantPrices,
 } from '../common/pricing';
 import { StudentCodesService } from '../student-codes/student-codes.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -23,9 +25,15 @@ const IMAGE_URL_ID = /\/products\/images\/([0-9a-f-]{36})$/i;
 // What the API returns: the stored product plus the computed pricing/stock
 // fields, so the web never re-implements the discount maths.
 export interface ProductView extends Product {
+  // Regular price of the default pick (first colour + first configuration);
+  // equals `price` when the default options add nothing.
+  listPrice: number;
   memberPrice: number;
   saving: number;
   stockLabel: string | null;
+  // The price of every colour × configuration pick (one row when the product
+  // has no options). listPrice/memberPrice/saving above match the first row.
+  variants: VariantPrice[];
 }
 
 // One row's outcome from a bulk upload — created rows carry the saved
@@ -86,6 +94,7 @@ export class ProductsService {
     product: Product,
     code: PricingCode | null = null,
   ): ProductView {
+    const variants = variantPrices(product, code);
     return {
       ...product,
       // Derived live so correctness never depends on the backfill script's
@@ -97,9 +106,12 @@ export class ProductsService {
           : product.imageUrl
             ? [product.imageUrl]
             : [],
-      memberPrice: memberPrice(product, code),
-      saving: saving(product, code),
+      // The headline price is the default pick: first colour + first config.
+      listPrice: variants[0]?.price ?? product.price,
+      memberPrice: variants[0]?.memberPrice ?? memberPrice(product, code),
+      saving: variants[0]?.saving ?? saving(product, code),
       stockLabel: stockLabel(product.stock),
+      variants,
     };
   }
 
@@ -112,7 +124,7 @@ export class ProductsService {
     if (query.search) {
       const term = `%${query.search.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(p.name) LIKE :term OR LOWER(p.description) LIKE :term OR LOWER(p.category) LIKE :term OR EXISTS (SELECT 1 FROM unnest(p.tags) AS t WHERE t LIKE :term))',
+        '(LOWER(p.name) LIKE :term OR LOWER(p.description) LIKE :term OR LOWER(p.category) LIKE :term OR LOWER(p.brand) LIKE :term OR EXISTS (SELECT 1 FROM unnest(p.tags) AS t WHERE t LIKE :term))',
         { term },
       );
     }

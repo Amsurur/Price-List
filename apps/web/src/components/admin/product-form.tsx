@@ -10,7 +10,8 @@ import {
   uploadProductImage,
 } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
-import type { Product, ProductInput } from "@/lib/types";
+import type { Product, ProductColor, ProductConfig, ProductInput, ProductSpec } from "@/lib/types";
+import { ColorsField, ConfigsField, SpecsField } from "./product-options-fields";
 
 const inputClass =
   "w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -32,6 +33,10 @@ export function ProductForm({ product }: { product?: Product }) {
 
   const [name, setName] = useState(product?.name ?? "");
   const [category, setCategory] = useState(product?.category ?? "");
+  const [brand, setBrand] = useState(product?.brand ?? "");
+  const [colors, setColors] = useState<ProductColor[]>(product?.colors ?? []);
+  const [configs, setConfigs] = useState<ProductConfig[]>(product?.configs ?? []);
+  const [specs, setSpecs] = useState<ProductSpec[]>(product?.specs ?? []);
   const [tags, setTags] = useState((product?.tags ?? []).join(", "));
   const [price, setPrice] = useState(String(product?.price ?? ""));
   const [memberDiscount, setMemberDiscount] = useState(
@@ -63,7 +68,10 @@ export function ProductForm({ product }: { product?: Product }) {
   }
 
   function removeImage(index: number) {
+    const url = images[index];
     setImages((prev) => prev.filter((_, i) => i !== index));
+    // A deleted photo can't stay attached to a colour.
+    setColors((prev) => prev.map((c) => ({ ...c, images: c.images.filter((u) => u !== url) })));
   }
 
   function moveImage(index: number, direction: -1 | 1) {
@@ -83,6 +91,12 @@ export function ProductForm({ product }: { product?: Product }) {
     const input: ProductInput = {
       name: name.trim(),
       category: category.trim() || undefined,
+      brand: brand.trim() || undefined,
+      colors: colors.map((c) => ({ ...c, name: c.name.trim() })),
+      configs: configs.map((c) => ({ ...c, label: c.label.trim() })),
+      specs: specs
+        .map((s) => ({ label: s.label.trim(), value: s.value.trim() }))
+        .filter((s) => s.label && s.value),
       tags: tags
         .split(",")
         .map((t) => t.trim().toLowerCase())
@@ -109,7 +123,7 @@ export function ProductForm({ product }: { product?: Product }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl">
+    <form onSubmit={handleSubmit} className="max-w-3xl">
       {error && (
         <p
           role="alert"
@@ -134,7 +148,20 @@ export function ProductForm({ product }: { product?: Product }) {
           />
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-5 sm:grid-cols-3">
+          <div>
+            <label htmlFor="brand" className={labelClass}>
+              Бренд
+            </label>
+            <input
+              id="brand"
+              className={`mt-1 ${inputClass}`}
+              value={brand}
+              onChange={(e) => setBrand(e.target.value)}
+              placeholder="например, Lenovo"
+              maxLength={100}
+            />
+          </div>
           <div>
             <label htmlFor="category" className={labelClass}>
               Категория
@@ -292,6 +319,10 @@ export function ProductForm({ product }: { product?: Product }) {
             )}
           </div>
         </div>
+
+        <ColorsField colors={colors} images={images} onChange={setColors} />
+        <ConfigsField configs={configs} onChange={setConfigs} />
+        <SpecsField specs={specs} onChange={setSpecs} />
 
         <div>
           <label htmlFor="description" className={labelClass}>

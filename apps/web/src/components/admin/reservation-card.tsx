@@ -61,6 +61,7 @@ export function ReservationCard({
           {reservation.quantity > 1 ? `${reservation.quantity} × ` : ""}
           {reservation.productName}
         </div>
+        {reservation.variant && <div className="text-xs text-ink-soft">{reservation.variant}</div>}
         {reservation.note && <div className="mt-0.5 text-xs text-muted">«{reservation.note}»</div>}
       </div>
 

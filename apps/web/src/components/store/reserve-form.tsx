@@ -4,7 +4,7 @@ import { useState } from "react";
 import { createReservation } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { AppliedCode } from "@/lib/use-applied-code";
-import type { Product, Reservation } from "@/lib/types";
+import type { Product, Reservation, Selection } from "@/lib/types";
 import { CheckIcon } from "@/components/ui/icons";
 
 const inputClass =
@@ -15,10 +15,12 @@ const labelClass = "flex flex-col gap-1.5 text-sm font-semibold text-ink";
 // the API (product.memberPrice); the API re-prices the reservation itself.
 export function ReserveForm({
   product,
+  selection,
   appliedCode,
   onClose,
 }: {
   product: Product;
+  selection: Selection;
   appliedCode: AppliedCode | null;
   onClose: () => void;
 }) {
@@ -40,6 +42,8 @@ export function ReserveForm({
       const created = await createReservation({
         code: appliedCode?.code,
         productId: product.id,
+        color: selection.color ?? undefined,
+        config: selection.config ?? undefined,
         studentName: name.trim() || undefined,
         studentContact: contact.trim(),
         quantity,
@@ -69,6 +73,7 @@ export function ReserveForm({
           <div className="flex justify-between gap-3">
             <span className="text-ink-soft">
               {reservation.quantity} × {reservation.productName}
+              {reservation.variant ? ` · ${reservation.variant}` : ""}
             </span>
           </div>
           <div className="mt-2 flex justify-between border-t border-dashed border-line pt-2 font-semibold text-ink">
@@ -87,10 +92,11 @@ export function ReserveForm({
     );
   }
 
-  const discounted = product.saving > 0;
-  const subtotal = product.price * quantity;
-  const saving = product.saving * quantity;
-  const total = product.memberPrice * quantity;
+  const { price } = selection;
+  const discounted = price.saving > 0;
+  const subtotal = price.price * quantity;
+  const saving = price.saving * quantity;
+  const total = price.memberPrice * quantity;
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">

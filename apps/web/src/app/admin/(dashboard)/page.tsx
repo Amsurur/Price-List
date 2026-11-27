@@ -146,6 +146,7 @@ function Dashboard({ data }: { data: Data }) {
                     <div className="truncate text-xs text-muted">
                       {r.quantity > 1 ? `${r.quantity} × ` : ""}
                       {r.productName}
+                      {r.variant ? ` · ${r.variant}` : ""}
                     </div>
                   </div>
                   <span className="tabular hidden text-sm font-semibold text-ink sm:block">

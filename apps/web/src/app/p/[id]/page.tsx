@@ -8,7 +8,7 @@ import { imageSrc, listProducts } from "@/lib/api";
 import { catalogHref, categoriesOf } from "@/lib/categories";
 import { formatMoney } from "@/lib/format";
 import { useAppliedCode } from "@/lib/use-applied-code";
-import type { Product } from "@/lib/types";
+import type { Product, Selection, VariantPrice } from "@/lib/types";
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, ClockIcon, StoreIcon } from "@/components/ui/icons";
 import { StoreHeader } from "@/components/store/store-header";
 import { StoreFooter } from "@/components/store/store-footer";
@@ -18,12 +18,7 @@ import { ImageLightbox } from "@/components/store/image-lightbox";
 import { ProductCard } from "@/components/store/product-card";
 import { PRODUCT_GRID } from "@/components/store/product-grid-skeleton";
 import { ReserveSheet } from "@/components/store/reserve-sheet";
-import {
-  DiscountBreakdown,
-  StockLabel,
-  discountPercent,
-  hasDiscount,
-} from "@/components/store/product-price";
+import { DiscountBreakdown, StockLabel } from "@/components/store/product-price";
 
 type State =
   | { kind: "loading" }
@@ -35,6 +30,17 @@ export default function ProductPage() {
   const { appliedCode, ready, apply, remove } = useAppliedCode();
   const [state, setState] = useState<State>({ kind: "loading" });
   const [reserveOpen, setReserveOpen] = useState(false);
+  // Picked options; null means "the default" (the first of each).
+  const [pickedColor, setPickedColor] = useState<string | null>(null);
+  const [pickedConfig, setPickedConfig] = useState<string | null>(null);
+  // Opening another product (e.g. from "Похожие товары") starts fresh.
+  const [shownId, setShownId] = useState(id);
+  if (shownId !== id) {
+    setShownId(id);
+    setPickedColor(null);
+    setPickedConfig(null);
+    setReserveOpen(false);
+  }
   const [attempt, setAttempt] = useState(0);
 
   // The public listing is the only endpoint that prices for a code, and it
@@ -60,6 +66,21 @@ export default function ProductPage() {
   const products = useMemo(() => (state.kind === "ready" ? state.products : []), [state]);
   const product = products.find((p) => p.id === id) ?? null;
   const categories = useMemo(() => categoriesOf(products).map((c) => c.name), [products]);
+
+  const selection = useMemo<Selection | null>(() => {
+    if (!product) return null;
+    const color = pickedColor ?? product.colors[0]?.name ?? null;
+    const config = pickedConfig ?? product.configs[0]?.label ?? null;
+    const price =
+      product.variants.find((v) => v.color === color && v.config === config) ?? product.variants[0];
+    return price ? { color, config, price } : null;
+  }, [product, pickedColor, pickedConfig]);
+
+  const galleryImages = useMemo(() => {
+    if (!product) return [];
+    const own = product.colors.find((c) => c.name === selection?.color)?.images ?? [];
+    return own.length > 0 ? own : product.images;
+  }, [product, selection]);
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -112,7 +133,7 @@ export default function ProductPage() {
           </div>
         )}
 
-        {product && (
+        {product && selection && (
           <>
             <nav aria-label="Навигация" className="mb-4 flex flex-wrap items-center gap-1.5 text-sm text-muted">
               <Link href="/" className="hover:text-ink">
@@ -131,13 +152,18 @@ export default function ProductPage() {
             </nav>
 
             <div className="grid gap-4 lg:grid-cols-[1.1fr_1fr] lg:gap-8">
-              <Gallery key={product.id} product={product} />
+              <Gallery
+                key={`${product.id}-${selection.color ?? ""}`}
+                product={product}
+                images={galleryImages}
+                discount={percentOf(selection.price)}
+              />
 
               <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  {product.category && (
+                  {(product.brand || product.category) && (
                     <span className="text-xs font-semibold tracking-[0.14em] text-muted uppercase">
-                      {product.category}
+                      {[product.brand, product.category].filter(Boolean).join(" · ")}
                     </span>
                   )}
                   <h1 className="font-display text-[28px] leading-tight font-bold tracking-tight text-ink sm:text-4xl">
@@ -158,7 +184,42 @@ export default function ProductPage() {
                   </div>
                 </div>
 
-                <PriceCard product={product} hasCode={Boolean(appliedCode)} />
+                {product.colors.length > 0 && (
+                  <OptionGroup label="Цвет" value={selection.color}>
+                    {product.colors.map((c) => (
+                      <OptionButton
+                        key={c.name}
+                        active={c.name === selection.color}
+                        onClick={() => setPickedColor(c.name)}
+                        extra={c.extraPrice}
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="h-5 w-5 shrink-0 rounded-full border border-line"
+                          style={{ backgroundColor: c.hex }}
+                        />
+                        {c.name}
+                      </OptionButton>
+                    ))}
+                  </OptionGroup>
+                )}
+
+                {product.configs.length > 0 && (
+                  <OptionGroup label="Конфигурация" value={selection.config}>
+                    {product.configs.map((c) => (
+                      <OptionButton
+                        key={c.label}
+                        active={c.label === selection.config}
+                        onClick={() => setPickedConfig(c.label)}
+                        extra={c.extraPrice}
+                      >
+                        {c.label}
+                      </OptionButton>
+                    ))}
+                  </OptionGroup>
+                )}
+
+                <PriceCard price={selection.price} hasCode={Boolean(appliedCode)} />
                 <DiscountBreakdown product={product} appliedCode={appliedCode} />
 
                 <CodeUnlockStrip
@@ -185,6 +246,31 @@ export default function ProductPage() {
               </div>
             </div>
 
+            {product.specs.length > 0 && (
+              <section className="mt-6 rounded-3xl bg-surface p-5 sm:mt-8 sm:p-8">
+                <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Характеристики</h2>
+                <dl className="mt-4 grid gap-x-10 sm:grid-cols-2">
+                  {product.specs.map((spec) => (
+                    <div
+                      key={spec.label}
+                      className="flex justify-between gap-4 border-b border-dashed border-line py-3 text-[15px]"
+                    >
+                      <dt className="text-muted">{spec.label}</dt>
+                      <dd className="text-right font-medium text-ink">{spec.value}</dd>
+                    </div>
+                  ))}
+                  {(selection.color || selection.config) && (
+                    <div className="flex justify-between gap-4 border-b border-dashed border-line py-3 text-[15px]">
+                      <dt className="text-muted">Выбрано</dt>
+                      <dd className="text-right font-medium text-brand-strong">
+                        {[selection.color, selection.config].filter(Boolean).join(" · ")}
+                      </dd>
+                    </div>
+                  )}
+                </dl>
+              </section>
+            )}
+
             {product.description && (
               <section className="mt-6 rounded-3xl bg-surface p-5 sm:mt-8 sm:p-8">
                 <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Описание</h2>
@@ -208,13 +294,17 @@ export default function ProductPage() {
             {/* Phone: price + reserve stay within thumb reach. */}
             <div className="fixed inset-x-0 bottom-0 z-20 flex items-center gap-3 border-t border-line bg-surface/95 px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] backdrop-blur sm:hidden">
               <div className="flex min-w-0 flex-col">
-                {hasDiscount(product) && (
-                  <span className="tabular text-xs text-muted line-through">{formatMoney(product.price)}</span>
+                {selection.price.saving > 0 && (
+                  <span className="tabular text-xs text-muted line-through">
+                    {formatMoney(selection.price.price)}
+                  </span>
                 )}
                 <span
-                  className={`tabular font-display text-xl font-bold ${hasDiscount(product) ? "text-save" : "text-ink"}`}
+                  className={`tabular font-display text-xl font-bold ${
+                    selection.price.saving > 0 ? "text-save" : "text-ink"
+                  }`}
                 >
-                  {formatMoney(product.memberPrice)}
+                  {formatMoney(selection.price.memberPrice)}
                 </span>
               </div>
               <button
@@ -228,7 +318,7 @@ export default function ProductPage() {
             </div>
 
             {reserveOpen && (
-              <ReserveSheet product={product} appliedCode={appliedCode} onClose={() => setReserveOpen(false)} />
+              <ReserveSheet product={product} selection={selection} appliedCode={appliedCode} onClose={() => setReserveOpen(false)} />
             )}
           </>
         )}
@@ -239,10 +329,14 @@ export default function ProductPage() {
   );
 }
 
-function PriceCard({ product, hasCode }: { product: Product; hasCode: boolean }) {
-  const discounted = hasDiscount(product);
+function percentOf(price: VariantPrice): number {
+  return price.price > 0 ? Math.round((price.saving / price.price) * 100) : 0;
+}
+
+function PriceCard({ price, hasCode }: { price: VariantPrice; hasCode: boolean }) {
+  const discounted = price.saving > 0;
   return (
-    <div className="rounded-3xl border border-line bg-surface p-5">
+    <div className="rounded-3xl border border-line bg-surface p-5" aria-live="polite">
       {discounted ? (
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -256,13 +350,13 @@ function PriceCard({ product, hasCode }: { product: Product; hasCode: boolean })
               {hasCode ? "Ваша цена по коду" : "Цена со скидкой"}
             </div>
             <div className="tabular mt-1 font-display text-4xl font-bold tracking-tight text-save sm:text-5xl">
-              {formatMoney(product.memberPrice)}
+              {formatMoney(price.memberPrice)}
             </div>
           </div>
           <div className="flex flex-col items-end gap-1">
-            <span className="tabular text-sm text-muted line-through">{formatMoney(product.price)}</span>
+            <span className="tabular text-sm text-muted line-through">{formatMoney(price.price)}</span>
             <span className="tabular rounded-full bg-save-tint px-2.5 py-1 text-xs font-semibold text-save-strong">
-              −{discountPercent(product)}% · экономия {formatMoney(product.saving)}
+              −{percentOf(price)}% · экономия {formatMoney(price.saving)}
             </span>
           </div>
         </div>
@@ -270,11 +364,56 @@ function PriceCard({ product, hasCode }: { product: Product; hasCode: boolean })
         <div>
           <div className="text-sm text-muted">Цена</div>
           <div className="tabular mt-1 font-display text-4xl font-bold tracking-tight text-ink sm:text-5xl">
-            {formatMoney(product.price)}
+            {formatMoney(price.price)}
           </div>
         </div>
       )}
     </div>
+  );
+}
+
+function OptionGroup({
+  label,
+  value,
+  children,
+}: {
+  label: string;
+  value: string | null;
+  children: React.ReactNode;
+}) {
+  return (
+    <div role="group" aria-label={label} className="flex flex-col gap-2">
+      <p className="text-sm text-muted">
+        {label}: <span className="font-semibold text-ink">{value}</span>
+      </p>
+      <div className="flex flex-wrap gap-2">{children}</div>
+    </div>
+  );
+}
+
+function OptionButton({
+  active,
+  onClick,
+  extra,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  extra: number;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={active}
+      className={`flex min-h-11 items-center gap-2 rounded-2xl border-2 px-3.5 py-2 text-sm font-medium transition-colors ${
+        active ? "border-brand bg-brand-tint text-ink" : "border-line bg-surface text-ink-soft hover:border-ink-soft"
+      }`}
+    >
+      {children}
+      {extra > 0 && <span className="tabular text-xs text-muted">+{formatMoney(extra)}</span>}
+    </button>
   );
 }
 
@@ -292,10 +431,17 @@ function Perk({ icon, title, text }: { icon: React.ReactNode; title: string; tex
   );
 }
 
-function Gallery({ product }: { product: Product }) {
+function Gallery({
+  product,
+  images,
+  discount,
+}: {
+  product: Product;
+  images: string[];
+  discount: number;
+}) {
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
-  const images = product.images;
   const current = imageSrc(images[index]);
   const multi = images.length > 1;
 
@@ -320,9 +466,9 @@ function Gallery({ product }: { product: Product }) {
             <CategoryIcon name={product.category ?? ""} className="h-20 w-20" />
           </div>
         )}
-        {hasDiscount(product) && (
+        {discount > 0 && (
           <span className="tabular absolute top-4 left-4 rounded-full bg-save px-3 py-1.5 text-sm font-bold text-white">
-            −{discountPercent(product)}%
+            −{discount}%
           </span>
         )}
         {multi && (

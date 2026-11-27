@@ -55,9 +55,9 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         <div className="flex flex-1 flex-col gap-1 px-1.5">
-          {product.category && (
+          {(product.brand || product.category) && (
             <span className="text-[11px] font-semibold tracking-[0.12em] text-muted uppercase">
-              {product.category}
+              {product.brand || product.category}
             </span>
           )}
           <h3
@@ -66,6 +66,18 @@ export function ProductCard({ product }: { product: Product }) {
           >
             {product.name}
           </h3>
+          {product.colors.length > 1 && (
+            <div className="flex items-center gap-1" aria-label={`${product.colors.length} цвета`}>
+              {product.colors.slice(0, 5).map((c) => (
+                <span
+                  key={c.name}
+                  title={c.name}
+                  className="h-3.5 w-3.5 rounded-full border border-line"
+                  style={{ backgroundColor: c.hex }}
+                />
+              ))}
+            </div>
+          )}
           <div className="mt-auto flex flex-wrap-reverse items-end justify-between gap-x-2 gap-y-1 pt-2">
             <ProductPrice product={product} />
             <StockLabel product={product} />
