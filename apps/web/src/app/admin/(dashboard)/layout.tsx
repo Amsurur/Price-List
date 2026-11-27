@@ -1,61 +1,53 @@
 import Link from "next/link";
 import { AdminAuthGuard } from "@/components/admin/auth-guard";
+import { AdminNav } from "@/components/admin/admin-nav";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { Seal } from "@/components/seal";
 
-// Admin shell: sticky top bar + tabs. AdminAuthGuard redirects to
-// /admin/login when the session check fails; the JwtAuthGuard on the API
-// enforces it on every actual request regardless.
-const tabs = [
-  { href: "/admin", label: "Панель" },
-  { href: "/admin/products", label: "Товары" },
-  { href: "/admin/discounts", label: "Скидки" },
-  { href: "/admin/codes", label: "Коды студентов" },
-  { href: "/admin/reservations", label: "Брони" },
-  { href: "/admin/analytics", label: "Аналитика" },
-];
-
+// Admin shell: a sidebar on desktop, a top bar with scrolling tabs on phones.
+// AdminAuthGuard redirects to /admin/login when the session check fails; the
+// JwtAuthGuard on the API enforces it on every actual request regardless.
+// `admin-light` keeps the panel light even if the storefront is in dark mode.
 export default function AdminLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-screen flex-col bg-bg">
-      <header className="sticky top-0 z-10 border-b border-line bg-surface/90 backdrop-blur">
-        <div className="mx-auto flex max-w-[1120px] flex-wrap items-center gap-x-4 gap-y-2 px-6 py-3 sm:h-16 sm:flex-nowrap sm:py-0">
-          <Link
-            href="/admin"
-            className="flex shrink-0 items-center gap-3 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-          >
+    <div className="admin-light flex min-h-screen flex-col bg-bg text-ink lg:flex-row">
+      <aside className="sticky top-0 z-20 flex flex-col gap-3 border-b border-line bg-surface/95 px-3 py-3 backdrop-blur lg:h-screen lg:w-64 lg:shrink-0 lg:gap-6 lg:border-r lg:border-b-0 lg:px-4 lg:py-6">
+        <div className="flex items-center justify-between gap-3 lg:px-2">
+          <Link href="/admin" className="flex items-center gap-2.5 rounded-full">
             <Seal />
-            <span className="font-display text-lg font-semibold text-ink">
-              Computerra админ
+            <span>
+              <span className="block font-display text-base leading-tight font-bold text-ink">
+                Computerra<span className="text-brand">.store</span>
+              </span>
+              <span className="block text-xs text-muted">Админ-панель</span>
             </span>
           </Link>
-          <nav className="-mx-1 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto px-1 sm:ml-4 sm:flex-none">
-            {tabs.map((tab) => (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className="shrink-0 rounded-full px-3 py-2 text-sm font-medium text-muted transition-colors hover:bg-brand-tint hover:text-brand-strong focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-              >
-                {tab.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex shrink-0 items-center gap-4 sm:ml-auto">
-            <Link
-              href="/"
-              className="text-sm font-medium text-brand-strong hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
-            >
+          <div className="flex items-center gap-3 lg:hidden">
+            <Link href="/" className="text-sm font-medium text-brand-strong">
               В магазин
             </Link>
             <LogoutButton />
           </div>
         </div>
-      </header>
 
-      <main className="mx-auto w-full max-w-[1120px] flex-1 px-6 py-8">
-        <AdminAuthGuard>{children}</AdminAuthGuard>
+        <AdminNav />
+
+        <div className="mt-auto hidden flex-col gap-2 border-t border-line pt-4 lg:flex lg:px-2">
+          <Link href="/" className="text-sm font-medium text-brand-strong hover:underline">
+            Открыть магазин →
+          </Link>
+          <div>
+            <LogoutButton />
+          </div>
+        </div>
+      </aside>
+
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-8">
+        <div className="mx-auto max-w-[1180px]">
+          <AdminAuthGuard>{children}</AdminAuthGuard>
+        </div>
       </main>
     </div>
   );

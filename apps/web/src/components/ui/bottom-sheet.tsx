@@ -19,11 +19,11 @@ export function BottomSheet({
       onClose={onClose}
       align="bottom"
       labelledBy={labelledBy}
-      contentClassName="max-h-[85vh] w-full overflow-y-auto rounded-t-xl border-t border-line bg-surface p-4 shadow-xl"
+      contentClassName="max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-surface px-4 pt-3 pb-6 shadow-xl"
     >
       <div
         aria-hidden="true"
-        className="mx-auto mb-3 h-1.5 w-10 rounded-full bg-line"
+        className="mx-auto mb-2 h-1.5 w-10 rounded-full bg-line"
       />
       {children}
     </Overlay>
