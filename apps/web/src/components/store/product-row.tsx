@@ -23,7 +23,10 @@ export function ProductRow({
           </Link>
         )}
       </div>
-      <ul className="no-scrollbar -mx-3 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-3 pb-2 sm:mx-0 sm:gap-4 sm:px-0">
+      {/* A scrolling row clips anything that sticks out of it, including a
+          card lifting on hover. The padding gives the lift room; the
+          matching negative margin keeps the layout where it was. */}
+      <ul className="no-scrollbar -mx-3 -my-3 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-3 py-3 sm:-mx-2 sm:gap-4 sm:px-2">
         {products.map((p) => (
           <ProductCard key={p.id} product={p} className="h-auto! w-[46%] shrink-0 snap-start sm:w-[calc(25%-12px)]" />
         ))}
