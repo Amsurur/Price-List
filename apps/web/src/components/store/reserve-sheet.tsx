@@ -8,7 +8,7 @@ import type { AppliedCode } from "@/lib/use-applied-code";
 import type { Product, Selection } from "@/lib/types";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { SideDrawer } from "@/components/ui/side-drawer";
-import { CloseIcon } from "@/components/ui/icons";
+import { CheckIcon, CloseIcon } from "@/components/ui/icons";
 import { CategoryIcon } from "./category-icon";
 import { ReserveForm } from "./reserve-form";
 
@@ -68,12 +68,7 @@ export function ReserveSheet({
 
       {appliedCode && (
         <div className="flex items-center gap-2.5 rounded-2xl bg-save-tint px-4 py-3 text-sm text-save-strong">
-          <span
-            aria-hidden="true"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-save font-display text-xs font-bold text-white"
-          >
-            S
-          </span>
+          <CheckIcon className="h-4 w-4 shrink-0" />
           <span>
             <b className="tabular">{appliedCode.code}</b> применён
           </span>

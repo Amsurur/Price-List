@@ -1,13 +1,15 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
-import { listProducts } from "@/lib/api";
+import { imageSrc, listProducts } from "@/lib/api";
+import { formatMoney } from "@/lib/format";
 import { brandsOf, catalogHref, categoriesOf, plural } from "@/lib/categories";
 import { useAppliedCode } from "@/lib/use-applied-code";
 import type { Product } from "@/lib/types";
-import { SearchIcon } from "@/components/ui/icons";
+import { FilterIcon, SearchIcon } from "@/components/ui/icons";
 import { StoreHeader } from "@/components/store/store-header";
 import { StoreFooter } from "@/components/store/store-footer";
 import { CodeUnlockStrip } from "@/components/store/code-unlock-strip";
@@ -26,7 +28,6 @@ import {
 import { ProductRow } from "@/components/store/product-row";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Reveal } from "@/components/ui/reveal";
-import { FilterIcon } from "@/components/ui/icons";
 
 type State =
   | { kind: "loading" }
@@ -119,6 +120,12 @@ function HomeContent() {
 
   const brands = useMemo(() => brandsOf(inCategory), [inCategory]);
 
+  // A category's tile shows the first product photo found in it.
+  function coverOf(category: string): string | null {
+    const withPhoto = products.find((p) => p.category === category && p.images.length > 0);
+    return imageSrc(withPhoto?.images[0]);
+  }
+
   // The most-used tags in view, so the chip row stays short.
   const allTags = useMemo(() => {
     const counts = new Map<string, number>();
@@ -183,7 +190,6 @@ function HomeContent() {
     document.getElementById("catalog")?.scrollIntoView({ behavior: "smooth" });
   }
 
-  const maxDiscount = products.reduce((m, p) => Math.max(m, p.memberDiscount), 0);
 
   return (
     <div className="flex min-h-screen flex-col bg-bg">
@@ -194,69 +200,54 @@ function HomeContent() {
       />
 
       <main className="mx-auto flex w-full max-w-[1240px] flex-1 flex-col gap-5 px-3 pt-4 sm:gap-8 sm:px-6 sm:pt-6">
-        {/* Hero */}
-        <section className="relative overflow-hidden rounded-3xl bg-brand-tint px-5 py-8 sm:px-10 sm:py-14">
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -top-40 -right-32 h-[420px] w-[420px] rounded-full bg-brand/25 blur-3xl"
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-save/15 blur-3xl"
-          />
-          <div className="relative grid items-center gap-8 lg:grid-cols-[1.3fr_1fr]">
-            <div className="flex flex-col gap-5">
-              <span className="w-fit rounded-full bg-surface px-3 py-1.5 text-xs font-semibold text-brand-strong">
-                Скидка для студентов Softclub
-              </span>
-              <h1 className="font-display text-[34px] leading-[1.05] font-bold tracking-tight text-ink sm:text-6xl">
-                Техника для учёбы.
-                <br />
-                <span className="text-brand">Цена — для своих.</span>
-              </h1>
-              <p className="max-w-md text-[15px] text-ink-soft sm:text-base">
-                Ноутбуки, мониторы и аксессуары. Бронируйте онлайн, забирайте и оплачивайте в
-                магазине.
-              </p>
-              <form
-                onSubmit={handleHeroSearch}
-                role="search"
-                className="flex h-14 max-w-lg items-center gap-2 rounded-full bg-surface pr-1.5 pl-5 shadow-lg shadow-brand/10"
+        {/* Hero: search first, plus what students reserve most. */}
+        <section className="grid gap-6 rounded-3xl border border-line bg-surface p-5 sm:p-8 lg:grid-cols-[1.4fr_1fr] lg:gap-10">
+          <div className="flex flex-col gap-4">
+            <h1 className="font-display text-3xl leading-tight font-bold tracking-tight text-ink sm:text-[40px]">
+              Ноутбуки, мониторы и аксессуары
+            </h1>
+            <p className="max-w-lg text-[15px] text-ink-soft">
+              Студенты Softclub получают скидку по личному коду. Бронируйте на сайте, оплачивайте
+              и забирайте в магазине.
+            </p>
+            <form
+              onSubmit={handleHeroSearch}
+              role="search"
+              className="flex h-12 max-w-xl items-center gap-2 rounded-full border border-line bg-bg pr-1 pl-4 focus-within:border-brand"
+            >
+              <SearchIcon className="h-5 w-5 shrink-0 text-muted" />
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Название, бренд или категория"
+                aria-label="Поиск техники"
+                className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-muted focus-visible:outline-none"
+              />
+              <button
+                type="submit"
+                className="h-10 shrink-0 rounded-full bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-strong"
               >
-                <SearchIcon className="h-5 w-5 shrink-0 text-muted" />
-                <input
-                  type="search"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Например, MacBook или монитор 27"
-                  aria-label="Поиск техники"
-                  className="min-w-0 flex-1 bg-transparent text-[15px] text-ink outline-none placeholder:text-muted focus-visible:outline-none"
-                />
-                <button
-                  type="submit"
-                  className="h-11 shrink-0 rounded-full bg-brand px-5 font-display text-sm font-semibold text-white hover:bg-brand-strong"
-                >
-                  Найти
-                </button>
-              </form>
-              {categories.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {categories.slice(0, 4).map((c) => (
-                    <Link
-                      key={c.name}
-                      href={catalogHref(c.name)}
-                      className="flex h-9 items-center gap-2 rounded-full bg-surface/70 px-3.5 text-sm font-medium text-ink-soft hover:bg-surface hover:text-ink"
-                    >
-                      <CategoryIcon name={c.name} className="h-4 w-4" />
-                      {c.name}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <HeroSeal maxDiscount={maxDiscount} />
+                Найти
+              </button>
+            </form>
+            {categories.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {categories.slice(0, 5).map((c) => (
+                  <Link
+                    key={c.name}
+                    href={catalogHref(c.name)}
+                    className="flex h-9 items-center gap-1.5 rounded-full border border-line px-3.5 text-sm text-ink-soft hover:border-ink-soft hover:text-ink"
+                  >
+                    {c.name}
+                    <span className="tabular text-xs text-muted">{c.count}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
+
+          <TopPicks products={popular.length ? popular : newest} title={popular.length ? "Чаще всего бронируют" : "Новое в каталоге"} />
         </section>
 
         <CodeUnlockStrip applied={appliedCode} onApply={apply} onRemove={remove} />
@@ -272,17 +263,15 @@ function HomeContent() {
                 <li key={c.name}>
                   <Link
                     href={catalogHref(c.name)}
-                    className={`group flex h-full flex-col gap-6 rounded-3xl border p-4 transition-colors ${
+                    className={`flex h-full flex-col gap-3 rounded-2xl border p-2.5 pb-3 transition-colors ${
                       activeCategory === c.name
                         ? "border-brand bg-brand-tint"
-                        : "border-line bg-surface hover:border-brand/40"
+                        : "border-line bg-surface hover:border-ink-soft"
                     }`}
                   >
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-bg text-brand transition-colors group-hover:bg-brand group-hover:text-white">
-                      <CategoryIcon name={c.name} className="h-6 w-6" />
-                    </span>
-                    <span>
-                      <span className="block font-semibold text-ink">{c.name}</span>
+                    <CategoryCover name={c.name} src={coverOf(c.name)} />
+                    <span className="px-1">
+                      <span className="block text-sm font-semibold text-ink">{c.name}</span>
                       <span className="tabular text-xs text-muted">
                         {c.count} {plural(c.count, "товар", "товара", "товаров")}
                       </span>
@@ -454,48 +443,71 @@ function HomeContent() {
   );
 }
 
-// Decorative right side of the hero: the member seal with a discount tag.
-function HeroSeal({ maxDiscount }: { maxDiscount: number }) {
+function CategoryCover({ name, src }: { name: string; src: string | null }) {
   return (
-    <div aria-hidden="true" className="relative hidden h-72 items-center justify-center lg:flex">
-      <div className="absolute h-64 w-64 rounded-full border border-dashed border-brand/40" />
-      <div className="absolute h-48 w-48 rounded-full border border-brand/20 bg-surface/60" />
-      <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-4 border-brand bg-surface font-display text-6xl font-bold text-brand shadow-2xl shadow-brand/30">
-        S
-      </div>
-      {maxDiscount > 0 && (
-        <div className="absolute top-6 right-6 rotate-6 rounded-2xl bg-save px-4 py-3 text-white shadow-xl shadow-save/30">
-          <div className="text-xs font-medium opacity-80">по коду до</div>
-          <div className="tabular font-display text-3xl font-bold">−{maxDiscount}%</div>
-        </div>
+    <span className="relative flex aspect-[4/3] items-center justify-center overflow-hidden rounded-xl bg-bg text-muted">
+      {src ? (
+        <Image src={src} alt="" fill unoptimized sizes="200px" className="object-contain p-2" />
+      ) : (
+        <CategoryIcon name={name} className="h-10 w-10" />
       )}
-      <div className="absolute bottom-8 left-4 -rotate-3 rounded-2xl bg-surface px-4 py-3 shadow-xl shadow-brand/10">
-        <div className="text-xs text-muted">Оплата</div>
-        <div className="text-sm font-semibold text-ink">в магазине</div>
-      </div>
+    </span>
+  );
+}
+
+// The hero's right column: three real products, linked.
+function TopPicks({ products, title }: { products: Product[]; title: string }) {
+  const picks = products.slice(0, 3);
+  if (picks.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-semibold text-ink">{title}</p>
+      <ul className="flex flex-col divide-y divide-line rounded-2xl border border-line">
+        {picks.map((p) => {
+          const cover = imageSrc(p.images[0]);
+          return (
+            <li key={p.id}>
+              <Link href={`/p/${p.id}`} className="flex items-center gap-3 p-3 hover:bg-bg">
+                <span className="relative flex h-12 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-bg text-muted">
+                  {cover ? (
+                    <Image src={cover} alt="" fill unoptimized sizes="56px" className="object-contain p-1" />
+                  ) : (
+                    <CategoryIcon name={p.category ?? ""} className="h-6 w-6" />
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="line-clamp-1 text-sm font-medium text-ink">{p.name}</span>
+                  <span className="text-xs text-muted">{p.brand || p.category}</span>
+                </span>
+                <span className={`tabular shrink-0 text-sm font-semibold ${p.saving > 0 ? "text-save" : "text-ink"}`}>
+                  {formatMoney(p.memberPrice)}
+                </span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
     </div>
   );
 }
 
 const STEPS = [
-  { title: "Введите код", text: "Личный код студента Softclub открывает цену участника на всех товарах." },
-  { title: "Забронируйте", text: "Выберите товар и оставьте имя и телефон. Это бесплатно и ни к чему не обязывает." },
-  { title: "Заберите в магазине", text: "Мы свяжемся с вами. Оплата и получение — прямо в магазине." },
+  { title: "Введите код", text: "Личный код студента Softclub открывает цену со скидкой." },
+  { title: "Забронируйте", text: "Оставьте имя и телефон. Бронь бесплатная и ни к чему не обязывает." },
+  { title: "Заберите в магазине", text: "Мы свяжемся с вами. Оплата при получении." },
 ];
 
 function HowItWorks() {
   return (
-    <section id="how" aria-labelledby="how-title" className="scroll-mt-32 rounded-3xl bg-surface p-5 sm:p-10">
-      <h2 id="how-title" className="font-display text-2xl font-bold tracking-tight text-ink sm:text-3xl">
+    <section id="how" aria-labelledby="how-title" className="scroll-mt-32 rounded-3xl border border-line bg-surface p-5 sm:p-8">
+      <h2 id="how-title" className="font-display text-xl font-bold text-ink sm:text-2xl">
         Как купить
       </h2>
-      <ol className="mt-6 grid gap-3 sm:grid-cols-3 sm:gap-4">
+      <ol className="mt-4 grid gap-4 sm:grid-cols-3 sm:gap-8">
         {STEPS.map((s, i) => (
-          <li key={s.title} className="flex flex-col gap-3 rounded-2xl bg-bg p-5">
-            <span className="tabular flex h-10 w-10 items-center justify-center rounded-full bg-brand font-display font-bold text-white">
-              {i + 1}
-            </span>
-            <span className="font-display text-lg font-semibold text-ink">{s.title}</span>
+          <li key={s.title} className="flex flex-col gap-1">
+            <span className="tabular text-sm font-semibold text-brand-strong">Шаг {i + 1}</span>
+            <span className="font-semibold text-ink">{s.title}</span>
             <span className="text-sm text-ink-soft">{s.text}</span>
           </li>
         ))}

@@ -22,7 +22,7 @@ export function StoreFooter() {
             </span>
           </div>
           <p className="max-w-xs text-sm text-white/60">
-            Техника для учёбы и работы. Бронируйте онлайн — забирайте и оплачивайте в магазине.
+            Компьютерная техника для учёбы и работы. Бронь на сайте, оплата в магазине.
           </p>
         </div>
         <div className="flex flex-col gap-2 text-sm">

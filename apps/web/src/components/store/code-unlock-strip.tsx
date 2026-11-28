@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ValidateCodeResult } from "@/lib/types";
 import type { AppliedCode } from "@/lib/use-applied-code";
-import { CheckIcon } from "@/components/ui/icons";
+import { CheckIcon, KeyIcon } from "@/components/ui/icons";
 
 export type { AppliedCode };
 
@@ -130,31 +130,25 @@ export function CodeUnlockStrip({
     <section
       id="code"
       aria-label="Личный код студента"
-      className="relative scroll-mt-32 overflow-hidden rounded-3xl bg-night px-5 py-6 text-white sm:px-8"
+      className="scroll-mt-32 rounded-3xl bg-night px-5 py-5 text-white sm:px-8"
     >
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -top-24 -right-16 h-64 w-64 rounded-full bg-brand/40 blur-3xl"
-      />
-      <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <span
             aria-hidden="true"
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-brand bg-brand/20 font-display text-lg font-bold"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10"
           >
-            S
+            <KeyIcon className="h-5 w-5" />
           </span>
           <div>
-            <p className="font-display text-lg font-semibold">Учитесь в Softclub? Цена для вас ниже.</p>
-            <p className="text-sm text-white/60">
-              Введите личный код. Скидка сразу появится на всех товарах.
-            </p>
+            <p className="font-semibold">Личный код студента Softclub</p>
+            <p className="text-sm text-white/60">Введите его, и цены на всех товарах станут ниже.</p>
           </div>
         </div>
         {form}
       </div>
       {error && (
-        <p role="alert" className="relative mt-3 text-sm text-red-300">
+        <p role="alert" className="mt-3 text-sm text-red-300">
           {error}
         </p>
       )}

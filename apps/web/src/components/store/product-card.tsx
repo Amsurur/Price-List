@@ -17,11 +17,11 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
     <li className={`relative h-full ${className}`}>
       <Link
         href={`/p/${product.id}`}
-        className={`group flex h-full flex-col gap-3 rounded-3xl border border-line bg-surface p-2.5 pb-4 transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-xl hover:shadow-brand/10 ${
+        className={`group flex h-full flex-col gap-3 rounded-2xl border border-line bg-surface p-2.5 pb-3.5 transition-colors hover:border-ink-soft ${
           outOfStock ? "opacity-70" : ""
         }`}
       >
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-bg">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-bg">
           {cover ? (
             <>
               <Image
@@ -87,16 +87,6 @@ export function ProductCard({ product, className = "" }: { product: Product; cla
             <StockLabel product={product} />
           </div>
         </div>
-
-        <span
-          className={`mx-1.5 flex h-11 items-center justify-center rounded-full font-display text-sm font-semibold transition-colors ${
-            outOfStock
-              ? "bg-bg text-muted"
-              : "bg-brand-tint text-brand-strong group-hover:bg-brand group-hover:text-white"
-          }`}
-        >
-          {outOfStock ? "Нет в наличии" : "Забронировать"}
-        </span>
       </Link>
       {/* Outside the link: a button can't sit inside an <a>. */}
       <div className="absolute top-4 right-4">

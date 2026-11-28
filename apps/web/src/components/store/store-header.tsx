@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Seal } from "@/components/seal";
-import { HeartIcon, SearchIcon } from "@/components/ui/icons";
+import { CheckIcon, HeartIcon, KeyIcon, SearchIcon } from "@/components/ui/icons";
 import { useSaved } from "@/lib/use-saved";
 import { catalogHref } from "@/lib/categories";
 import type { AppliedCode } from "@/lib/use-applied-code";
@@ -81,11 +81,11 @@ export function StoreHeader({
           >
             <span
               aria-hidden="true"
-              className={`flex h-6 w-6 items-center justify-center rounded-full font-display text-xs font-bold ${
+              className={`flex h-6 w-6 items-center justify-center rounded-full ${
                 appliedCode ? "bg-save text-white" : "bg-brand text-white"
               }`}
             >
-              S
+              {appliedCode ? <CheckIcon className="h-3.5 w-3.5" /> : <KeyIcon className="h-3.5 w-3.5" />}
             </span>
             <span className="tabular hidden sm:inline">
               {appliedCode ? appliedCode.code : "Мой код"}

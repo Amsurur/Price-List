@@ -289,14 +289,14 @@ export default function ProductPage() {
                   </a>
                 )}
 
-                <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
-                  <Perk icon={<CheckIcon className="h-4 w-4" />} title="Бронь бесплатно" text="Ни к чему не обязывает" />
-                  <Perk icon={<StoreIcon className="h-4 w-4" />} title="Оплата в магазине" text="Без предоплаты" />
-                  <Perk
-                    icon={<ClockIcon className="h-4 w-4" />}
-                    title="Мы свяжемся"
-                    text={shop ? `Бронь держим ${holdDaysText(shop.holdDays)}` : "Чтобы договориться о выдаче"}
-                  />
+                <ul className="flex flex-col gap-2 rounded-2xl border border-line p-4 text-sm text-ink-soft">
+                  <Perk icon={<CheckIcon className="h-4 w-4" />}>Бронь бесплатная и ни к чему не обязывает</Perk>
+                  <Perk icon={<StoreIcon className="h-4 w-4" />}>Оплата при получении, без предоплаты</Perk>
+                  <Perk icon={<ClockIcon className="h-4 w-4" />}>
+                    {shop
+                      ? `Мы свяжемся с вами и держим бронь ${holdDaysText(shop.holdDays)}`
+                      : "Мы свяжемся с вами, чтобы договориться о выдаче"}
+                  </Perk>
                 </ul>
               </div>
             </div>
@@ -412,13 +412,7 @@ function PriceCard({ price, hasCode }: { price: VariantPrice; hasCode: boolean }
       {discounted ? (
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <div className="flex items-center gap-2 text-sm font-medium text-save-strong">
-              <span
-                aria-hidden="true"
-                className="flex h-6 w-6 items-center justify-center rounded-full bg-save font-display text-[11px] font-bold text-white"
-              >
-                S
-              </span>
+            <div className="text-sm font-medium text-save-strong">
               {hasCode ? "Ваша цена по коду" : "Цена со скидкой"}
             </div>
             <div className="tabular mt-1 font-display text-4xl font-bold tracking-tight text-save sm:text-5xl">
@@ -499,16 +493,11 @@ function OptionButton({
   );
 }
 
-function Perk({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+function Perk({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
   return (
-    <li className="flex items-start gap-2.5 rounded-2xl bg-surface p-3">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-tint text-brand">
-        {icon}
-      </span>
-      <span>
-        <span className="block text-sm font-semibold text-ink">{title}</span>
-        <span className="block text-xs text-muted">{text}</span>
-      </span>
+    <li className="flex items-center gap-2.5">
+      <span className="shrink-0 text-brand">{icon}</span>
+      {children}
     </li>
   );
 }
