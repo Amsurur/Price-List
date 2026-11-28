@@ -11,6 +11,16 @@ export class TelegramService {
 
   constructor(private readonly config: ConfigService) {}
 
+  // For the admin sidebar: whether notifications can be sent, and to how
+  // many chats. Never reveals the token or chat ids.
+  status(): { configured: boolean; chats: number } {
+    const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
+    const chats = (this.config.get<string>('TELEGRAM_CHAT_ID') ?? '')
+      .split(',')
+      .filter((id) => id.trim().length > 0).length;
+    return { configured: Boolean(token) && chats > 0, chats };
+  }
+
   async notify(text: string): Promise<void> {
     const token = this.config.get<string>('TELEGRAM_BOT_TOKEN');
     const chatIds = (this.config.get<string>('TELEGRAM_CHAT_ID') ?? '')
@@ -33,7 +43,11 @@ export class TelegramService {
     await Promise.all(chatIds.map((chatId) => this.send(token, chatId, text)));
   }
 
-  private async send(token: string, chatId: string, text: string): Promise<void> {
+  private async send(
+    token: string,
+    chatId: string,
+    text: string,
+  ): Promise<void> {
     try {
       const res = await fetch(
         `https://api.telegram.org/bot${token}/sendMessage`,

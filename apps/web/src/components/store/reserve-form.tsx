@@ -5,7 +5,9 @@ import { createReservation } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { AppliedCode } from "@/lib/use-applied-code";
 import type { Product, Reservation, Selection } from "@/lib/types";
-import { CheckIcon } from "@/components/ui/icons";
+import { CheckIcon, ClockIcon, MapPinIcon } from "@/components/ui/icons";
+import { useShopSettings } from "@/lib/use-shop-settings";
+import { holdDaysText } from "./store-footer";
 
 const inputClass =
   "h-12 w-full rounded-2xl border-[1.5px] border-line bg-surface px-4 text-[15px] text-ink outline-none transition-colors placeholder:text-muted focus:border-brand";
@@ -31,6 +33,7 @@ export function ReserveForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reservation, setReservation] = useState<Reservation | null>(null);
+  const shop = useShopSettings();
 
   const maxQty = Math.max(1, product.stock);
 
@@ -68,7 +71,30 @@ export function ReserveForm({
         <h3 className="font-display text-2xl font-bold text-ink">Товар забронирован</h3>
         <p className="max-w-xs text-sm text-ink-soft">
           Мы свяжемся с вами по {reservation.studentContact}, чтобы договориться о получении.
+          {shop ? ` Бронь держим ${holdDaysText(shop.holdDays)}.` : ""}
         </p>
+        {shop && (shop.address || shop.hours) && (
+          <div className="flex w-full flex-col gap-1.5 rounded-2xl border border-line p-4 text-left text-sm text-ink-soft">
+            {shop.address && (
+              <span className="flex items-start gap-2">
+                <MapPinIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                {shop.mapUrl ? (
+                  <a href={shop.mapUrl} target="_blank" rel="noreferrer" className="underline-offset-2 hover:underline">
+                    {shop.address}
+                  </a>
+                ) : (
+                  shop.address
+                )}
+              </span>
+            )}
+            {shop.hours && (
+              <span className="flex items-start gap-2">
+                <ClockIcon className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+                {shop.hours}
+              </span>
+            )}
+          </div>
+        )}
         <div className="mt-2 w-full rounded-2xl bg-bg p-4 text-left text-sm">
           <div className="flex justify-between gap-3">
             <span className="text-ink-soft">

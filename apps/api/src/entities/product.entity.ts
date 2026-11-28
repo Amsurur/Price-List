@@ -13,6 +13,8 @@ export interface ProductColor {
   hex: string;
   extraPrice: number;
   images: string[];
+  // Stock of this colour. Null/absent means "use the product's stock".
+  stock?: number | null;
 }
 
 // One configuration (e.g. "16 ГБ / 512 ГБ"), priced on top of the base.
@@ -54,6 +56,15 @@ export class Product {
   // Regular price, before any discount.
   @Column('integer')
   price: number;
+
+  // A sale for everyone (the "Акция" badge), stacked with the member
+  // discount; 0 means no sale.
+  @Column('integer', { name: 'sale_percent', default: 0 })
+  salePercent: number;
+
+  // "Кому подойдёт": short audience labels, e.g. {Для учёбы, Для дизайна}.
+  @Column('text', { array: true, default: () => "'{}'" })
+  audience: string[];
 
   // Standard Softclub discount % for this item.
   @Column('integer', { name: 'member_discount', default: 15 })

@@ -59,7 +59,7 @@ describe('reservationStatusMessage', () => {
       to: 'contacted',
     });
 
-    expect(message).toContain('new → contacted');
+    expect(message).toContain('Новая → Связались');
     expect(message).toContain('ID: r1');
   });
 });

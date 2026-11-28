@@ -31,7 +31,10 @@ export class AnalyticsService {
     private readonly pageViews: Repository<PageView>,
   ) {}
 
-  async recordPageView(dto: CreatePageViewDto, userAgent?: string): Promise<void> {
+  async recordPageView(
+    dto: CreatePageViewDto,
+    userAgent?: string,
+  ): Promise<void> {
     if (!userAgent) return;
     const ua = userAgent.toLowerCase();
     if (BOT_USER_AGENT_SUBSTRINGS.some((s) => ua.includes(s))) return;
@@ -83,7 +86,10 @@ export class AnalyticsService {
       days: clampedDays,
       totalViews,
       uniqueVisitors: Number(uniqueRow?.count ?? 0),
-      topPaths: topPathsRaw.map((r) => ({ path: r.path, views: Number(r.views) })),
+      topPaths: topPathsRaw.map((r) => ({
+        path: r.path,
+        views: Number(r.views),
+      })),
       daily: dailyRaw.map((r) => ({
         date: r.date,
         views: Number(r.views),

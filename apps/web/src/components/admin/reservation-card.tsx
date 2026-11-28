@@ -9,7 +9,8 @@ import { shortWhen } from "./reservation-status";
 
 const NEXT: Partial<Record<ReservationStatus, { status: ReservationStatus; label: string; className: string }>> = {
   new: { status: "contacted", label: "Связались", className: "bg-brand text-white hover:bg-brand-strong" },
-  contacted: { status: "completed", label: "Выдано", className: "bg-save text-white hover:bg-save-strong" },
+  contacted: { status: "ready", label: "Готово к выдаче", className: "bg-ink text-surface hover:bg-ink-soft" },
+  ready: { status: "completed", label: "Выдано", className: "bg-save text-white hover:bg-save-strong" },
 };
 
 // One reservation on the board: who, what, how much, and one tap to move it on.

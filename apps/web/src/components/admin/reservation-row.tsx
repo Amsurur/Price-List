@@ -80,6 +80,15 @@ export function ReservationRow({
           )}
           {reservation.status === "contacted" && (
             <button
+              onClick={() => transition("ready")}
+              disabled={updating}
+              className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              Отметить «Готово к выдаче»
+            </button>
+          )}
+          {(reservation.status === "contacted" || reservation.status === "ready") && (
+            <button
               onClick={() => transition("completed")}
               disabled={updating}
               className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"

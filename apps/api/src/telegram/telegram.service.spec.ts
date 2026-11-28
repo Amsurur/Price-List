@@ -1,5 +1,9 @@
 import { TelegramService } from './telegram.service';
 
+function chatIdOf(body: string): string {
+  return (JSON.parse(body) as { chat_id: string }).chat_id;
+}
+
 describe('TelegramService', () => {
   let service: TelegramService;
   let config: { get: jest.Mock };
@@ -8,7 +12,9 @@ describe('TelegramService', () => {
   beforeEach(() => {
     config = { get: jest.fn() };
     service = new TelegramService(config as never);
-    fetchMock = jest.fn().mockResolvedValue({ ok: true, text: async () => '' });
+    fetchMock = jest
+      .fn()
+      .mockResolvedValue({ ok: true, text: () => Promise.resolve('') });
     global.fetch = fetchMock as never;
   });
 
@@ -53,7 +59,7 @@ describe('TelegramService', () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 400,
-      text: async () => 'Bad Request',
+      text: () => Promise.resolve('Bad Request'),
     });
 
     await expect(service.notify('hello')).resolves.toBeUndefined();
@@ -67,9 +73,8 @@ describe('TelegramService', () => {
     await service.notify('hello');
 
     expect(fetchMock).toHaveBeenCalledTimes(3);
-    const chatIdsSent = fetchMock.mock.calls.map(
-      ([, init]) => JSON.parse(init.body).chat_id,
-    );
+    const calls = fetchMock.mock.calls as [string, { body: string }][];
+    const chatIdsSent = calls.map(([, init]) => chatIdOf(init.body));
     expect(chatIdsSent.sort()).toEqual(['111', '222', '333']);
   });
 
@@ -78,10 +83,10 @@ describe('TelegramService', () => {
       key === 'TELEGRAM_BOT_TOKEN' ? 'TOKEN' : '111,222',
     );
     fetchMock.mockImplementation((_url: string, init: { body: string }) => {
-      const chatId = JSON.parse(init.body).chat_id;
+      const chatId = chatIdOf(init.body);
       return chatId === '111'
         ? Promise.reject(new Error('network down'))
-        : Promise.resolve({ ok: true, text: async () => '' });
+        : Promise.resolve({ ok: true, text: () => Promise.resolve('') });
     });
 
     await service.notify('hello');

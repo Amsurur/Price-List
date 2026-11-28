@@ -27,6 +27,14 @@ export function newReservationMessage(params: {
   return lines.join('\n');
 }
 
+const STATUS_RU: Record<Reservation['status'], string> = {
+  new: 'Новая',
+  contacted: 'Связались',
+  ready: 'Готова к выдаче',
+  completed: 'Выдана',
+  cancelled: 'Отменена',
+};
+
 export function reservationStatusMessage(params: {
   id: string;
   productName: string;
@@ -36,7 +44,7 @@ export function reservationStatusMessage(params: {
   return [
     '🔄 <b>Статус брони изменён</b>',
     `Товар: ${escapeHtml(params.productName)}`,
-    `${params.from} → ${params.to}`,
+    `${STATUS_RU[params.from]} → ${STATUS_RU[params.to]}`,
     `ID: ${params.id}`,
   ].join('\n');
 }

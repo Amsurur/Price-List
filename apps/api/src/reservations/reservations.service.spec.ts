@@ -11,6 +11,8 @@ function makeReservation(overrides: Partial<Reservation> = {}): Reservation {
     productId: 'p1',
     productName: 'Laptop',
     variant: null,
+    color: null,
+    config: null,
     unitPrice: 679,
     quantity: 2,
     status: 'new',
@@ -30,7 +32,7 @@ describe('ReservationsService', () => {
     findCodeStrings: jest.Mock;
   };
   let products: { findOne: jest.Mock; decrementStock: jest.Mock };
-  let telegram: { notify: jest.Mock };
+  let telegram: { notify: jest.Mock<Promise<undefined>, [string]> };
 
   beforeEach(() => {
     reservations = {
@@ -47,7 +49,11 @@ describe('ReservationsService', () => {
       findOne: jest.fn(),
       decrementStock: jest.fn(() => Promise.resolve(undefined)),
     };
-    telegram = { notify: jest.fn(() => Promise.resolve(undefined)) };
+    telegram = {
+      notify: jest.fn<Promise<undefined>, [string]>(() =>
+        Promise.resolve(undefined),
+      ),
+    };
 
     service = new ReservationsService(
       reservations as never,
@@ -180,23 +186,66 @@ describe('ReservationsService', () => {
 
       expect(result.variant).toBe('Серебристый · 24/1TB');
       expect(result.unitPrice).toBe(960); // (800 + 100 + 300) * 0.8
-      expect(telegram.notify.mock.calls[0][0]).toContain('Серебристый · 24/1TB');
+      expect(telegram.notify.mock.calls[0][0]).toContain(
+        'Серебристый · 24/1TB',
+      );
     });
 
     it('falls back to the first options when none are picked', async () => {
       products.findOne.mockResolvedValue(withOptions);
 
-      const result = await service.create({ productId: 'p1', studentContact: '@ada' });
+      const result = await service.create({
+        productId: 'p1',
+        studentContact: '@ada',
+      });
 
       expect(result.variant).toBe('Серый · 16/512');
       expect(result.unitPrice).toBe(640);
+    });
+
+    it('rejects a colour that has run out', async () => {
+      products.findOne.mockResolvedValue({
+        ...withOptions,
+        colors: [
+          {
+            name: 'Серый',
+            hex: '#5B6070',
+            extraPrice: 0,
+            images: [],
+            stock: 0,
+          },
+        ],
+      });
+
+      await expect(
+        service.create({
+          productId: 'p1',
+          studentContact: '@ada',
+          color: 'Серый',
+        }),
+      ).rejects.toThrow('Этот цвет закончился');
+    });
+
+    it('applies the product sale on top of the member discount', async () => {
+      products.findOne.mockResolvedValue({ ...withOptions, salePercent: 10 });
+
+      const result = await service.create({
+        productId: 'p1',
+        studentContact: '@ada',
+      });
+
+      expect(result.unitPrice).toBe(560); // 800 * (1 - (20 + 10)/100)
     });
 
     it('rejects an option the product does not offer', async () => {
       products.findOne.mockResolvedValue(withOptions);
 
       await expect(
-        service.create({ productId: 'p1', studentContact: '@ada', color: 'Золотой' }),
+        service.create({
+          productId: 'p1',
+          studentContact: '@ada',
+          color: 'Золотой',
+        }),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -220,8 +269,8 @@ describe('ReservationsService', () => {
       expect(result.status).toBe('contacted');
       expect(products.decrementStock).not.toHaveBeenCalled();
       expect(telegram.notify).toHaveBeenCalledTimes(1);
-      expect(telegram.notify.mock.calls[0][0]).toContain('new');
-      expect(telegram.notify.mock.calls[0][0]).toContain('contacted');
+      expect(telegram.notify.mock.calls[0][0]).toContain('Новая');
+      expect(telegram.notify.mock.calls[0][0]).toContain('Связались');
     });
 
     it('decrements stock by the reserved quantity on contacted → completed', async () => {
@@ -232,7 +281,34 @@ describe('ReservationsService', () => {
       const result = await service.updateStatus('r1', { status: 'completed' });
 
       expect(result.status).toBe('completed');
-      expect(products.decrementStock).toHaveBeenCalledWith('p1', 2);
+      expect(products.decrementStock).toHaveBeenCalledWith('p1', 2, null);
+    });
+
+    it("takes the picked colour's stock too", async () => {
+      reservations.findOne.mockResolvedValue(
+        makeReservation({
+          status: 'ready',
+          productId: 'p1',
+          quantity: 1,
+          color: 'Серый',
+        }),
+      );
+
+      await service.updateStatus('r1', { status: 'completed' });
+
+      expect(products.decrementStock).toHaveBeenCalledWith('p1', 1, 'Серый');
+    });
+
+    it('allows contacted → ready without touching stock', async () => {
+      reservations.findOne.mockResolvedValue(
+        makeReservation({ status: 'contacted' }),
+      );
+
+      const result = await service.updateStatus('r1', { status: 'ready' });
+
+      expect(result.status).toBe('ready');
+      expect(products.decrementStock).not.toHaveBeenCalled();
+      expect(telegram.notify.mock.calls[0][0]).toContain('Готова к выдаче');
     });
 
     it('skips the stock decrement if the product was deleted', async () => {

@@ -1,4 +1,13 @@
-import { Body, Controller, Get, HttpCode, Post, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AnalyticsService } from './analytics.service';
@@ -11,7 +20,10 @@ export class AnalyticsController {
   // Public: fired by the storefront's tracking beacon on every page view.
   @Post('page-views')
   @HttpCode(204)
-  async create(@Body() dto: CreatePageViewDto, @Req() req: Request): Promise<void> {
+  async create(
+    @Body() dto: CreatePageViewDto,
+    @Req() req: Request,
+  ): Promise<void> {
     await this.analytics.recordPageView(dto, req.headers['user-agent']);
   }
 

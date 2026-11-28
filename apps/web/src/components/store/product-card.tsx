@@ -4,16 +4,17 @@ import { imageSrc } from "@/lib/api";
 import type { Product } from "@/lib/types";
 import { CategoryIcon } from "./category-icon";
 import { DiscountBadge, ProductPrice, StockLabel } from "./product-price";
+import { SaveButton } from "./save-button";
 
 // A catalogue tile. The whole card opens the product page; the price shown is
 // whatever the API priced for the current code (member price in green).
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, className = "" }: { product: Product; className?: string }) {
   const cover = imageSrc(product.images[0]);
   const second = imageSrc(product.images[1]);
   const outOfStock = product.stock <= 0;
 
   return (
-    <li className="h-full">
+    <li className={`relative h-full ${className}`}>
       <Link
         href={`/p/${product.id}`}
         className={`group flex h-full flex-col gap-3 rounded-3xl border border-line bg-surface p-2.5 pb-4 transition-all hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-xl hover:shadow-brand/10 ${
@@ -49,8 +50,11 @@ export function ProductCard({ product }: { product: Product }) {
               <CategoryIcon name={product.category ?? ""} className="h-12 w-12" />
             </div>
           )}
-          <div className="absolute top-2 left-2 flex gap-1.5">
+          <div className="absolute top-2 left-2 flex flex-wrap gap-1.5">
             <DiscountBadge product={product} />
+            {product.salePercent > 0 && (
+              <span className="rounded-full bg-warn px-2.5 py-1 text-xs font-bold text-white">Акция</span>
+            )}
           </div>
         </div>
 
@@ -94,6 +98,10 @@ export function ProductCard({ product }: { product: Product }) {
           {outOfStock ? "Нет в наличии" : "Забронировать"}
         </span>
       </Link>
+      {/* Outside the link: a button can't sit inside an <a>. */}
+      <div className="absolute top-4 right-4">
+        <SaveButton productId={product.id} productName={product.name} />
+      </div>
     </li>
   );
 }

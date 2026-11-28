@@ -9,7 +9,14 @@ import { catalogHref, categoriesOf } from "@/lib/categories";
 import { formatMoney } from "@/lib/format";
 import { useAppliedCode } from "@/lib/use-applied-code";
 import type { Product, Selection, VariantPrice } from "@/lib/types";
-import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, ClockIcon, StoreIcon } from "@/components/ui/icons";
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  ClockIcon,
+  StoreIcon,
+  TelegramIcon,
+} from "@/components/ui/icons";
 import { StoreHeader } from "@/components/store/store-header";
 import { StoreFooter } from "@/components/store/store-footer";
 import { CodeUnlockStrip } from "@/components/store/code-unlock-strip";
@@ -18,6 +25,10 @@ import { ImageLightbox } from "@/components/store/image-lightbox";
 import { ProductCard } from "@/components/store/product-card";
 import { PRODUCT_GRID } from "@/components/store/product-grid-skeleton";
 import { ReserveSheet } from "@/components/store/reserve-sheet";
+import { SaveButton } from "@/components/store/save-button";
+import { holdDaysText } from "@/components/store/store-footer";
+import { Reveal } from "@/components/ui/reveal";
+import { telegramLink, useShopSettings } from "@/lib/use-shop-settings";
 import { DiscountBreakdown, StockLabel } from "@/components/store/product-price";
 
 type State =
@@ -28,6 +39,7 @@ type State =
 export default function ProductPage() {
   const { id } = useParams<{ id: string }>();
   const { appliedCode, ready, apply, remove } = useAppliedCode();
+  const shop = useShopSettings();
   const [state, setState] = useState<State>({ kind: "loading" });
   const [reserveOpen, setReserveOpen] = useState(false);
   // Picked options; null means "the default" (the first of each).
@@ -69,7 +81,11 @@ export default function ProductPage() {
 
   const selection = useMemo<Selection | null>(() => {
     if (!product) return null;
-    const color = pickedColor ?? product.colors[0]?.name ?? null;
+    // Default to the first colour that's still in stock.
+    const color =
+      pickedColor ??
+      (product.colors.find((c) => !soldOut(c)) ?? product.colors[0])?.name ??
+      null;
     const config = pickedConfig ?? product.configs[0]?.label ?? null;
     const price =
       product.variants.find((v) => v.color === color && v.config === config) ?? product.variants[0];
@@ -81,6 +97,16 @@ export default function ProductPage() {
     const own = product.colors.find((c) => c.name === selection?.color)?.images ?? [];
     return own.length > 0 ? own : product.images;
   }, [product, selection]);
+
+  const pickedColorSoldOut = Boolean(
+    product && soldOut(product.colors.find((c) => c.name === selection?.color)),
+  );
+  const canReserve = Boolean(product && product.stock > 0 && !pickedColorSoldOut);
+  const reserveLabel = !product || product.stock <= 0
+    ? "Нет в наличии"
+    : pickedColorSoldOut
+      ? "Этот цвет закончился"
+      : "Забронировать";
 
   const related = useMemo(() => {
     if (!product) return [];
@@ -192,6 +218,7 @@ export default function ProductPage() {
                         active={c.name === selection.color}
                         onClick={() => setPickedColor(c.name)}
                         extra={c.extraPrice}
+                        unavailable={soldOut(c)}
                       >
                         <span
                           aria-hidden="true"
@@ -229,22 +256,66 @@ export default function ProductPage() {
                   onRemove={remove}
                 />
 
-                <button
-                  type="button"
-                  onClick={() => setReserveOpen(true)}
-                  disabled={product.stock <= 0}
-                  className="hidden h-14 rounded-full bg-brand font-display text-base font-semibold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50 sm:block"
-                >
-                  {product.stock > 0 ? "Забронировать" : "Нет в наличии"}
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setReserveOpen(true)}
+                    disabled={!canReserve}
+                    className="hidden h-14 flex-1 rounded-full bg-brand font-display text-base font-semibold text-white transition-colors hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50 sm:block"
+                  >
+                    {reserveLabel}
+                  </button>
+                  <div className="hidden sm:block">
+                    <SaveButton productId={product.id} productName={product.name} variant="inline" />
+                  </div>
+                </div>
+
+                {shop?.telegram && (
+                  <a
+                    href={telegramLink(
+                      shop.telegram,
+                      `Здравствуйте! Вопрос по товару «${product.name}»${
+                        selection.color || selection.config
+                          ? ` (${[selection.color, selection.config].filter(Boolean).join(", ")})`
+                          : ""
+                      }`,
+                    )}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-12 items-center justify-center gap-2 rounded-full border border-line bg-surface text-sm font-semibold text-ink transition-colors hover:bg-bg"
+                  >
+                    <TelegramIcon className="h-4 w-4 text-brand" />
+                    Спросить в Telegram
+                  </a>
+                )}
 
                 <ul className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
                   <Perk icon={<CheckIcon className="h-4 w-4" />} title="Бронь бесплатно" text="Ни к чему не обязывает" />
                   <Perk icon={<StoreIcon className="h-4 w-4" />} title="Оплата в магазине" text="Без предоплаты" />
-                  <Perk icon={<ClockIcon className="h-4 w-4" />} title="Мы свяжемся" text="Чтобы договориться о выдаче" />
+                  <Perk
+                    icon={<ClockIcon className="h-4 w-4" />}
+                    title="Мы свяжемся"
+                    text={shop ? `Бронь держим ${holdDaysText(shop.holdDays)}` : "Чтобы договориться о выдаче"}
+                  />
                 </ul>
               </div>
             </div>
+
+            {product.audience.length > 0 && (
+              <Reveal as="section" className="mt-6 rounded-3xl bg-brand-tint p-5 sm:mt-8 sm:p-8">
+                <h2 className="font-display text-xl font-bold text-ink sm:text-2xl">Кому подойдёт</h2>
+                <ul className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  {product.audience.map((a) => (
+                    <li key={a} className="flex items-center gap-3 rounded-2xl bg-surface p-3.5 text-[15px] font-medium text-ink">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-save text-white">
+                        <CheckIcon className="h-4 w-4" />
+                      </span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              </Reveal>
+            )}
 
             {product.specs.length > 0 && (
               <section className="mt-6 rounded-3xl bg-surface p-5 sm:mt-8 sm:p-8">
@@ -307,13 +378,14 @@ export default function ProductPage() {
                   {formatMoney(selection.price.memberPrice)}
                 </span>
               </div>
+              <SaveButton productId={product.id} productName={product.name} />
               <button
                 type="button"
                 onClick={() => setReserveOpen(true)}
-                disabled={product.stock <= 0}
-                className="ml-auto h-12 flex-1 rounded-full bg-brand font-display text-[15px] font-semibold text-white disabled:opacity-50"
+                disabled={!canReserve}
+                className="h-12 flex-1 rounded-full bg-brand font-display text-[15px] font-semibold text-white disabled:opacity-50"
               >
-                {product.stock > 0 ? "Забронировать" : "Нет в наличии"}
+                {reserveLabel}
               </button>
             </div>
 
@@ -391,15 +463,21 @@ function OptionGroup({
   );
 }
 
+function soldOut(color: { stock?: number | null } | undefined): boolean {
+  return color?.stock !== undefined && color.stock !== null && color.stock <= 0;
+}
+
 function OptionButton({
   active,
   onClick,
   extra,
+  unavailable = false,
   children,
 }: {
   active: boolean;
   onClick: () => void;
   extra: number;
+  unavailable?: boolean;
   children: React.ReactNode;
 }) {
   return (
@@ -409,10 +487,14 @@ function OptionButton({
       aria-pressed={active}
       className={`flex min-h-11 items-center gap-2 rounded-2xl border-2 px-3.5 py-2 text-sm font-medium transition-colors ${
         active ? "border-brand bg-brand-tint text-ink" : "border-line bg-surface text-ink-soft hover:border-ink-soft"
-      }`}
+      } ${unavailable ? "opacity-60" : ""}`}
     >
       {children}
-      {extra > 0 && <span className="tabular text-xs text-muted">+{formatMoney(extra)}</span>}
+      {unavailable ? (
+        <span className="text-xs text-danger">нет</span>
+      ) : (
+        extra > 0 && <span className="tabular text-xs text-muted">+{formatMoney(extra)}</span>
+      )}
     </button>
   );
 }

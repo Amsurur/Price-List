@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Seal } from "@/components/seal";
-import { SearchIcon } from "@/components/ui/icons";
+import { HeartIcon, SearchIcon } from "@/components/ui/icons";
+import { useSaved } from "@/lib/use-saved";
 import { catalogHref } from "@/lib/categories";
 import type { AppliedCode } from "@/lib/use-applied-code";
 import { ThemeToggle } from "./theme-toggle";
@@ -22,6 +23,7 @@ export function StoreHeader({
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
+  const { ids: savedIds } = useSaved();
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -31,10 +33,10 @@ export function StoreHeader({
 
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-surface/90 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-[1240px] items-center gap-2 px-3 sm:gap-3 sm:px-6">
         <Link href="/" className="flex shrink-0 items-center gap-2.5 rounded-full">
           <Seal />
-          <span className="font-display text-lg font-bold tracking-tight text-ink">
+          <span className="font-display text-base font-bold tracking-tight text-ink sm:text-lg">
             Computerra<span className="text-brand">.store</span>
           </span>
         </Link>
@@ -55,11 +57,23 @@ export function StoreHeader({
           />
         </form>
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <Link
+            href="/saved"
+            aria-label={`Сохранённые товары: ${savedIds.length}`}
+            className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-bg text-ink transition-colors hover:bg-sunken sm:h-11 sm:w-11"
+          >
+            <HeartIcon className="h-5 w-5" />
+            {savedIds.length > 0 && (
+              <span className="tabular absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[11px] font-bold text-white">
+                {savedIds.length}
+              </span>
+            )}
+          </Link>
           <ThemeToggle />
           <Link
             href="/#code"
-            className={`flex h-11 items-center gap-2 rounded-full px-4 text-sm font-semibold transition-colors ${
+            className={`flex h-10 items-center gap-2 rounded-full px-2 text-sm font-semibold transition-colors sm:h-11 sm:px-4 ${
               appliedCode
                 ? "bg-save-tint text-save-strong"
                 : "bg-ink text-surface hover:bg-ink-soft"

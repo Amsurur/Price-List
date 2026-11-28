@@ -23,25 +23,35 @@ const LOW_STOCK = 3;
 export default function AdminHomePage() {
   const [state, setState] = useState<State>({ kind: "loading" });
 
-  async function load() {
-    setState({ kind: "loading" });
+  // Fetches and returns the next page state (no setState here, so the
+  // effect below can apply it asynchronously).
+  async function fetchState(): Promise<State> {
     try {
       const [products, codes, reservations] = await Promise.all([
         listProducts(),
         listStudentCodes(),
         listReservations(),
       ]);
-      setState({ kind: "ready", data: { products, codes, reservations } });
+      return ({ kind: "ready", data: { products, codes, reservations } });
     } catch (err) {
-      setState({
+      return ({
         kind: "error",
         message: err instanceof Error ? err.message : "Не удалось загрузить статистику",
       });
     }
   }
+  function load() {
+    fetchState().then(setState);
+  }
+
+
+  function retry() {
+    setState({ kind: "loading" });
+    load();
+  }
 
   useEffect(() => {
-    load();
+    fetchState().then(setState);
   }, []);
 
   return (
@@ -65,7 +75,7 @@ export default function AdminHomePage() {
         <div className="rounded-3xl border border-danger/30 bg-danger/5 px-4 py-8 text-center">
           <p className="text-sm text-danger">{state.message}</p>
           <button
-            onClick={load}
+            onClick={retry}
             className="mt-3 h-10 rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink hover:bg-bg"
           >
             Повторить
@@ -80,7 +90,9 @@ export default function AdminHomePage() {
 
 function Dashboard({ data }: { data: Data }) {
   const { products, codes, reservations } = data;
-  const open = reservations.filter((r) => r.status === "new" || r.status === "contacted");
+  const open = reservations.filter(
+    (r) => r.status === "new" || r.status === "contacted" || r.status === "ready",
+  );
   const fresh = reservations.filter((r) => r.status === "new").length;
   const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getTime();
   const soldThisMonth = reservations.filter(

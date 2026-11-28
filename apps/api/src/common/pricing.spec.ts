@@ -33,7 +33,10 @@ describe('pricing', () => {
     it('adds the code bonus on top of the product discount', () => {
       // 10% own + 5% code = 15%
       expect(
-        effectiveDiscount({ price: 1000, memberDiscount: 10 }, { extraDiscount: 5 }),
+        effectiveDiscount(
+          { price: 1000, memberDiscount: 10 },
+          { extraDiscount: 5 },
+        ),
       ).toBe(15);
     });
 
@@ -127,7 +130,13 @@ describe('pricing', () => {
     it('returns one row for a product without options', () => {
       const rows = variantPrices({ ...product, colors: [], configs: [] }, null);
       expect(rows).toEqual([
-        { color: null, config: null, price: 1000, memberPrice: 900, saving: 100 },
+        {
+          color: null,
+          config: null,
+          price: 1000,
+          memberPrice: 900,
+          saving: 100,
+        },
       ]);
     });
   });

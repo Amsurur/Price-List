@@ -16,6 +16,7 @@ const STATUS_FILTERS: { label: string; value: ReservationStatus | null }[] = [
   { label: "Все", value: null },
   { label: "Новые", value: "new" },
   { label: "Связались", value: "contacted" },
+  { label: "Готовы к выдаче", value: "ready" },
   { label: "Выдано", value: "completed" },
   { label: "Отменено", value: "cancelled" },
 ];
@@ -28,24 +29,34 @@ export default function ReservationsPage() {
   const [search, setSearch] = useState("");
   const [view, setView] = useState<"board" | "list">("board");
 
-  async function load() {
-    setState({ kind: "loading" });
+  // Fetches and returns the next page state (no setState here, so the
+  // effect below can apply it asynchronously).
+  async function fetchState(): Promise<State> {
     try {
-      setState({ kind: "ready", reservations: await listReservations() });
+      return ({ kind: "ready", reservations: await listReservations() });
     } catch (err) {
-      setState({
+      return ({
         kind: "error",
         message:
           err instanceof Error ? err.message : "Не удалось загрузить брони",
       });
     }
   }
+  function load() {
+    fetchState().then(setState);
+  }
+
+
+  function retry() {
+    setState({ kind: "loading" });
+    load();
+  }
 
   useEffect(() => {
-    load();
+    fetchState().then(setState);
   }, []);
 
-  const reservations = state.kind === "ready" ? state.reservations : [];
+  const reservations = useMemo(() => (state.kind === "ready" ? state.reservations : []), [state]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -126,7 +137,7 @@ export default function ReservationsPage() {
           <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-6 text-center">
             <p className="text-sm text-danger">{state.message}</p>
             <button
-              onClick={load}
+              onClick={retry}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Повторить
@@ -178,6 +189,7 @@ export default function ReservationsPage() {
 const COLUMNS: { status: ReservationStatus; title: string; dot: string }[] = [
   { status: "new", title: "Новые", dot: "bg-brand" },
   { status: "contacted", title: "Связались", dot: "bg-warn" },
+  { status: "ready", title: "Готовы к выдаче", dot: "bg-ink" },
   { status: "completed", title: "Выдано", dot: "bg-save" },
 ];
 
@@ -196,7 +208,7 @@ function Board({
   const cancelled = reservations.filter((r) => r.status === "cancelled").length;
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
         {COLUMNS.map((col) => {
           const all = reservations
             .filter((r) => r.status === col.status)

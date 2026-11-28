@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminAuthGuard } from "@/components/admin/auth-guard";
 import { AdminNav } from "@/components/admin/admin-nav";
+import { TelegramStatusCard } from "@/components/admin/telegram-status-card";
 import { LogoutButton } from "@/components/admin/logout-button";
 import { Seal } from "@/components/seal";
 
@@ -34,7 +35,11 @@ export default function AdminLayout({
 
         <AdminNav />
 
-        <div className="mt-auto hidden flex-col gap-2 border-t border-line pt-4 lg:flex lg:px-2">
+        <div className="mt-auto hidden flex-col gap-3 lg:flex">
+          <TelegramStatusCard />
+        </div>
+
+        <div className="hidden flex-col gap-2 border-t border-line pt-4 lg:flex lg:px-2">
           <Link href="/" className="text-sm font-medium text-brand-strong hover:underline">
             Открыть магазин →
           </Link>

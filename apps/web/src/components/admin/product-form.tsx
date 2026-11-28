@@ -12,6 +12,7 @@ import {
 import { formatMoney } from "@/lib/format";
 import type { Product, ProductColor, ProductConfig, ProductInput, ProductSpec } from "@/lib/types";
 import { ColorsField, ConfigsField, SpecsField } from "./product-options-fields";
+import { ProductCard } from "@/components/store/product-card";
 
 const inputClass =
   "w-full rounded-[10px] border border-line bg-surface px-3 py-2 text-[15px] text-ink outline-none focus:border-brand focus:ring-2 focus:ring-brand/30";
@@ -43,6 +44,8 @@ export function ProductForm({ product }: { product?: Product }) {
     String(product?.memberDiscount ?? 15),
   );
   const [stock, setStock] = useState(String(product?.stock ?? 0));
+  const [salePercent, setSalePercent] = useState(String(product?.salePercent ?? 0));
+  const [audience, setAudience] = useState((product?.audience ?? []).join(", "));
   const [description, setDescription] = useState(product?.description ?? "");
   const [active, setActive] = useState(product?.active ?? true);
   const [images, setImages] = useState<string[]>(product?.images ?? []);
@@ -84,6 +87,42 @@ export function ProductForm({ product }: { product?: Product }) {
     });
   }
 
+  // A display-only stand-in for the storefront card, rebuilt as the owner
+  // types. Prices use the same preview maths as the hint above; the API
+  // prices the real thing.
+  const basePrice = Number(price) || 0;
+  const listPrice = basePrice + (colors[0]?.extraPrice ?? 0) + (configs[0]?.extraPrice ?? 0);
+  const previewDiscount = (Number(memberDiscount) || 0) + (Number(salePercent) || 0);
+  const previewMember = previewMemberPrice(listPrice, previewDiscount);
+  const stockCount = Number(stock) || 0;
+  const previewProduct: Product = {
+    id: product?.id ?? "preview",
+    name: name.trim() || "Название товара",
+    description: description || null,
+    category: category.trim() || null,
+    brand: brand.trim() || null,
+    tags: [],
+    price: basePrice,
+    salePercent: Number(salePercent) || 0,
+    audience: [],
+    memberDiscount: Number(memberDiscount) || 0,
+    stock: stockCount,
+    images: colors[0]?.images.length ? colors[0].images : images,
+    active,
+    sortOrder: 0,
+    colors,
+    configs,
+    specs,
+    createdAt: "",
+    updatedAt: "",
+    listPrice,
+    memberPrice: previewMember,
+    saving: listPrice - previewMember,
+    stockLabel: stockCount <= 0 ? "Нет в наличии" : stockCount <= 3 ? `Осталось ${stockCount}` : null,
+    popularity: 0,
+    variants: [],
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -103,6 +142,11 @@ export function ProductForm({ product }: { product?: Product }) {
         .filter(Boolean),
       price: Number(price),
       memberDiscount: Number(memberDiscount),
+      salePercent: Number(salePercent) || 0,
+      audience: audience
+        .split(",")
+        .map((a) => a.trim())
+        .filter(Boolean),
       stock: Number(stock),
       description: description.trim() || undefined,
       active,
@@ -123,7 +167,7 @@ export function ProductForm({ product }: { product?: Product }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-3xl">
+    <form onSubmit={handleSubmit} className="max-w-6xl">
       {error && (
         <p
           role="alert"
@@ -133,6 +177,7 @@ export function ProductForm({ product }: { product?: Product }) {
         </p>
       )}
 
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
       <div className="grid gap-5">
         <div>
           <label htmlFor="name" className={labelClass}>
@@ -188,7 +233,7 @@ export function ProductForm({ product }: { product?: Product }) {
           </div>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
           <div>
             <label htmlFor="price" className={labelClass}>
               Обычная цена
@@ -219,9 +264,27 @@ export function ProductForm({ product }: { product?: Product }) {
               onChange={(e) => setMemberDiscount(e.target.value)}
             />
             <p className="mt-1 text-xs text-muted">
-              {Number(memberDiscount) > 0 && Number(price) > 0
-                ? `Студент увидит: ${formatMoney(previewMemberPrice(Number(price), Number(memberDiscount)))} вместо ${formatMoney(Number(price))}`
+              {Number(memberDiscount) + (Number(salePercent) || 0) > 0 && Number(price) > 0
+                ? `Студент увидит: ${formatMoney(previewMemberPrice(Number(price), Number(memberDiscount) + (Number(salePercent) || 0)))} вместо ${formatMoney(Number(price))}`
                 : "Скидка не установлена — цена будет обычной"}
+            </p>
+          </div>
+          <div>
+            <label htmlFor="sale" className={labelClass}>
+              Акция для всех, %
+            </label>
+            <input
+              id="sale"
+              type="number"
+              inputMode="numeric"
+              min={0}
+              max={90}
+              className={`mt-1 tabular ${inputClass}`}
+              value={salePercent}
+              onChange={(e) => setSalePercent(e.target.value)}
+            />
+            <p className="mt-1 text-xs text-muted">
+              Складывается со скидкой для студентов. 0 — без акции.
             </p>
           </div>
           <div>
@@ -325,6 +388,20 @@ export function ProductForm({ product }: { product?: Product }) {
         <SpecsField specs={specs} onChange={setSpecs} />
 
         <div>
+          <label htmlFor="audience" className={labelClass}>
+            Кому подойдёт
+          </label>
+          <input
+            id="audience"
+            className={`mt-1 ${inputClass}`}
+            value={audience}
+            onChange={(e) => setAudience(e.target.value)}
+            placeholder="через запятую, например: Для учёбы, Для дизайна, Для игр"
+          />
+          <p className="mt-1 text-xs text-muted">До 6 пунктов. Показываются карточкой на странице товара.</p>
+        </div>
+
+        <div>
           <label htmlFor="description" className={labelClass}>
             Описание
           </label>
@@ -347,6 +424,17 @@ export function ProductForm({ product }: { product?: Product }) {
           />
           Активен (виден в магазине)
         </label>
+      </div>
+
+        <aside className="hidden lg:block">
+          <div className="sticky top-6">
+            <p className="mb-2 text-sm font-semibold text-ink">Так увидит студент</p>
+            <ul aria-hidden="true" className="pointer-events-none">
+              <ProductCard product={previewProduct} />
+            </ul>
+            <p className="mt-2 text-xs text-muted">Цена без личного кода студента.</p>
+          </div>
+        </aside>
       </div>
 
       <div className="sticky bottom-0 -mx-6 mt-6 flex flex-wrap items-center gap-3 border-t border-line bg-surface px-6 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:px-0 sm:py-0">

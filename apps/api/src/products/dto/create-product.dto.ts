@@ -19,7 +19,9 @@ export class ProductColorDto {
   name: string;
 
   // A CSS hex colour for the swatch, e.g. #C9CCD3.
-  @Matches(/^#[0-9a-fA-F]{6}$/, { message: 'Цвет должен быть в формате #RRGGBB' })
+  @Matches(/^#[0-9a-fA-F]{6}$/, {
+    message: 'Цвет должен быть в формате #RRGGBB',
+  })
   hex: string;
 
   @IsInt()
@@ -30,6 +32,11 @@ export class ProductColorDto {
   @ArrayMaxSize(8)
   @IsString({ each: true })
   images: string[];
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  stock?: number | null;
 }
 
 export class ProductConfigDto {
@@ -75,10 +82,10 @@ export class CreateProductDto {
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
-  @Transform(({ value }) =>
+  @Transform(({ value }: { value: unknown }) =>
     Array.isArray(value)
       ? value
-          .map((t: string) => String(t).trim().toLowerCase())
+          .map((t: unknown) => String(t).trim().toLowerCase())
           .filter((t: string) => t.length > 0)
       : value,
   )
@@ -99,6 +106,25 @@ export class CreateProductDto {
   @IsInt()
   @Min(0)
   stock?: number;
+
+  // A sale for everyone, stacked with memberDiscount (total clamped to 90).
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(90)
+  salePercent?: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(6)
+  @IsString({ each: true })
+  @MaxLength(40, { each: true })
+  @Transform(({ value }: { value: unknown }) =>
+    Array.isArray(value)
+      ? value.map((t: unknown) => String(t).trim()).filter((t: string) => t)
+      : value,
+  )
+  audience?: string[];
 
   @IsOptional()
   @IsString()

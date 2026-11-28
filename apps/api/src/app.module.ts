@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AnalyticsModule } from './analytics/analytics.module';
@@ -8,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 import { ProductsModule } from './products/products.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { SettingsModule } from './settings/settings.module';
 import { StudentCodesModule } from './student-codes/student-codes.module';
 
 @Module({
@@ -31,10 +33,15 @@ import { StudentCodesModule } from './student-codes/student-codes.module';
         const base = {
           type: 'postgres' as const,
           autoLoadEntities: true,
-          // Dev convenience only (no migrations exist yet) — must be off
-          // wherever real data lives, since a drift between entities and
-          // the actual schema could silently alter or drop columns.
+          // Dev convenience only — must be off wherever real data lives,
+          // since a drift between entities and the actual schema could
+          // silently alter or drop columns. Production should use
+          // migrations instead (documents/09-migrations.md).
           synchronize: config.get<string>('DB_SYNCHRONIZE') === 'true',
+          // The app always runs from dist/, so only compiled .js (not .d.ts).
+          migrations: [join(__dirname, 'migrations', '*.js')],
+          // Apply pending migrations on start (production setting).
+          migrationsRun: config.get<string>('DB_MIGRATIONS_RUN') === 'true',
           ssl,
         };
         if (url) {
@@ -56,6 +63,7 @@ import { StudentCodesModule } from './student-codes/student-codes.module';
     StudentCodesModule,
     ReservationsModule,
     AnalyticsModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

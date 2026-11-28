@@ -15,9 +15,10 @@ export function SortSelect({
   onChange: (value: SortOption) => void;
 }) {
   return (
-    <label className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface pr-2 pl-4 text-sm">
-      <span className="text-muted">Сортировка:</span>
+    <label className="flex h-10 min-w-0 items-center gap-2 rounded-full border border-line bg-surface pr-2 pl-4 text-sm">
+      <span className="hidden text-muted sm:inline">Сортировка:</span>
       <select
+        aria-label="Сортировка"
         value={value}
         onChange={(e) => onChange(e.target.value as SortOption)}
         className="cursor-pointer bg-transparent font-medium text-ink outline-none"

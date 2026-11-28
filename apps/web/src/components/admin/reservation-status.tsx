@@ -3,6 +3,7 @@ import type { ReservationStatus } from "@/lib/types";
 export const STATUS_STYLE: Record<ReservationStatus, string> = {
   new: "bg-brand-tint text-brand-strong",
   contacted: "bg-warn-tint text-warn",
+  ready: "bg-save text-white",
   completed: "bg-save-tint text-save-strong",
   cancelled: "bg-danger/10 text-danger",
 };
@@ -10,6 +11,7 @@ export const STATUS_STYLE: Record<ReservationStatus, string> = {
 export const STATUS_LABEL: Record<ReservationStatus, string> = {
   new: "Новая",
   contacted: "Связались",
+  ready: "Готова к выдаче",
   completed: "Выдано",
   cancelled: "Отменено",
 };

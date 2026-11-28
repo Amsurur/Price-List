@@ -8,6 +8,7 @@ import {
   HomeIcon,
   KeyIcon,
   LaptopIcon,
+  SettingsIcon,
   TagIcon,
   UploadIcon,
 } from "@/components/ui/icons";
@@ -20,6 +21,7 @@ const ITEMS = [
   { href: "/admin/discounts", label: "Скидки", Icon: TagIcon },
   { href: "/admin/products/bulk", label: "Загрузка из Excel", Icon: UploadIcon },
   { href: "/admin/analytics", label: "Аналитика", Icon: ChartIcon },
+  { href: "/admin/settings", label: "Настройки", Icon: SettingsIcon },
 ];
 
 // Sidebar links on desktop, a scrolling pill row on phones.

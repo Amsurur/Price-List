@@ -34,7 +34,10 @@ export interface FindReservationsQuery {
 // rather than silently re-decrementing stock.
 const ALLOWED_TRANSITIONS: Record<ReservationStatus, ReservationStatus[]> = {
   new: ['contacted', 'cancelled'],
-  contacted: ['completed', 'cancelled'],
+  // "ready" (packed and waiting at the counter) is optional: a reservation
+  // can go straight from contacted to completed.
+  contacted: ['ready', 'completed', 'cancelled'],
+  ready: ['completed', 'cancelled'],
   completed: [],
   cancelled: [],
 };
@@ -148,6 +151,11 @@ export class ReservationsService {
     );
     const variant = [color, config].filter(Boolean).join(' · ') || null;
 
+    const colorStock = product.colors.find((c) => c.name === color)?.stock;
+    if (colorStock !== undefined && colorStock !== null && colorStock <= 0) {
+      throw new BadRequestException('Этот цвет закончился. Выберите другой.');
+    }
+
     const entity = this.reservations.create({
       codeId: code?.id ?? null,
       studentName: dto.studentName?.trim() || code?.studentName || null,
@@ -155,10 +163,13 @@ export class ReservationsService {
       productId: product.id,
       productName: product.name,
       variant,
+      color,
+      config,
       unitPrice: memberPrice(
         {
           price: optionsPrice(product, color, config),
           memberDiscount: product.memberDiscount,
+          salePercent: product.salePercent,
         },
         code ? { extraDiscount: code.extraDiscount } : null,
       ),
@@ -190,7 +201,7 @@ export class ReservationsService {
     return view;
   }
 
-  // The admin status pipeline: new → contacted → completed, cancelled from
+  // The admin status pipeline: new → contacted → (ready) → completed, cancelled from
   // any non-completed state. Never touches the snapshot fields.
   async updateStatus(
     id: string,
@@ -214,6 +225,7 @@ export class ReservationsService {
       await this.products.decrementStock(
         reservation.productId,
         reservation.quantity,
+        reservation.color,
       );
     }
 

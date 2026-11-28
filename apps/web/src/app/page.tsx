@@ -15,7 +15,18 @@ import { CategoryIcon } from "@/components/store/category-icon";
 import { ProductCard } from "@/components/store/product-card";
 import { TagFilterChips } from "@/components/store/tag-filter-chips";
 import { SortSelect, type SortOption } from "@/components/store/sort-select";
-import { PRODUCT_GRID, ProductGridSkeleton } from "@/components/store/product-grid-skeleton";
+import { ProductGridSkeleton } from "@/components/store/product-grid-skeleton";
+import {
+  CatalogFilters,
+  NO_FILTERS,
+  activeFilterCount,
+  matchesFilters,
+  type Filters,
+} from "@/components/store/catalog-filters";
+import { ProductRow } from "@/components/store/product-row";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { Reveal } from "@/components/ui/reveal";
+import { FilterIcon } from "@/components/ui/icons";
 
 type State =
   | { kind: "loading" }
@@ -42,6 +53,8 @@ function HomeContent() {
   const [search, setSearch] = useState(urlQuery);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [sort, setSort] = useState<SortOption>("featured");
 
   // The header's search box navigates here with ?q=…; mirror it. A new
@@ -52,6 +65,7 @@ function HomeContent() {
     if (seen.category !== activeCategory) {
       setActiveTag(null);
       setActiveBrand(null);
+      setFilters(NO_FILTERS);
     }
     setSeen({ q: urlQuery, category: activeCategory });
   }
@@ -127,7 +141,7 @@ function HomeContent() {
         (p.category ?? "").toLowerCase().includes(term) ||
         (p.brand ?? "").toLowerCase().includes(term) ||
         p.tags.some((t) => t.toLowerCase().includes(term));
-      return matchesTag && matchesBrand && matchesSearch;
+      return matchesTag && matchesBrand && matchesSearch && matchesFilters(p, filters);
     });
     const sorted = [...matches];
     if (sort === "price-asc") sorted.sort((a, b) => a.memberPrice - b.memberPrice);
@@ -135,14 +149,32 @@ function HomeContent() {
     else if (sort === "name-asc") sorted.sort((a, b) => a.name.localeCompare(b.name, "ru"));
     // "featured" keeps the API's order (the admin's drag-and-drop order).
     return sorted;
-  }, [inCategory, search, activeTag, activeBrand, sort]);
+  }, [inCategory, search, activeTag, activeBrand, filters, sort]);
 
-  const filtering = Boolean(activeCategory || search.trim() || activeTag || activeBrand);
+  const filterCount = activeFilterCount(filters);
+  const filtering = Boolean(
+    activeCategory || search.trim() || activeTag || activeBrand || filterCount,
+  );
+
+  // Home-page rows, shown while the student is just browsing.
+  const newest = useMemo(
+    () => [...products].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8),
+    [products],
+  );
+  const popular = useMemo(
+    () =>
+      products
+        .filter((p) => p.popularity > 0)
+        .sort((a, b) => b.popularity - a.popularity)
+        .slice(0, 8),
+    [products],
+  );
 
   function resetFilters() {
     setSearch("");
     setActiveTag(null);
     setActiveBrand(null);
+    setFilters(NO_FILTERS);
     router.replace("/#catalog", { scroll: false });
   }
 
@@ -231,7 +263,7 @@ function HomeContent() {
 
         {/* Categories */}
         {categories.length > 1 && (
-          <section aria-labelledby="cats-title" className="flex flex-col gap-4">
+          <Reveal as="section" className="flex flex-col gap-4">
             <h2 id="cats-title" className="font-display text-2xl font-bold tracking-tight text-ink">
               Категории
             </h2>
@@ -259,7 +291,18 @@ function HomeContent() {
                 </li>
               ))}
             </ul>
-          </section>
+          </Reveal>
+        )}
+
+        {state.kind === "ready" && !filtering && (
+          <>
+            <Reveal>
+              <ProductRow title="Хиты продаж" products={popular} />
+            </Reveal>
+            <Reveal>
+              <ProductRow title="Новинки" products={newest} />
+            </Reveal>
+          </>
         )}
 
         {/* Catalogue */}
@@ -276,7 +319,20 @@ function HomeContent() {
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(true)}
+                className="flex h-10 items-center gap-2 rounded-full border border-line bg-surface px-4 text-sm font-semibold text-ink lg:hidden"
+              >
+                <FilterIcon className="h-4 w-4" />
+                Фильтры
+                {filterCount > 0 && (
+                  <span className="tabular flex h-5 min-w-5 items-center justify-center rounded-full bg-brand px-1 text-[11px] text-white">
+                    {filterCount}
+                  </span>
+                )}
+              </button>
               {filtering && (
                 <button
                   type="button"
@@ -317,7 +373,12 @@ function HomeContent() {
             <TagFilterChips tags={allTags} activeTag={activeTag} onSelect={setActiveTag} />
           )}
 
-          {state.kind === "loading" && <ProductGridSkeleton />}
+          <div className="lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:items-start lg:gap-6">
+          <aside aria-label="Фильтры" className="sticky top-32 hidden rounded-3xl border border-line bg-surface p-5 lg:block">
+            <CatalogFilters products={inCategory} value={filters} onChange={setFilters} />
+          </aside>
+          <div className="min-w-0">
+          {state.kind === "loading" && <ProductGridSkeleton count={6} />}
 
           {state.kind === "error" && (
             <div className="rounded-3xl border border-danger/30 bg-danger/5 px-4 py-14 text-center">
@@ -353,15 +414,39 @@ function HomeContent() {
           )}
 
           {state.kind === "ready" && filtered.length > 0 && (
-            <ul className={PRODUCT_GRID}>
+            <ul className="grid grid-cols-2 gap-2.5 sm:gap-4 md:grid-cols-3">
               {filtered.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </ul>
           )}
+          </div>
+          </div>
         </section>
 
-        <HowItWorks />
+        {filtersOpen && (
+          <BottomSheet onClose={() => setFiltersOpen(false)} labelledBy="filters-title">
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center justify-between">
+                <h2 id="filters-title" className="font-display text-xl font-bold text-ink">
+                  Фильтры
+                </h2>
+              </div>
+              <CatalogFilters products={inCategory} value={filters} onChange={setFilters} />
+              <button
+                type="button"
+                onClick={() => setFiltersOpen(false)}
+                className="h-12 rounded-full bg-brand font-display text-sm font-semibold text-white"
+              >
+                Показать {filtered.length} {plural(filtered.length, "товар", "товара", "товаров")}
+              </button>
+            </div>
+          </BottomSheet>
+        )}
+
+        <Reveal>
+          <HowItWorks />
+        </Reveal>
       </main>
 
       <StoreFooter />

@@ -179,3 +179,39 @@ export const PrinterIcon = (p: IconProps) => (
     <rect x="7" y="14" width="10" height="7" rx="1" />
   </Svg>
 );
+export const SettingsIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+  </Svg>
+);
+export const HeartIcon = (p: IconProps & { filled?: boolean }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill={p.filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth={2}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    className={p.className ?? "h-5 w-5"}
+  >
+    <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z" />
+  </svg>
+);
+export const TelegramIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M21 4 3 11l6 2 2 6 3-4 5 4z" />
+  </Svg>
+);
+export const MapPinIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 21s-7-6.2-7-12a7 7 0 0 1 14 0c0 5.8-7 12-7 12z" />
+    <circle cx="12" cy="9" r="2.5" />
+  </Svg>
+);
+export const FilterIcon = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 6h16M7 12h10M10 18h4" />
+  </Svg>
+);

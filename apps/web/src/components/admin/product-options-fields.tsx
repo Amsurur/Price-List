@@ -55,7 +55,7 @@ export function ColorsField({
   return (
     <Section
       title="Цвета"
-      hint="Первый цвет выбран по умолчанию. Доплата добавляется к цене."
+      hint="Первый цвет выбран по умолчанию. Доплата добавляется к цене. Остаток пустой — общий на товар."
       action={
         <button
           type="button"
@@ -99,6 +99,25 @@ export function ColorsField({
                 className={`tabular ${inputClass}`}
                 value={c.extraPrice}
                 onChange={(e) => onChange(update(colors, i, { extraPrice: toInt(e.target.value) }))}
+              />
+            </label>
+            <label className="flex w-28 flex-col gap-1 text-xs font-medium text-muted">
+              Остаток
+              <input
+                type="number"
+                min={0}
+                inputMode="numeric"
+                className={`tabular ${inputClass}`}
+                value={c.stock ?? ""}
+                placeholder="общий"
+                title="Пусто — используется общий остаток товара"
+                onChange={(e) =>
+                  onChange(
+                    update(colors, i, {
+                      stock: e.target.value === "" ? null : toInt(e.target.value),
+                    }),
+                  )
+                }
               />
             </label>
             <button

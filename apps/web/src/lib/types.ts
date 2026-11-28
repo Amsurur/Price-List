@@ -8,6 +8,8 @@ export interface ProductColor {
   hex: string;
   extraPrice: number;
   images: string[];
+  // This colour's own stock; null/absent means it shares the product's.
+  stock?: number | null;
 }
 
 export interface ProductConfig {
@@ -44,6 +46,10 @@ export interface Product {
   brand: string | null;
   tags: string[];
   price: number;
+  // A sale for everyone ("Акция"), stacked with memberDiscount.
+  salePercent: number;
+  // "Кому подойдёт" labels.
+  audience: string[];
   memberDiscount: number;
   stock: number;
   // Photo URLs in display order; the first is the cover shown on the card.
@@ -62,6 +68,8 @@ export interface Product {
   memberPrice: number;
   saving: number;
   stockLabel: string | null;
+  // Units reserved (not cancelled) in the last 90 days.
+  popularity: number;
   variants: VariantPrice[];
 }
 
@@ -73,6 +81,8 @@ export interface ProductInput {
   brand?: string;
   tags?: string[];
   price: number;
+  salePercent?: number;
+  audience?: string[];
   memberDiscount?: number;
   stock?: number;
   images?: string[];
@@ -125,7 +135,7 @@ export type ValidateCodeResult =
   | { ok: false; reason: "empty" | "invalid" | "disabled" }
   | { ok: true; studentName: string | null; extraDiscount: number | null };
 
-export type ReservationStatus = "new" | "contacted" | "completed" | "cancelled";
+export type ReservationStatus = "new" | "contacted" | "ready" | "completed" | "cancelled";
 
 // Matches the API's ReservationView (the entity plus the joined code string).
 export interface Reservation {
@@ -138,6 +148,8 @@ export interface Reservation {
   productName: string;
   // Snapshot of the picked colour / configuration, e.g. "Серебристый · 16/512".
   variant: string | null;
+  color: string | null;
+  config: string | null;
   unitPrice: number;
   quantity: number;
   status: ReservationStatus;
@@ -166,4 +178,22 @@ export interface AnalyticsSummary {
   uniqueVisitors: number;
   topPaths: { path: string; views: number }[];
   daily: { date: string; views: number; uniqueVisitors: number }[];
+}
+
+// Matches the API's ShopSettings (GET /settings). Shown on the storefront.
+export interface ShopSettings {
+  address: string | null;
+  phone: string | null;
+  // Username without the @.
+  telegram: string | null;
+  hours: string | null;
+  holdDays: number;
+  mapUrl: string | null;
+}
+
+export type ShopSettingsInput = Partial<ShopSettings>;
+
+export interface TelegramStatus {
+  configured: boolean;
+  chats: number;
 }

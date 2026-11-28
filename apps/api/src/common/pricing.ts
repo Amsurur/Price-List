@@ -7,6 +7,9 @@
 export interface PricingProduct {
   price: number;
   memberDiscount: number;
+  // A sale for everyone; stacks with the member discount. Optional so older
+  // callers (and tests) that predate sales still type-check.
+  salePercent?: number;
 }
 
 export interface PricingCode {
@@ -19,7 +22,8 @@ export function clampDiscount(percent: number): number {
   return Math.min(90, Math.max(0, Math.round(percent)));
 }
 
-// A code's extraDiscount stacks on top of the product's own member discount
+// The product's own member discount, plus its sale (if any), plus a code's
+// extraDiscount on top
 // (e.g. product 10% + code 5% = 15%), clamped so the sum can never exceed 90.
 // No code, or a code with no bonus → just the product's own discount.
 export function effectiveDiscount(
@@ -27,7 +31,9 @@ export function effectiveDiscount(
   code: PricingCode | null,
 ): number {
   const bonus = code?.extraDiscount ?? 0;
-  return clampDiscount(product.memberDiscount + bonus);
+  return clampDiscount(
+    product.memberDiscount + (product.salePercent ?? 0) + bonus,
+  );
 }
 
 // Member price, rounded to a whole unit so students never see 679.15.
@@ -93,6 +99,7 @@ export function variantPrices(
       const priced = {
         price: optionsPrice(product, color, config),
         memberDiscount: product.memberDiscount,
+        salePercent: product.salePercent,
       };
       rows.push({
         color,

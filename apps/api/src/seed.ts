@@ -13,8 +13,16 @@ const products: Partial<Product>[] = [
     brand: 'Lenovo',
     colors: [
       { name: 'Серый', hex: '#5B6070', extraPrice: 0, images: [] },
-      { name: 'Серебристый', hex: '#C9CCD3', extraPrice: 50, images: [] },
+      {
+        name: 'Серебристый',
+        hex: '#C9CCD3',
+        extraPrice: 50,
+        images: [],
+        stock: 2,
+      },
+      { name: 'Синий', hex: '#2B4C8C', extraPrice: 50, images: [], stock: 0 },
     ],
+    audience: ['Для дизайна', 'Для учёбы', 'Для монтажа видео'],
     configs: [
       { label: '16 ГБ / 512 ГБ', extraPrice: 0 },
       { label: '32 ГБ / 1 ТБ', extraPrice: 250 },
@@ -34,6 +42,8 @@ const products: Partial<Product>[] = [
     description: 'Reliable everyday laptop for coursework and browsing.',
     category: 'Laptops',
     brand: 'HP',
+    salePercent: 5,
+    audience: ['Для учёбы', 'Для офиса'],
     specs: [
       { label: 'Процессор', value: 'Intel Core i5-1335U' },
       { label: 'Память', value: '8 ГБ' },
