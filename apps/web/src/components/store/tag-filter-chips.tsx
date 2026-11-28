@@ -8,14 +8,14 @@ export function TagFilterChips({
   onSelect: (tag: string | null) => void;
 }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="no-scrollbar -mx-4 flex gap-1.5 overflow-x-auto px-4 sm:mx-0 sm:flex-wrap sm:px-0">
       <Chip label="Все" active={activeTag === null} onClick={() => onSelect(null)} />
       {tags.map((tag) => (
         <Chip
           key={tag}
           label={tag}
           active={activeTag === tag}
-          onClick={() => onSelect(tag)}
+          onClick={() => onSelect(activeTag === tag ? null : tag)}
         />
       ))}
     </div>
@@ -35,10 +35,11 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-1 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
+      aria-pressed={active}
+      className={`h-9 shrink-0 rounded-full border px-4 text-sm font-medium whitespace-nowrap transition-colors ${
         active
-          ? "border-brand bg-brand text-white"
-          : "border-line bg-surface text-muted hover:text-ink"
+          ? "border-ink bg-ink text-surface"
+          : "border-line bg-surface text-ink-soft hover:border-ink-soft hover:text-ink"
       }`}
     >
       {label}

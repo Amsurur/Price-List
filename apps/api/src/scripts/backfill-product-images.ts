@@ -7,7 +7,8 @@ import { dataSource } from '../data-source';
 async function run() {
   await dataSource.initialize();
   try {
-    const result = await dataSource.query(
+    // pg returns [rows, affectedCount] for an UPDATE.
+    const result = await dataSource.query<[unknown[], number]>(
       `UPDATE products
        SET images = ARRAY[image_url]
        WHERE image_url IS NOT NULL AND images = '{}'`,

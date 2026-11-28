@@ -2,7 +2,9 @@ import {
   clampDiscount,
   effectiveDiscount,
   memberPrice,
+  optionsPrice,
   saving,
+  variantPrices,
   stockLabel,
 } from './pricing';
 
@@ -31,7 +33,10 @@ describe('pricing', () => {
     it('adds the code bonus on top of the product discount', () => {
       // 10% own + 5% code = 15%
       expect(
-        effectiveDiscount({ price: 1000, memberDiscount: 10 }, { extraDiscount: 5 }),
+        effectiveDiscount(
+          { price: 1000, memberDiscount: 10 },
+          { extraDiscount: 5 },
+        ),
       ).toBe(15);
     });
 
@@ -84,6 +89,55 @@ describe('pricing', () => {
     it('shows no badge when there is plenty', () => {
       expect(stockLabel(4)).toBeNull();
       expect(stockLabel(50)).toBeNull();
+    });
+  });
+
+  describe('options', () => {
+    const product = {
+      price: 1000,
+      memberDiscount: 10,
+      colors: [
+        { name: 'Серый', extraPrice: 0 },
+        { name: 'Серебристый', extraPrice: 100 },
+      ],
+      configs: [
+        { label: '16/512', extraPrice: 0 },
+        { label: '24/1TB', extraPrice: 500 },
+      ],
+    };
+
+    it('adds the chosen extras to the base price', () => {
+      expect(optionsPrice(product, 'Серебристый', '24/1TB')).toBe(1600);
+      expect(optionsPrice(product, null, null)).toBe(1000);
+      expect(optionsPrice(product, 'Нет такого', null)).toBe(1000);
+    });
+
+    it('prices every combination with the discount on the total', () => {
+      const rows = variantPrices(product, { extraDiscount: 5 });
+      expect(rows).toHaveLength(4);
+      const top = rows.find(
+        (r) => r.color === 'Серебристый' && r.config === '24/1TB',
+      );
+      expect(top).toEqual({
+        color: 'Серебристый',
+        config: '24/1TB',
+        price: 1600,
+        memberPrice: 1360,
+        saving: 240,
+      });
+    });
+
+    it('returns one row for a product without options', () => {
+      const rows = variantPrices({ ...product, colors: [], configs: [] }, null);
+      expect(rows).toEqual([
+        {
+          color: null,
+          config: null,
+          price: 1000,
+          memberPrice: 900,
+          saving: 100,
+        },
+      ]);
     });
   });
 });

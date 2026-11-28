@@ -3,7 +3,7 @@
 // render and edit before anything is sent to the API.
 import ExcelJS from "exceljs";
 import Papa from "papaparse";
-import type { ProductInput } from "./types";
+import type { ProductColor, ProductConfig, ProductInput, ProductSpec } from "./types";
 
 export interface ParsedProductRow {
   // Client-only key for React lists/editing — never sent to the API.
@@ -18,12 +18,14 @@ export class ParseError extends Error {}
 // instead, since that's "our own" product shape.
 const TEMPLATE_HEADERS = [
   "Название",
+  "Бренд",
   "Категория",
   "Теги",
   "Цена",
   "Скидка для студентов, %",
   "Остаток",
   "Описание",
+  "Характеристики",
   "Активен",
 ] as const;
 
@@ -64,15 +66,34 @@ function toText(value: unknown): string | undefined {
   return s.length > 0 ? s : undefined;
 }
 
+// "Экран: 13.6″; Вес: 1.2 кг" → spec rows. Lines or semicolons separate rows.
+function toSpecs(value: unknown): ProductSpec[] {
+  const text = toText(value);
+  if (!text) return [];
+  return text
+    .split(/[;\n]/)
+    .map((part) => {
+      const i = part.indexOf(":");
+      return i > 0 ? { label: part.slice(0, i).trim(), value: part.slice(i + 1).trim() } : null;
+    })
+    .filter((s): s is ProductSpec => Boolean(s && s.label && s.value));
+}
+
+function jsonList<T>(value: unknown): T[] | undefined {
+  return Array.isArray(value) ? (value as T[]) : undefined;
+}
+
 function fromTemplateRow(row: Record<string, unknown>): ProductInput {
   return {
     name: toText(row["Название"]) ?? "",
+    brand: toText(row["Бренд"]),
     category: toText(row["Категория"]),
     tags: toTags(row["Теги"]),
     price: toNumber(row["Цена"], 0),
     memberDiscount: toNumber(row["Скидка для студентов, %"], 15),
     stock: toNumber(row["Остаток"], 0),
     description: toText(row["Описание"]),
+    specs: toSpecs(row["Характеристики"]),
     active: toBoolean(row["Активен"], true),
     images: [],
   };
@@ -81,6 +102,7 @@ function fromTemplateRow(row: Record<string, unknown>): ProductInput {
 function fromJsonRow(row: Record<string, unknown>): ProductInput {
   return {
     name: toText(row.name) ?? "",
+    brand: toText(row.brand),
     category: toText(row.category),
     tags: toTags(row.tags),
     price: toNumber(row.price, 0),
@@ -89,6 +111,11 @@ function fromJsonRow(row: Record<string, unknown>): ProductInput {
     description: toText(row.description),
     active: row.active === undefined ? true : Boolean(row.active),
     images: Array.isArray(row.images) ? row.images.map(String) : [],
+    // JSON is "our own" shape, so options pass through as-is; the API
+    // validates them.
+    colors: jsonList<ProductColor>(row.colors),
+    configs: jsonList<ProductConfig>(row.configs),
+    specs: jsonList<ProductSpec>(row.specs) ?? toSpecs(row.specs),
   };
 }
 
@@ -173,12 +200,14 @@ export async function downloadProductsTemplate(): Promise<void> {
   sheet.addRow([...TEMPLATE_HEADERS]);
   sheet.addRow([
     "Ноутбук Lenovo IdeaPad 3",
+    "Lenovo",
     "Ноутбуки",
     "ноутбук, для учёбы",
     4500000,
     15,
     3,
     "Лёгкий ноутбук для учёбы",
+    "Процессор: Ryzen 5; Память: 16 ГБ; Экран: 15.6″",
     "Да",
   ]);
   sheet.getRow(1).font = { bold: true };

@@ -2,9 +2,9 @@ export type SortOption = "featured" | "price-asc" | "price-desc" | "name-asc";
 
 const OPTIONS: { value: SortOption; label: string }[] = [
   { value: "featured", label: "Рекомендуемые" },
-  { value: "price-asc", label: "Цена: по возрастанию" },
-  { value: "price-desc", label: "Цена: по убыванию" },
-  { value: "name-asc", label: "Название А–Я" },
+  { value: "price-asc", label: "Сначала дешевле" },
+  { value: "price-desc", label: "Сначала дороже" },
+  { value: "name-asc", label: "По названию" },
 ];
 
 export function SortSelect({
@@ -15,26 +15,20 @@ export function SortSelect({
   onChange: (value: SortOption) => void;
 }) {
   return (
-    <div
-      role="group"
-      aria-label="Сортировка товаров"
-      className="inline-flex flex-wrap gap-1 rounded-xl border border-line bg-surface p-1"
-    >
-      {OPTIONS.map((opt) => (
-        <button
-          key={opt.value}
-          type="button"
-          aria-pressed={value === opt.value}
-          onClick={() => onChange(opt.value)}
-          className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand ${
-            value === opt.value
-              ? "bg-brand text-white"
-              : "text-muted hover:text-ink"
-          }`}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
+    <label className="flex h-10 min-w-0 items-center gap-2 rounded-full border border-line bg-surface pr-2 pl-4 text-sm">
+      <span className="hidden text-muted sm:inline">Сортировка:</span>
+      <select
+        aria-label="Сортировка"
+        value={value}
+        onChange={(e) => onChange(e.target.value as SortOption)}
+        className="cursor-pointer bg-transparent font-medium text-ink outline-none"
+      >
+        {OPTIONS.map((opt) => (
+          <option key={opt.value} value={opt.value}>
+            {opt.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }

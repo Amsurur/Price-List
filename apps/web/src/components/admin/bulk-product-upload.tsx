@@ -379,7 +379,15 @@ function BulkRow({
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <label className={labelClass}>Бренд</label>
+              <input
+                className={`mt-1 ${inputClass}`}
+                value={data.brand ?? ""}
+                onChange={(e) => onChange({ brand: e.target.value })}
+              />
+            </div>
             <div>
               <label className={labelClass}>Категория</label>
               <input

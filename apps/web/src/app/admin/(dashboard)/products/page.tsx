@@ -33,23 +33,33 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
 
-  async function load() {
-    setState({ kind: "loading" });
+  // Fetches and returns the next page state (no setState here, so the
+  // effect below can apply it asynchronously).
+  async function fetchState(): Promise<State> {
     try {
-      setState({ kind: "ready", products: await listProducts() });
+      return ({ kind: "ready", products: await listProducts() });
     } catch (err) {
-      setState({
+      return ({
         kind: "error",
         message: err instanceof Error ? err.message : "Не удалось загрузить товары",
       });
     }
   }
+  function load() {
+    fetchState().then(setState);
+  }
+
+
+  function retry() {
+    setState({ kind: "loading" });
+    load();
+  }
 
   useEffect(() => {
-    load();
+    fetchState().then(setState);
   }, []);
 
-  const products = state.kind === "ready" ? state.products : [];
+  const products = useMemo(() => (state.kind === "ready" ? state.products : []), [state]);
 
   // Tag chips built from the loaded catalogue.
   const allTags = useMemo(() => {
@@ -174,7 +184,7 @@ export default function ProductsPage() {
           <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-6 text-center">
             <p className="text-sm text-danger">{state.message}</p>
             <button
-              onClick={load}
+              onClick={retry}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Повторить

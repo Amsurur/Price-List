@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
@@ -10,6 +14,8 @@ import {
   PricingCode,
   saving,
   stockLabel,
+  VariantPrice,
+  variantPrices,
 } from '../common/pricing';
 import { StudentCodesService } from '../student-codes/student-codes.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -23,9 +29,17 @@ const IMAGE_URL_ID = /\/products\/images\/([0-9a-f-]{36})$/i;
 // What the API returns: the stored product plus the computed pricing/stock
 // fields, so the web never re-implements the discount maths.
 export interface ProductView extends Product {
+  // Regular price of the default pick (first colour + first configuration);
+  // equals `price` when the default options add nothing.
+  listPrice: number;
   memberPrice: number;
   saving: number;
   stockLabel: string | null;
+  // Units reserved (not cancelled) in the last 90 days.
+  popularity: number;
+  // The price of every colour × configuration pick (one row when the product
+  // has no options). listPrice/memberPrice/saving above match the first row.
+  variants: VariantPrice[];
 }
 
 // One row's outcome from a bulk upload — created rows carry the saved
@@ -85,7 +99,9 @@ export class ProductsService {
   private toView(
     product: Product,
     code: PricingCode | null = null,
+    popularity = 0,
   ): ProductView {
+    const variants = variantPrices(product, code);
     return {
       ...product,
       // Derived live so correctness never depends on the backfill script's
@@ -97,9 +113,13 @@ export class ProductsService {
           : product.imageUrl
             ? [product.imageUrl]
             : [],
-      memberPrice: memberPrice(product, code),
-      saving: saving(product, code),
+      // The headline price is the default pick: first colour + first config.
+      listPrice: variants[0]?.price ?? product.price,
+      memberPrice: variants[0]?.memberPrice ?? memberPrice(product, code),
+      saving: variants[0]?.saving ?? saving(product, code),
       stockLabel: stockLabel(product.stock),
+      popularity,
+      variants,
     };
   }
 
@@ -112,7 +132,7 @@ export class ProductsService {
     if (query.search) {
       const term = `%${query.search.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(p.name) LIKE :term OR LOWER(p.description) LIKE :term OR LOWER(p.category) LIKE :term OR EXISTS (SELECT 1 FROM unnest(p.tags) AS t WHERE t LIKE :term))',
+        '(LOWER(p.name) LIKE :term OR LOWER(p.description) LIKE :term OR LOWER(p.category) LIKE :term OR LOWER(p.brand) LIKE :term OR EXISTS (SELECT 1 FROM unnest(p.tags) AS t WHERE t LIKE :term))',
         { term },
       );
     }
@@ -132,7 +152,8 @@ export class ProductsService {
     const pricingCode: PricingCode | null = code
       ? { extraDiscount: code.extraDiscount }
       : null;
-    return rows.map((p) => this.toView(p, pricingCode));
+    const popular = await this.popularity();
+    return rows.map((p) => this.toView(p, pricingCode, popular.get(p.id) ?? 0));
   }
 
   async findOne(id: string): Promise<ProductView> {
@@ -194,7 +215,9 @@ export class ProductsService {
   async reorder(ids: string[]): Promise<void> {
     const total = await this.products.count();
     if (ids.length !== total) {
-      throw new BadRequestException('Список товаров устарел — обновите страницу');
+      throw new BadRequestException(
+        'Список товаров устарел — обновите страницу',
+      );
     }
     await this.dataSource.transaction(async (manager) => {
       const found = await manager
@@ -202,7 +225,9 @@ export class ProductsService {
         .where('p.id IN (:...ids)', { ids })
         .getCount();
       if (found !== ids.length) {
-        throw new BadRequestException('Список товаров устарел — обновите страницу');
+        throw new BadRequestException(
+          'Список товаров устарел — обновите страницу',
+        );
       }
       await Promise.all(
         ids.map((id, index) =>
@@ -248,7 +273,12 @@ export class ProductsService {
   // Atomic, floor-at-0 decrement — the only place stock ever moves (on a
   // reservation's contacted → completed transition). A single UPDATE avoids
   // a read-then-write race between two reservations completing close together.
-  async decrementStock(id: string, qty: number): Promise<void> {
+  async decrementStock(
+    id: string,
+    qty: number,
+    color: string | null = null,
+  ): Promise<void> {
+    if (color) await this.decrementColorStock(id, qty, color);
     await this.products
       .createQueryBuilder()
       .update(Product)
@@ -256,5 +286,42 @@ export class ProductsService {
       .where('id = :id', { id })
       .setParameter('qty', qty)
       .execute();
+  }
+
+  // A colour with its own stock count loses `qty` too (floor 0). Colours
+  // without a count share the product's stock and are left alone. One UPDATE
+  // rewrites the jsonb array in place, so concurrent completions can't race.
+  private async decrementColorStock(
+    id: string,
+    qty: number,
+    color: string,
+  ): Promise<void> {
+    await this.dataSource.query(
+      `UPDATE products SET colors = (
+         SELECT COALESCE(jsonb_agg(
+           CASE
+             WHEN c->>'name' = $2 AND jsonb_typeof(c->'stock') = 'number'
+               THEN jsonb_set(c, '{stock}', to_jsonb(GREATEST((c->>'stock')::int - $3, 0)))
+             ELSE c
+           END
+           ORDER BY ord), '[]'::jsonb)
+         FROM jsonb_array_elements(colors) WITH ORDINALITY AS t(c, ord)
+       ) WHERE id = $1`,
+      [id, color, qty],
+    );
+  }
+
+  // Reservations (not cancelled) per product over the last 90 days — drives
+  // the storefront's "Хиты продаж" row.
+  private async popularity(): Promise<Map<string, number>> {
+    const rows = await this.dataSource.query<
+      { product_id: string; n: string }[]
+    >(
+      `SELECT product_id, SUM(quantity) AS n FROM reservations
+       WHERE product_id IS NOT NULL AND status <> 'cancelled'
+         AND created_at > now() - interval '90 days'
+       GROUP BY product_id`,
+    );
+    return new Map(rows.map((r) => [r.product_id, Number(r.n)]));
   }
 }

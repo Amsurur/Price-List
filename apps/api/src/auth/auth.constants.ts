@@ -15,9 +15,10 @@ export function adminCookieOptions() {
   // HTTP (e.g. a bare-IP deploy before a domain/TLS exists) — a Secure
   // cookie would be silently refused by the browser in that case.
   const cookieSecure = process.env.COOKIE_SECURE === 'true';
+  const sameSite: 'none' | 'lax' = cookieSecure ? 'none' : 'lax';
   return {
     httpOnly: true,
-    sameSite: (cookieSecure ? 'none' : 'lax') as 'none' | 'lax',
+    sameSite,
     secure: cookieSecure,
     path: '/',
     maxAge: expiresInSeconds * 1000,

@@ -6,7 +6,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export type ReservationStatus = 'new' | 'contacted' | 'completed' | 'cancelled';
+export type ReservationStatus =
+  'new' | 'contacted' | 'ready' | 'completed' | 'cancelled';
 
 // A student's reserve-for-pickup request. product_name and unit_price are
 // SNAPSHOTS taken at creation so later product edits never rewrite history.
@@ -34,6 +35,19 @@ export class Reservation {
   // Snapshot of the product name at reservation time.
   @Column('text', { name: 'product_name' })
   productName: string;
+
+  // Snapshot of the chosen colour / configuration, e.g. "Серебристый · 16/512".
+  // Null for products without options.
+  @Column('text', { nullable: true })
+  variant: string | null;
+
+  // The picked colour / configuration on their own, so completing the
+  // reservation can take the right colour's stock.
+  @Column('text', { nullable: true })
+  color: string | null;
+
+  @Column('text', { nullable: true })
+  config: string | null;
 
   // Snapshot of the member price paid (whole-unit integer).
   @Column('integer', { name: 'unit_price' })

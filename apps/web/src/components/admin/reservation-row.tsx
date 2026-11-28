@@ -4,20 +4,7 @@ import { useState } from "react";
 import { updateReservationStatus } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import type { Reservation, ReservationStatus } from "@/lib/types";
-
-const STATUS_STYLE: Record<ReservationStatus, string> = {
-  new: "bg-brand-tint text-brand-strong",
-  contacted: "bg-warn-tint text-warn",
-  completed: "bg-save-tint text-save",
-  cancelled: "bg-danger/10 text-danger",
-};
-
-const STATUS_LABEL: Record<ReservationStatus, string> = {
-  new: "Новая",
-  contacted: "Связались",
-  completed: "Завершено",
-  cancelled: "Отменено",
-};
+import { STATUS_LABEL, STATUS_STYLE } from "./reservation-status";
 
 export function ReservationRow({
   reservation,
@@ -46,7 +33,7 @@ export function ReservationRow({
     reservation.status === "completed" || reservation.status === "cancelled";
 
   return (
-    <li className="flex flex-wrap items-center gap-4 rounded-xl border border-line bg-surface p-3">
+    <li className="flex flex-wrap items-center gap-4 rounded-2xl border border-line bg-surface p-4">
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-ink">
           {reservation.studentName || "Без имени"}
@@ -62,6 +49,7 @@ export function ReservationRow({
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm text-ink">
           {reservation.quantity} × {reservation.productName}
+          {reservation.variant ? ` · ${reservation.variant}` : ""}
         </div>
         <div className="text-xs text-muted">
           {formatMoney(reservation.unitPrice * reservation.quantity)} ·{" "}
@@ -92,11 +80,20 @@ export function ReservationRow({
           )}
           {reservation.status === "contacted" && (
             <button
+              onClick={() => transition("ready")}
+              disabled={updating}
+              className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+            >
+              Отметить «Готово к выдаче»
+            </button>
+          )}
+          {(reservation.status === "contacted" || reservation.status === "ready") && (
+            <button
               onClick={() => transition("completed")}
               disabled={updating}
               className="rounded-lg bg-brand px-3 py-2 text-xs font-semibold text-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
-              Отметить «Завершено»
+              Отметить «Выдано»
             </button>
           )}
           <button

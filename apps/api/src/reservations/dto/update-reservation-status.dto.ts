@@ -3,6 +3,7 @@ import { IsIn } from 'class-validator';
 // 'new' is never a valid target — it's only the creation default.
 export const RESERVATION_TARGET_STATUSES = [
   'contacted',
+  'ready',
   'completed',
   'cancelled',
 ] as const;

@@ -15,23 +15,33 @@ export default function StudentCodesPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [search, setSearch] = useState("");
 
-  async function load() {
-    setState({ kind: "loading" });
+  // Fetches and returns the next page state (no setState here, so the
+  // effect below can apply it asynchronously).
+  async function fetchState(): Promise<State> {
     try {
-      setState({ kind: "ready", codes: await listStudentCodes() });
+      return ({ kind: "ready", codes: await listStudentCodes() });
     } catch (err) {
-      setState({
+      return ({
         kind: "error",
         message: err instanceof Error ? err.message : "Не удалось загрузить коды студентов",
       });
     }
   }
+  function load() {
+    fetchState().then(setState);
+  }
+
+
+  function retry() {
+    setState({ kind: "loading" });
+    load();
+  }
 
   useEffect(() => {
-    load();
+    fetchState().then(setState);
   }, []);
 
-  const codes = state.kind === "ready" ? state.codes : [];
+  const codes = useMemo(() => (state.kind === "ready" ? state.codes : []), [state]);
 
   const filtered = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -106,7 +116,7 @@ export default function StudentCodesPage() {
           <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-6 text-center">
             <p className="text-sm text-danger">{state.message}</p>
             <button
-              onClick={load}
+              onClick={retry}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Повторить

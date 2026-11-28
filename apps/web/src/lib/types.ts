@@ -1,13 +1,55 @@
 // Shared types matching the API's product response (apps/api ProductView).
 // Money is a whole-unit integer; memberDiscount is a percent 0–90.
 
+// A colour option: extraPrice adds to the base price; images are a subset of
+// the product's photos shown when this colour is picked.
+export interface ProductColor {
+  name: string;
+  hex: string;
+  extraPrice: number;
+  images: string[];
+  // This colour's own stock; null/absent means it shares the product's.
+  stock?: number | null;
+}
+
+export interface ProductConfig {
+  label: string;
+  extraPrice: number;
+}
+
+export interface ProductSpec {
+  label: string;
+  value: string;
+}
+
+// The API's price for one colour × configuration pick.
+export interface VariantPrice {
+  color: string | null;
+  config: string | null;
+  price: number;
+  memberPrice: number;
+  saving: number;
+}
+
+// What the student picked on the product page, with its API price.
+export interface Selection {
+  color: string | null;
+  config: string | null;
+  price: VariantPrice;
+}
+
 export interface Product {
   id: string;
   name: string;
   description: string | null;
   category: string | null;
+  brand: string | null;
   tags: string[];
   price: number;
+  // A sale for everyone ("Акция"), stacked with memberDiscount.
+  salePercent: number;
+  // "Кому подойдёт" labels.
+  audience: string[];
   memberDiscount: number;
   stock: number;
   // Photo URLs in display order; the first is the cover shown on the card.
@@ -15,12 +57,20 @@ export interface Product {
   active: boolean;
   // Manual display order set via admin drag-and-drop; lower sorts first.
   sortOrder: number;
+  colors: ProductColor[];
+  configs: ProductConfig[];
+  specs: ProductSpec[];
   createdAt: string;
   updatedAt: string;
   // Computed by the API (never recompute discount maths in the web app).
+  // listPrice/memberPrice/saving are for the default pick (first options).
+  listPrice: number;
   memberPrice: number;
   saving: number;
   stockLabel: string | null;
+  // Units reserved (not cancelled) in the last 90 days.
+  popularity: number;
+  variants: VariantPrice[];
 }
 
 // Fields the admin form sends when creating or editing a product.
@@ -28,12 +78,18 @@ export interface ProductInput {
   name: string;
   description?: string;
   category?: string;
+  brand?: string;
   tags?: string[];
   price: number;
+  salePercent?: number;
+  audience?: string[];
   memberDiscount?: number;
   stock?: number;
   images?: string[];
   active?: boolean;
+  colors?: ProductColor[];
+  configs?: ProductConfig[];
+  specs?: ProductSpec[];
 }
 
 // One row's outcome from POST /products/bulk (apps/api ProductsService.bulkCreate).
@@ -79,7 +135,7 @@ export type ValidateCodeResult =
   | { ok: false; reason: "empty" | "invalid" | "disabled" }
   | { ok: true; studentName: string | null; extraDiscount: number | null };
 
-export type ReservationStatus = "new" | "contacted" | "completed" | "cancelled";
+export type ReservationStatus = "new" | "contacted" | "ready" | "completed" | "cancelled";
 
 // Matches the API's ReservationView (the entity plus the joined code string).
 export interface Reservation {
@@ -90,6 +146,10 @@ export interface Reservation {
   studentContact: string;
   productId: string | null;
   productName: string;
+  // Snapshot of the picked colour / configuration, e.g. "Серебристый · 16/512".
+  variant: string | null;
+  color: string | null;
+  config: string | null;
   unitPrice: number;
   quantity: number;
   status: ReservationStatus;
@@ -103,6 +163,8 @@ export interface Reservation {
 export interface ReservationInput {
   code?: string;
   productId: string;
+  color?: string;
+  config?: string;
   studentName?: string;
   studentContact: string;
   quantity?: number;
@@ -116,4 +178,22 @@ export interface AnalyticsSummary {
   uniqueVisitors: number;
   topPaths: { path: string; views: number }[];
   daily: { date: string; views: number; uniqueVisitors: number }[];
+}
+
+// Matches the API's ShopSettings (GET /settings). Shown on the storefront.
+export interface ShopSettings {
+  address: string | null;
+  phone: string | null;
+  // Username without the @.
+  telegram: string | null;
+  hours: string | null;
+  holdDays: number;
+  mapUrl: string | null;
+}
+
+export type ShopSettingsInput = Partial<ShopSettings>;
+
+export interface TelegramStatus {
+  configured: boolean;
+  chats: number;
 }

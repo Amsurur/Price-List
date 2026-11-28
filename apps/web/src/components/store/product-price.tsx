@@ -1,5 +1,5 @@
 import { formatMoney } from "@/lib/format";
-import type { AppliedCode } from "./code-unlock-strip";
+import type { AppliedCode } from "@/lib/use-applied-code";
 import type { Product } from "@/lib/types";
 
 // A product's discount is always priced by the API (falls back to the
@@ -9,51 +9,57 @@ export function hasDiscount(product: Product): boolean {
   return product.saving > 0;
 }
 
+export function discountPercent(product: Pick<Product, "listPrice" | "saving">): number {
+  return product.listPrice > 0 ? Math.round((product.saving / product.listPrice) * 100) : 0;
+}
+
 export function DiscountBadge({ product }: { product: Product }) {
   if (!hasDiscount(product)) return null;
-  const discountPercent =
-    product.price > 0 ? Math.round((product.saving / product.price) * 100) : 0;
   return (
-    <span className="rounded-full bg-brand-tint px-2 py-0.5 text-xs font-medium text-brand-strong">
-      Computerra −{discountPercent}%
+    <span className="tabular rounded-full bg-save px-2.5 py-1 text-xs font-bold text-white">
+      −{discountPercent(product)}%
     </span>
   );
 }
 
+// Compact price for cards: old price struck through, member price in green.
 export function ProductPrice({
   product,
-  showStock = true,
+  size = "md",
 }: {
   product: Product;
-  showStock?: boolean;
+  size?: "md" | "lg";
 }) {
   const discounted = hasDiscount(product);
+  const big = size === "lg" ? "text-4xl" : "text-xl";
   return (
-    <div className="flex items-center justify-between gap-2">
-      {discounted ? (
-        <div className="flex flex-col">
-          <span className="text-xs text-muted line-through">
-            {formatMoney(product.price)}
-          </span>
-          <span className="tabular font-display text-lg font-semibold text-ink">
-            {formatMoney(product.memberPrice)}
-          </span>
-        </div>
-      ) : (
-        <span className="tabular font-display text-lg font-semibold text-ink">
-          {formatMoney(product.price)}
+    <div className="flex flex-col">
+      {discounted && (
+        <span className="tabular text-sm text-muted line-through">
+          {formatMoney(product.listPrice)}
         </span>
       )}
-      {showStock && product.stockLabel && (
-        <span
-          className={`text-xs font-medium ${
-            product.stock <= 0 ? "text-danger" : "text-warn"
-          }`}
-        >
-          {product.stockLabel}
-        </span>
-      )}
+      <span
+        className={`tabular font-display font-bold tracking-tight ${big} ${
+          discounted ? "text-save" : "text-ink"
+        }`}
+      >
+        {formatMoney(discounted ? product.memberPrice : product.listPrice)}
+      </span>
     </div>
+  );
+}
+
+export function StockLabel({ product }: { product: Product }) {
+  if (!product.stockLabel) return null;
+  return (
+    <span
+      className={`rounded-full px-2.5 py-1 text-xs font-medium whitespace-nowrap ${
+        product.stock <= 0 ? "bg-danger/10 text-danger" : "bg-warn-tint text-warn"
+      }`}
+    >
+      {product.stockLabel}
+    </span>
   );
 }
 
@@ -82,7 +88,7 @@ export function DiscountBreakdown({
 export function SavingsPill({ product }: { product: Product }) {
   if (!hasDiscount(product)) return null;
   return (
-    <span className="inline-block w-fit rounded-full bg-save-tint px-2 py-0.5 text-xs font-medium text-save">
+    <span className="tabular inline-block w-fit rounded-full bg-save-tint px-2.5 py-1 text-xs font-semibold text-save-strong">
       Экономия {formatMoney(product.saving)}
     </span>
   );

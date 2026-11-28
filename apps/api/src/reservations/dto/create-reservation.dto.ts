@@ -19,6 +19,19 @@ export class CreateReservationDto {
   @IsUUID()
   productId: string;
 
+  // The picked colour name / configuration label, for products that have
+  // them. Checked against the product server-side; the price includes their
+  // extras.
+  @IsOptional()
+  @IsString()
+  @MaxLength(60)
+  color?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  config?: string;
+
   // Pre-filled from the code's student name on the storefront, but editable —
   // falls back to the code's own name server-side if omitted.
   @IsOptional()

@@ -19,7 +19,7 @@ export function SideDrawer({
       onClose={onClose}
       align="right"
       labelledBy={labelledBy}
-      contentClassName="w-full max-w-md overflow-y-auto border-l border-line bg-surface p-5 shadow-xl"
+      contentClassName="w-full max-w-md overflow-y-auto rounded-l-3xl bg-surface p-6 shadow-2xl"
     >
       {children}
     </Overlay>

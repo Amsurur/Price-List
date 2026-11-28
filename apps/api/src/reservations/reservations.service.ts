@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Reservation, ReservationStatus } from '../entities/reservation.entity';
 import { StudentCode } from '../entities/student-code.entity';
-import { memberPrice } from '../common/pricing';
+import { memberPrice, optionsPrice } from '../common/pricing';
 import { ProductsService } from '../products/products.service';
 import { StudentCodesService } from '../student-codes/student-codes.service';
 import { TelegramService } from '../telegram/telegram.service';
@@ -34,7 +34,10 @@ export interface FindReservationsQuery {
 // rather than silently re-decrementing stock.
 const ALLOWED_TRANSITIONS: Record<ReservationStatus, ReservationStatus[]> = {
   new: ['contacted', 'cancelled'],
-  contacted: ['completed', 'cancelled'],
+  // "ready" (packed and waiting at the counter) is optional: a reservation
+  // can go straight from contacted to completed.
+  contacted: ['ready', 'completed', 'cancelled'],
+  ready: ['completed', 'cancelled'],
   completed: [],
   cancelled: [],
 };
@@ -81,6 +84,18 @@ export class ReservationsService {
     }));
   }
 
+  private pickOption(
+    offered: string[],
+    picked: string | undefined,
+    error: string,
+  ): string | null {
+    if (offered.length === 0) return null;
+    const value = picked?.trim();
+    if (!value) return offered[0];
+    if (!offered.includes(value)) throw new BadRequestException(error);
+    return value;
+  }
+
   async findAll(query: FindReservationsQuery = {}): Promise<ReservationView[]> {
     const qb = this.reservations
       .createQueryBuilder('r')
@@ -93,7 +108,7 @@ export class ReservationsService {
     if (query.search) {
       const term = `%${query.search.toLowerCase()}%`;
       qb.andWhere(
-        '(LOWER(r.student_name) LIKE :term OR LOWER(r.student_contact) LIKE :term)',
+        '(LOWER(r.student_name) LIKE :term OR LOWER(r.student_contact) LIKE :term OR LOWER(r.product_name) LIKE :term)',
         { term },
       );
     }
@@ -121,14 +136,41 @@ export class ReservationsService {
       throw new BadRequestException('Этого товара нет в наличии.');
     }
 
+    // Options: must be one the product actually offers. A product with
+    // options but no pick (e.g. an older storefront tab) gets the default —
+    // the first of each, which is also what the storefront preselects.
+    const color = this.pickOption(
+      product.colors.map((c) => c.name),
+      dto.color,
+      'Такого цвета нет у этого товара.',
+    );
+    const config = this.pickOption(
+      product.configs.map((c) => c.label),
+      dto.config,
+      'Такой конфигурации нет у этого товара.',
+    );
+    const variant = [color, config].filter(Boolean).join(' · ') || null;
+
+    const colorStock = product.colors.find((c) => c.name === color)?.stock;
+    if (colorStock !== undefined && colorStock !== null && colorStock <= 0) {
+      throw new BadRequestException('Этот цвет закончился. Выберите другой.');
+    }
+
     const entity = this.reservations.create({
       codeId: code?.id ?? null,
       studentName: dto.studentName?.trim() || code?.studentName || null,
       studentContact: dto.studentContact.trim(),
       productId: product.id,
       productName: product.name,
+      variant,
+      color,
+      config,
       unitPrice: memberPrice(
-        product,
+        {
+          price: optionsPrice(product, color, config),
+          memberDiscount: product.memberDiscount,
+          salePercent: product.salePercent,
+        },
         code ? { extraDiscount: code.extraDiscount } : null,
       ),
       quantity: dto.quantity ?? 1,
@@ -145,7 +187,9 @@ export class ReservationsService {
     const view = await this.toView(saved);
     await this.telegram.notify(
       newReservationMessage({
-        productName: view.productName,
+        productName: view.variant
+          ? `${view.productName} (${view.variant})`
+          : view.productName,
         quantity: view.quantity,
         unitPrice: view.unitPrice,
         studentName: view.studentName,
@@ -157,7 +201,7 @@ export class ReservationsService {
     return view;
   }
 
-  // The admin status pipeline: new → contacted → completed, cancelled from
+  // The admin status pipeline: new → contacted → (ready) → completed, cancelled from
   // any non-completed state. Never touches the snapshot fields.
   async updateStatus(
     id: string,
@@ -181,6 +225,7 @@ export class ReservationsService {
       await this.products.decrementStock(
         reservation.productId,
         reservation.quantity,
+        reservation.color,
       );
     }
 

@@ -9,6 +9,9 @@ import type {
   Reservation,
   ReservationInput,
   ReservationStatus,
+  ShopSettings,
+  ShopSettingsInput,
+  TelegramStatus,
   StudentCode,
   StudentCodeInput,
   ValidateCodeResult,
@@ -241,4 +244,19 @@ export function updateReservationStatus(
 
 export function getAnalyticsSummary(days = 30): Promise<AnalyticsSummary> {
   return request<AnalyticsSummary>(`/analytics/summary?days=${days}`);
+}
+
+export function getSettings(): Promise<ShopSettings> {
+  return request<ShopSettings>("/settings");
+}
+
+export function updateSettings(input: ShopSettingsInput): Promise<ShopSettings> {
+  return request<ShopSettings>("/settings", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function getTelegramStatus(): Promise<TelegramStatus> {
+  return request<TelegramStatus>("/settings/telegram-status");
 }

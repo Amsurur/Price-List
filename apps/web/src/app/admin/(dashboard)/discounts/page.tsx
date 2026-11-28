@@ -20,25 +20,35 @@ type State =
 export default function DiscountsPage() {
   const [state, setState] = useState<State>({ kind: "loading" });
 
-  async function load() {
-    setState({ kind: "loading" });
+  // Fetches and returns the next page state (no setState here, so the
+  // effect below can apply it asynchronously).
+  async function fetchState(): Promise<State> {
     try {
       const [products, codes] = await Promise.all([
         listProducts(),
         listStudentCodes(),
       ]);
-      setState({ kind: "ready", products, codes });
+      return ({ kind: "ready", products, codes });
     } catch (err) {
-      setState({
+      return ({
         kind: "error",
         message:
           err instanceof Error ? err.message : "Не удалось загрузить скидки",
       });
     }
   }
+  function load() {
+    fetchState().then(setState);
+  }
+
+
+  function retry() {
+    setState({ kind: "loading" });
+    load();
+  }
 
   useEffect(() => {
-    load();
+    fetchState().then(setState);
   }, []);
 
   function handleProductSaved(updated: Product) {
@@ -85,7 +95,7 @@ export default function DiscountsPage() {
           <div className="rounded-xl border border-danger/30 bg-danger/5 px-4 py-6 text-center">
             <p className="text-sm text-danger">{state.message}</p>
             <button
-              onClick={load}
+              onClick={retry}
               className="mt-3 rounded-xl border border-line bg-surface px-4 py-2 text-sm font-medium text-ink hover:bg-bg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
             >
               Повторить
